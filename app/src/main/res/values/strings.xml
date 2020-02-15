@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Project_Salvation</string>
+
+    <string name="action_next">NEXT</string>
+    <string name="msg_phone_number_example">E.g. 555 555 1234</string>
 </resources>
