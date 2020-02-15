@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "412107296465",
+    "firebase_url": "https://projectsalvation-3956e.firebaseio.com",
+    "project_id": "projectsalvation-3956e",
+    "storage_bucket": "projectsalvation-3956e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412107296465:android:eaccaf81d424998867fff0",
+        "android_client_info": {
+          "package_name": "com.projectsalvation.pigeotalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "412107296465-0npnav3chsd8jmjnt900psutl0kdp559.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.projectsalvation.pigeotalk",
+            "certificate_hash": "9aa31c208e5b33aee8f10934509dc48292f45161"
+          }
+        },
+        {
+          "client_id": "412107296465-mc3pkrugmdi4185qunfgimuh0qo8qleh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8nYcV_fwYpMPqk29TZN48luGdbCtIfM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "412107296465-mc3pkrugmdi4185qunfgimuh0qo8qleh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
