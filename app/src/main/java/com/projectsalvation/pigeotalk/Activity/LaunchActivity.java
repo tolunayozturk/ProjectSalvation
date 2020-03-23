@@ -14,7 +14,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        // TODO: Implement the splash screen and remove this redirection
+        // TODO: Implement a splash screen
         Intent i = new Intent(LaunchActivity.this, ValidatePhoneNumberActivity.class);
         startActivity(i);
     }

@@ -6,64 +6,126 @@
     android:layout_height="match_parent"
     tools:context=".Activity.ValidatePhoneNumberActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/ValidatePN_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/text_verify_your_phone_number"
+        app:titleTextColor="@color/colorAccent">
+
+    </androidx.appcompat.widget.Toolbar>
+
     <LinearLayout
+        android:id="@+id/ValidatePN_linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.53"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3">
+        app:layout_constraintTop_toBottomOf="@+id/ValidatePN_toolbar"
+        app:layout_constraintVertical_bias="0.0">
 
-        <Spinner
-            android:id="@+id/ValidatePN_spinner_country"
-            style="@android:style/Widget.Holo.Light.Spinner"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:spinnerMode="dropdown"
-            android:textAlignment="center" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="0dp"
+            app:contentPadding="16dp">
 
-        <LinearLayout
+            <TextView
+                android:id="@+id/ValidatePN_tv_sms_charge_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_sms_charge_info"
+                android:textSize="16sp" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:orientation="horizontal"
-            android:layout_marginLeft="64dp"
-            android:layout_marginRight="64dp">
-
-            <EditText
-                android:id="@+id/ValidatePN_et_country_code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.75"
-                android:ems="10"
-                android:importantForAutofill="no"
-                android:inputType="none|phone"
-                android:textAlignment="center" />
-
-            <EditText
-                android:id="@+id/ValidatePN_et_phone_number"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:ems="10"
-                android:importantForAutofill="no"
-                android:inputType="phone"
-                android:textAlignment="center"
-                android:hint="@string/msg_phone_number_example" />
-
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/ValidatePN_btn_next"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
             android:layout_weight="1"
-            android:text="@string/action_next" />
+            app:cardElevation="0dp"
+            app:contentPadding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/ValidatePN_tv_country_code_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:text="@string/text_confirm_country_and_enter"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/ValidatePN_spinner_country"
+                    style="@android:style/Widget.Holo.Light.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:spinnerMode="dropdown"
+                    android:textAlignment="center" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/ValidatePN_et_country_code"
+                        android:layout_width="64dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:hint="@string/hint_country_code"
+                        android:importantForAutofill="no"
+                        android:inputType="none|phone"
+                        android:textAlignment="center" />
+
+                    <EditText
+                        android:id="@+id/ValidatePN_et_phone_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:hint="@string/hint_example_phone_number"
+                        android:importantForAutofill="no"
+                        android:inputType="phone"
+                        android:textAlignment="center" />
+
+                    <Button
+                        android:id="@+id/ValidatePN_btn_next"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/action_next"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

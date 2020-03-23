@@ -1,6 +1,30 @@
 <resources>
-    <string name="app_name">Project_Salvation</string>
+    <string name="app_name">PigeoTalk</string>
 
     <string name="action_next">NEXT</string>
-    <string name="msg_phone_number_example">E.g. 555 555 1234</string>
+    <string name="action_ok">OK</string>
+    <string name="action_edit">EDIT</string>
+    <string name="action_resend_sms_code">RESEND CODE</string>
+
+    <string name="hint_example_phone_number">E.g. 555 555 1234</string>
+    <string name="hint_country_code">+0</string>
+
+    <string name="text_sms_charge_info">PigeoTalk Messenger will send a one time SMS message to
+    verify your phone number. Please note that carrier SMS charges may apply.</string>
+
+    <string name="text_confirm_country_and_enter">Please confirm your country code and enter your
+    phone number.</string>
+
+    <string name="text_invalid_number">Please enter a valid phone number.</string>
+
+    <string name="dialog_confirm_number"><![CDATA[We will be verifying the phone number: <br/><br/><b>
+    %1$s </b><br/><br/> Is this OK, or would you like to edit the number?"]]></string>
+
+    <string name="text_verify_your_phone_number">Verify your phone number</string>
+
+    <string name="text_sent_sms_info">We have sent you a one time SMS message with a code to the
+        number above.\n\nTo complete your phone number verification, please enter your 6-digit
+        verification code.</string>
+
+
 </resources>
