@@ -26,5 +26,10 @@
         number above.\n\nTo complete your phone number verification, please enter your 6-digit
         verification code.</string>
 
+    <string name="FullName">FullName</string>
+
+    <string name="About">About</string>
+
+    <string name="Finish">Finish</string>
 
 </resources>

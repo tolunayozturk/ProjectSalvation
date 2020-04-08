@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "412107296465-p5hnmm77lce7civetgessrb8sb2e7nlp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.projectsalvation.pigeotalk",
+            "certificate_hash": "753a5b949ee71806db4e87c3542fecad3048d598"
+          }
+        },
+        {
           "client_id": "412107296465-0npnav3chsd8jmjnt900psutl0kdp559.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -3,6 +3,7 @@ package com.projectsalvation.pigeotalk.Activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,6 +101,7 @@ public class VerifySMSActivity extends AppCompatActivity {
                             VerifySMS_otpView_sms_code.setText(mVerificationCode);
 
                             signInWithPhoneAuthCredential(credential);
+
                         }
                     }
 
