@@ -16,7 +16,7 @@
         <activity android:name=".Activity.RegisterActivity"></activity>
         <activity android:name=".Activity.VerifySMSActivity" />
         <activity android:name=".Activity.ValidatePhoneNumberActivity" />
-        <activity android:name=".Activity.LaunchActivity">
+        <activity android:name=".Activity.LaunchActivity" android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

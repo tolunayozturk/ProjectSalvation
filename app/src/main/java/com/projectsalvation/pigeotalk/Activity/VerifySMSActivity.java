@@ -163,7 +163,9 @@ public class VerifySMSActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential:success");
 
                             FirebaseUser user = task.getResult().getUser();
-                            // TODO: Send necessary data to the 3rd step of the registration
+
+                            Intent i = new Intent(VerifySMSActivity.this, RegisterActivity.class);
+                            i.putExtra("userObj", user);
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
