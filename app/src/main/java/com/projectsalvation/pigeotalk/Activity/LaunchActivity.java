@@ -14,7 +14,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // TODO: Implement a splash screen
-        Intent i = new Intent(LaunchActivity.this, ValidatePhoneNumberActivity.class);
+        Intent i = new Intent(LaunchActivity.this, MainNavigationActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
     }
