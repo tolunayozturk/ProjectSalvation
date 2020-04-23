@@ -26,11 +26,21 @@
         number above.\n\nTo complete your phone number verification, please enter your 6-digit
         verification code.</string>
 
-    <string name="FullName">FullName</string>
+    <string name="FullName">Full Name</string>
 
     <string name="About">About</string>
 
     <string name="Finish">Finish</string>
+
+    <string name="Logout">Logout</string>
+
+    <string name="Settings">Settings</string>
+
+    <string name="Profile">Profile</string>
+
+    <string name="DeleteYourAccount">Delete Your Account</string>
+
+    <string name="Notification">Notification</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
