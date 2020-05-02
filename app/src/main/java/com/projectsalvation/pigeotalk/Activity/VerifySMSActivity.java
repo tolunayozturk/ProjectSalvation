@@ -166,6 +166,8 @@ public class VerifySMSActivity extends AppCompatActivity {
 
                             Intent i = new Intent(VerifySMSActivity.this, RegisterActivity.class);
                             i.putExtra("userObj", user);
+                            i.putExtra("formattedPhoneNumber", mFormattedPhoneNumber);
+                            startActivity(i);
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
