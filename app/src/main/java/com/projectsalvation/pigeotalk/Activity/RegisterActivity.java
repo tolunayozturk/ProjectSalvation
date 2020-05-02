@@ -97,7 +97,7 @@ public class RegisterActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                             if(databaseError == null){
-                                Intent i = new Intent(RegisterActivity.this,MainNavigationActivity.class);
+                                Intent i = new Intent(RegisterActivity.this, HomePageActivity.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(i);
                             }else{

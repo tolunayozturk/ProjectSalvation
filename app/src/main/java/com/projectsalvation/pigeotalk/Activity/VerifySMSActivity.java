@@ -162,6 +162,8 @@ public class VerifySMSActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
 
+                            FirebaseUser user = task.getResult().getUser();
+
                             Intent i = new Intent(VerifySMSActivity.this, RegisterActivity.class);
                             i.putExtra("userObj", user);
                             i.putExtra("formattedPhoneNumber", mFormattedPhoneNumber);
