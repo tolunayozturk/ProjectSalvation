@@ -20,6 +20,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -28,6 +31,8 @@ import com.google.firebase.storage.UploadTask;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.projectsalvation.pigeotalk.Database.User;
 import com.projectsalvation.pigeotalk.R;
+
+import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -44,9 +49,9 @@ public class RegisterActivity extends AppCompatActivity {
     private final int PERMISSION_CODE = 1000;
     private final int IMAGE_CAPTURE_CODE = 1001;
 
-    Uri profileUri;
+    FirebaseUser firebaseUser;
 
-    String mFormattedPhoneNumber;
+    Uri profileUri;
 
     DatabaseReference databaseReference;
     StorageReference userProfilePictureRef;
@@ -72,8 +77,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         // endregion
 
-        Intent i = getIntent();
-        mFormattedPhoneNumber = i.getExtras().getString("formattedPhoneNumber");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        firebaseUser = auth.getCurrentUser();
 
         Register_btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,16 +86,25 @@ public class RegisterActivity extends AppCompatActivity {
                 if(Register_textInput_userfullname.getText() == null || Register_textInput_userfullname.getText().toString().trim().isEmpty()){
                     Register_textLayout_userfullname.setError("Please enter your name");
                 }else{
-                    //TODO: For security will be adding "$uid === auth.uid" check.
-
                     user.setUserFullName(Register_textInput_userfullname.getText().toString());
                     if(Register_textInput_user_about == null ||Register_textInput_user_about.getText().toString().trim().isEmpty()){
                         user.setUserAbout("Hey There! I am using PigeoTalk");
                     }else{
                         user.setUserAbout(Register_textInput_user_about.getText().toString());
                     }
-                    user.setUserPhone(mFormattedPhoneNumber);
-                    databaseReference.child(mFormattedPhoneNumber).setValue(user);
+                    user.setUserPhone(firebaseUser.getPhoneNumber());
+                    databaseReference.child(Objects.requireNonNull(firebaseUser.getPhoneNumber())).setValue(user, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                            if(databaseError == null){
+                                Intent i = new Intent(RegisterActivity.this,MainNavigationActivity.class);
+                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(i);
+                            }else{
+                                System.err.println("Register Error : " + databaseError.getMessage());
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -129,13 +143,11 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case PERMISSION_CODE:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    openCamera();
-                }else{
-                    Toast.makeText(this, "You have to give camera permission to take a photo", Toast.LENGTH_SHORT).show();
-                }
+        if (requestCode == PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+                Toast.makeText(this, "You have to give camera permission to take a photo", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -146,7 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){
             Register_imgView_profile_picture.setImageURI(profileUri);
-            StorageReference filePath = userProfilePictureRef.child(mFormattedPhoneNumber + ".jpg");
+            StorageReference filePath = userProfilePictureRef.child(firebaseUser.getPhoneNumber() + ".jpg");
 
             filePath.putFile(profileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override

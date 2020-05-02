@@ -23,7 +23,7 @@ public class LaunchActivity extends AppCompatActivity {
             finish();
         }
 
-        // TODO: Implement a splash screen
+        // TODO: Implement a proper splash screen
         Intent i = new Intent(LaunchActivity.this, HomePageActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
