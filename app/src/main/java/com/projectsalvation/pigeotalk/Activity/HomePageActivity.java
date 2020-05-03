@@ -9,12 +9,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import com.google.android.material.tabs.TabLayout;
+import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
 import com.projectsalvation.pigeotalk.Fragment.CallsFragment;
 import com.projectsalvation.pigeotalk.Fragment.CameraFragment;
 import com.projectsalvation.pigeotalk.Fragment.ChatsFragment;
@@ -23,6 +25,7 @@ import com.projectsalvation.pigeotalk.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HomePageActivity extends AppCompatActivity {
 
@@ -50,6 +53,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         setSupportActionBar(HomePage_toolbar);
 
+        // region Set up fragments
         cameraFragment = new CameraFragment();
         chatsFragment = new ChatsFragment();
         statusFragment = new StatusFragment();
@@ -57,7 +61,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         HomePage_tabs.setupWithViewPager(HomePage_viewpager);
 
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), 0);
 
         viewPagerAdapter.addFragment(cameraFragment, "");
         viewPagerAdapter.addFragment(chatsFragment, "CHATS");
@@ -65,24 +69,26 @@ public class HomePageActivity extends AppCompatActivity {
         viewPagerAdapter.addFragment(callsFragment, "CALLS");
 
         HomePage_viewpager.setAdapter(viewPagerAdapter);
+        // endregion
 
-        HomePage_tabs.getTabAt(0).setIcon(R.drawable.ic_camera_alt_white_24dp);
+        // Set camera icon to the first tab of the tab layout
+        Objects.requireNonNull(HomePage_tabs.getTabAt(0)).setIcon(R.drawable.ic_camera_alt_white_24dp);
 
+        // Set starting tab to Chats
         HomePage_viewpager.setCurrentItem(1);
 
-        // region Shrink the first item in tab layout (camera item)
+        // region Shrink the first item in tab layout (camera tab)
         LinearLayout layout = ((LinearLayout) ((LinearLayout) HomePage_tabs.getChildAt(0))
                 .getChildAt(0));
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) layout.getLayoutParams();
-        layoutParams.weight = 0.64f; // e.g. 0.5f
+        layoutParams.weight = 0.64f;
         layout.setLayoutParams(layoutParams);
         // endregion
 
         HomePage_viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -111,8 +117,7 @@ public class HomePageActivity extends AppCompatActivity {
                 .getOrCreateBadge();
 
         newMessageBadge.setVisible(false);
-    }
-    */
+    } */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -123,41 +128,14 @@ public class HomePageActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            // case R.id.HomePage_menuItem_settings:
+            case R.id.HomePage_menuItem_newGroup:
+                break;
+            case R.id.HomePage_menuItem_settings:
+                Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
+                startActivity(i);
+                break;
         }
 
         return false;
-    }
-
-    private class ViewPagerAdapter extends FragmentPagerAdapter {
-
-        private List<Fragment> fragmentList = new ArrayList<>();
-        private List<String> fragmentTitleList = new ArrayList<>();
-
-        public ViewPagerAdapter(@NonNull FragmentManager fm, int behavior) {
-            super(fm, behavior);
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            fragmentList.add(fragment);
-            fragmentTitleList.add(title);
-        }
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            return fragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragmentList.size();
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return fragmentTitleList.get(position);
-        }
     }
 }

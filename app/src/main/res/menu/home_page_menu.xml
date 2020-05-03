@@ -8,11 +8,6 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/HomePage_menuItem_pgTalkWeb"
-        android:title="PigeoTalk Web"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/HomePage_menuItem_settings"
         android:title="Settings"
         app:showAsAction="never" />
