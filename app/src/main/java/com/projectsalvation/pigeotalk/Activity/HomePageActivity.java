@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
 import com.projectsalvation.pigeotalk.Fragment.CallsFragment;
@@ -30,15 +31,13 @@ import java.util.Objects;
 public class HomePageActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    TabLayout HomePage_tabs;
-    Toolbar HomePage_toolbar;
-    ViewPager HomePage_viewpager;
+    TabLayout a_home_page_tab_layout;
+    Toolbar a_home_page_toolbar;
+    ViewPager a_home_page_viewpager;
+    FloatingActionButton a_home_page_fab_contacts;
     // endregion
 
-    private CameraFragment cameraFragment;
-    private ChatsFragment chatsFragment;
-    private StatusFragment statusFragment;
-    private CallsFragment callsFragment;
+    private static final String TAG = "HomePageActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,39 +45,40 @@ public class HomePageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_page);
 
         // region Resource Assignment
-        HomePage_tabs = findViewById(R.id.HomePage_tabs);
-        HomePage_toolbar = findViewById(R.id.HomePage_toolbar);
-        HomePage_viewpager = findViewById(R.id.HomePage_viewpager);
+        a_home_page_tab_layout = findViewById(R.id.a_home_page_tab_layout);
+        a_home_page_toolbar = findViewById(R.id.a_home_page_toolbar);
+        a_home_page_viewpager = findViewById(R.id.a_home_page_viewpager);
+        a_home_page_fab_contacts = findViewById(R.id.a_home_page_fab_contacts);
         // endregion
 
-        setSupportActionBar(HomePage_toolbar);
+        setSupportActionBar(a_home_page_toolbar);
 
         // region Set up fragments
-        cameraFragment = new CameraFragment();
-        chatsFragment = new ChatsFragment();
-        statusFragment = new StatusFragment();
-        callsFragment = new CallsFragment();
+        CameraFragment cameraFragment = new CameraFragment();
+        ChatsFragment chatsFragment = new ChatsFragment();
+        StatusFragment statusFragment = new StatusFragment();
+        CallsFragment callsFragment = new CallsFragment();
 
-        HomePage_tabs.setupWithViewPager(HomePage_viewpager);
+        a_home_page_tab_layout.setupWithViewPager(a_home_page_viewpager);
 
         HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), 0);
 
-        viewPagerAdapter.addFragment(cameraFragment, "");
-        viewPagerAdapter.addFragment(chatsFragment, "CHATS");
-        viewPagerAdapter.addFragment(statusFragment, "STATUS");
-        viewPagerAdapter.addFragment(callsFragment, "CALLS");
+        viewPagerAdapter.addFragment(cameraFragment, getString(R.string.EMPTY_STRING));
+        viewPagerAdapter.addFragment(chatsFragment, getString(R.string.title_chats));
+        viewPagerAdapter.addFragment(statusFragment, "STATUS"); // TODO: Implement or convert to GROUPS?
+        viewPagerAdapter.addFragment(callsFragment, getString(R.string.title_calls));
 
-        HomePage_viewpager.setAdapter(viewPagerAdapter);
+        a_home_page_viewpager.setAdapter(viewPagerAdapter);
         // endregion
 
         // Set camera icon to the first tab of the tab layout
-        Objects.requireNonNull(HomePage_tabs.getTabAt(0)).setIcon(R.drawable.ic_camera_alt_white_24dp);
+        Objects.requireNonNull(a_home_page_tab_layout.getTabAt(0)).setIcon(R.drawable.ic_camera_alt_white_24dp);
 
         // Set starting tab to Chats
-        HomePage_viewpager.setCurrentItem(1);
+        a_home_page_viewpager.setCurrentItem(1);
 
         // region Shrink the first item in tab layout (camera tab)
-        LinearLayout layout = ((LinearLayout) ((LinearLayout) HomePage_tabs.getChildAt(0))
+        LinearLayout layout = ((LinearLayout) ((LinearLayout) a_home_page_tab_layout.getChildAt(0))
                 .getChildAt(0));
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) layout.getLayoutParams();
@@ -86,7 +86,7 @@ public class HomePageActivity extends AppCompatActivity {
         layout.setLayoutParams(layoutParams);
         // endregion
 
-        HomePage_viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        a_home_page_viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
@@ -128,9 +128,9 @@ public class HomePageActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.HomePage_menuItem_newGroup:
+            case R.id.a_home_page_menuItem_new_group:
                 break;
-            case R.id.HomePage_menuItem_settings:
+            case R.id.a_home_page_menuItem_settings:
                 Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
                 startActivity(i);
                 break;

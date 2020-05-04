@@ -1,35 +1,45 @@
 package com.projectsalvation.pigeotalk.Database;
 
 public class User {
-    private String userPhone;
-    private String userFullName;
+    private String userId;
+    private String userPhoneNumber;
+    private String userName;
     private String userAbout;
-    private String userProfilePicture;
+    private String userProfilePhotoUrl;
 
     public User() {
     }
 
-    public User(String userPhone, String userFullName, String userAbout, String userProfilePicture) {
-        this.userPhone = userPhone;
-        this.userFullName = userFullName;
-        this.userAbout = userAbout;
-        this.userProfilePicture = userProfilePicture;
+    public User(String userId, String phoneNumber, String name, String about, String profilePhotoUrl) {
+        this.userId = userId;
+        this.userPhoneNumber = phoneNumber;
+        this.userName = name;
+        this.userAbout = about;
+        this.userProfilePhotoUrl = profilePhotoUrl;
     }
 
-    public String getUserPhone() {
-        return userPhone;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUserPhone(String userPhone) {
-        this.userPhone = userPhone;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getUserFullName() {
-        return userFullName;
+    public String getUserPhoneNumber() {
+        return userPhoneNumber;
     }
 
-    public void setUserFullName(String userFullName) {
-        this.userFullName = userFullName;
+    public void setUserPhoneNumber(String userPhoneNumber) {
+        this.userPhoneNumber = userPhoneNumber;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getUserAbout() {
@@ -40,11 +50,11 @@ public class User {
         this.userAbout = userAbout;
     }
 
-    public String getUserProfilePicture() {
-        return userProfilePicture;
+    public String getUserProfilePhotoUrl() {
+        return userProfilePhotoUrl;
     }
 
-    public void setUserProfilePicture(String userProfilePicture) {
-        this.userProfilePicture = userProfilePicture;
+    public void setUserProfilePhotoUrl(String userProfilePhotoUrl) {
+        this.userProfilePhotoUrl = userProfilePhotoUrl;
     }
 }

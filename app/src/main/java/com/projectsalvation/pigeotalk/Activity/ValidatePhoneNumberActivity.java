@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.view.View;
@@ -29,11 +30,11 @@ import java.util.Locale;
 public class ValidatePhoneNumberActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    Spinner ValidatePN_spinner_country;
-    EditText ValidatePN_et_country_code;
-    EditText ValidatePN_et_phone_number;
-    MaterialButton ValidatePN_btn_next;
-    Toolbar ValidatePN_toolbar;
+    Spinner a_validate_phone_number_spinner_country;
+    EditText a_validate_phone_number_et_country_code;
+    EditText a_validate_phone_number_et_phone_number;
+    Button a_validate_phone_number_btn_next;
+    Toolbar a_validate_phone_number_toolbar;
     // endregion
 
     private static final String TAG = "ValidatePhoneNumberActivity";
@@ -44,26 +45,32 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
     private boolean mIsValidPhoneNumber;
 
     @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+        // Not calling **super**, disables back button in current screen.
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_validate_phone_number);
 
         // region Resource Assignment
-        ValidatePN_spinner_country = findViewById(R.id.ValidatePN_spinner_country);
-        ValidatePN_et_country_code = findViewById(R.id.ValidatePN_et_country_code);
-        ValidatePN_et_phone_number = findViewById(R.id.ValidatePN_et_phone_number);
-        ValidatePN_btn_next = findViewById(R.id.ValidatePN_btn_next);
-        ValidatePN_toolbar = findViewById(R.id.ValidatePN_toolbar);
+        a_validate_phone_number_spinner_country = findViewById(R.id.a_validate_phone_number_spinner_country);
+        a_validate_phone_number_et_country_code = findViewById(R.id.a_validate_phone_number_et_country_code);
+        a_validate_phone_number_et_phone_number = findViewById(R.id.a_validate_phone_number_et_phone_number);
+        a_validate_phone_number_btn_next = findViewById(R.id.a_validate_phone_number_btn_next);
+        a_validate_phone_number_toolbar = findViewById(R.id.a_validate_phone_number_toolbar);
         // endregion
 
-        setSupportActionBar(ValidatePN_toolbar);
+        setSupportActionBar(a_validate_phone_number_toolbar);
 
         mPhoneNumberUtil = PhoneNumberUtil.getInstance();
 
         // Make edit_country_code not editable
-        ValidatePN_et_country_code.setKeyListener(null);
+        a_validate_phone_number_et_country_code.setKeyListener(null);
 
-        // region Fill ValidatePN_spinner_country
+        // region Fill a_validate_phone_number_spinner_country
         List<String> countryArray = new ArrayList<>();
 
         for (String countryCode : Locale.getISOCountries()) {
@@ -76,33 +83,33 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, countryArray);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ValidatePN_spinner_country.setAdapter(adapter);
+        a_validate_phone_number_spinner_country.setAdapter(adapter);
         //endregion
 
-        // region Set default item in ValidatePN_spinner_country to default locale of the user
+        // region Set default item in a_validate_phone_number_spinner_country to default locale of the user
         String defaultCountry = Locale.getDefault().getDisplayCountry() + " " + "(" +
                 Locale.getDefault().getCountry() + ")";
 
         int indexOfDefaultCountry = countryArray.indexOf(defaultCountry);
-        ValidatePN_spinner_country.setSelection(indexOfDefaultCountry);
+        a_validate_phone_number_spinner_country.setSelection(indexOfDefaultCountry);
         // endregion
 
-        ValidatePN_spinner_country.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        a_validate_phone_number_spinner_country.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedItem = ValidatePN_spinner_country.getSelectedItem().toString();
+                String selectedItem = a_validate_phone_number_spinner_country.getSelectedItem().toString();
                 mCountryCodeStr = selectedItem.substring(selectedItem.length() - 3,
                         selectedItem.length() - 1);
 
                 int countryCode = mPhoneNumberUtil.getCountryCodeForRegion(mCountryCodeStr);
 
-                ValidatePN_et_country_code.setHint("+" + countryCode);
+                a_validate_phone_number_et_country_code.setHint("+" + countryCode);
 
                 PhoneNumberFormattingTextWatcher phoneNumberFormattingTextWatcher =
                         new PhoneNumberFormattingTextWatcher(mCountryCodeStr);
 
-                ValidatePN_et_phone_number.removeTextChangedListener(phoneNumberFormattingTextWatcher);
-                ValidatePN_et_phone_number.addTextChangedListener(phoneNumberFormattingTextWatcher);
+                a_validate_phone_number_et_phone_number.removeTextChangedListener(phoneNumberFormattingTextWatcher);
+                a_validate_phone_number_et_phone_number.addTextChangedListener(phoneNumberFormattingTextWatcher);
             }
 
             @Override
@@ -110,10 +117,10 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
             }
         });
 
-        ValidatePN_btn_next.setOnClickListener(new View.OnClickListener() {
+        a_validate_phone_number_btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phoneNumber = ValidatePN_et_phone_number.getText().toString();
+                String phoneNumber = a_validate_phone_number_et_phone_number.getText().toString();
 
                 if (phoneNumber.isEmpty()) {
                     // TODO: Phone number field is empty. Show a message and update the UI.

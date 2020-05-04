@@ -7,20 +7,18 @@
     tools:context=".Activity.RegisterActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/Register_toolbar"
+        android:id="@+id/a_register_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:title="Register" />
+        app:title="@string/text_profile_info"
+        app:titleTextColor="@color/colorAccent" />
 
     <LinearLayout
+        android:id="@+id/a_register_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -28,87 +26,62 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Register_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/a_register_toolbar"
         app:layout_constraintVertical_bias="0.0">
 
-        <androidx.cardview.widget.CardView
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/a_register_civ_profile_photo"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/default_profile_picture" />
+
+            <ImageView
+                android:id="@+id/a_register_iv_add_photo_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="top|end"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_add_a_photo_black_24dp" />
+
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/a_register_et_user_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginLeft="64dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="64dp"
+            android:backgroundTint="@color/colorAccent"
+            android:hint="@string/text_type_your_name"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLength="42"
+            android:textAlignment="textStart"
+            android:textSize="18sp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/text_provide_name_and_photo"
+            android:textAlignment="center" />
 
-                <com.mikhaellopez.circularimageview.CircularImageView
-                    android:id="@+id/Register_imgView_profile_picture"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    app:srcCompat="@android:drawable/ic_menu_camera"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="8dp"
-                    />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/Register_textLayout_userfullname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:errorEnabled="true"
-                    app:helperTextEnabled="true"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="15dp"
-                    >
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/Register_textInput_userfullname"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="@string/FullName" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/Register_textLayout_user_about"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:errorEnabled="true"
-                    app:helperTextEnabled="true"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="15dp"
-                    >
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/Register_textInput_user_about"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="@string/About" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-                <Button
-                    android:id="@+id/Register_btn_register"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:text="@string/Finish"
-                    app:iconTint="#00FFFFFF" />
-
-            </LinearLayout>
-
-
-        </androidx.cardview.widget.CardView>
+        <Button
+            android:id="@+id/a_register_btn_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/action_next" />
 
     </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

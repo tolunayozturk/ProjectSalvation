@@ -7,7 +7,7 @@
     tools:context=".Activity.VerifySMSActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/VerifySMS_toolbar"
+        android:id="@+id/a_verify_sms_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
@@ -15,12 +15,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/text_verify_your_phone_number"
-        app:titleTextColor="@color/colorAccent">
-
-    </androidx.appcompat.widget.Toolbar>
+        app:titleTextColor="@color/colorAccent" />
 
     <LinearLayout
-        android:id="@+id/ValidatePN_linearLayout"
+        android:id="@+id/a_verify_sms_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -28,11 +26,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/VerifySMS_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/a_verify_sms_toolbar"
         app:layout_constraintVertical_bias="0.04">
 
         <TextView
-            android:id="@+id/VerifySMS_tv_formatted_number"
+            android:id="@+id/a_verify_sms_tv_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
@@ -60,7 +58,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/VerifySMS_tv_sms_sent_info"
+                    android:id="@+id/a_verify_sms_sent_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="32dp"
@@ -68,7 +66,7 @@
                     android:textSize="16sp" />
 
                 <com.mukesh.OtpView
-                    android:id="@+id/VerifySMS_otpView_sms_code"
+                    android:id="@+id/a_verify_sms_otpView_sms_code"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="32dp"
@@ -82,7 +80,7 @@
                     app:viewType="line" />
 
                 <Button
-                    android:id="@+id/VerifySMS_btn_resend_sms_code"
+                    android:id="@+id/a_verify_sms_btn_resend_code"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

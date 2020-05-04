@@ -11,7 +11,7 @@
         android:layout_height="wrap_content" >
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/HomePage_toolbar"
+            android:id="@+id/a_home_page_toolbar"
             app:title="@string/app_name"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -19,7 +19,7 @@
             app:titleTextColor="@color/white" />
 
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/HomePage_tabs"
+            android:id="@+id/a_home_page_tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabBackground="@color/colorPrimary"
@@ -31,13 +31,13 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager.widget.ViewPager
-        android:id="@+id/HomePage_viewpager"
+        android:id="@+id/a_home_page_viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/HomePage_fab_contacts"
+        android:id="@+id/a_home_page_fab_contacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

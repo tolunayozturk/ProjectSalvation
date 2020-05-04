@@ -14,19 +14,23 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        // TODO: FOR TESTING PURPOSES - DO NOT FORGET TO REMOVE
+        FirebaseAuth.getInstance().signOut();
+
+        // TODO: Sometimes it works, sometimes doesn't???
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (firebaseUser != null) {
             Intent i = new Intent(LaunchActivity.this, HomePageActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            finish();
+        } else {
+            Intent i = new Intent(LaunchActivity.this, RegisterActivity.class);
             startActivity(i);
             finish();
         }
 
-        // TODO: Implement a proper splash screen
-        Intent i = new Intent(LaunchActivity.this, HomePageActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
+        // TODO: Implement a proper splash screen!
     }
 
     @Override

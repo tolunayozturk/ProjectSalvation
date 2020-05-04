@@ -10,10 +10,12 @@ import android.view.MenuItem;
 
 import com.projectsalvation.pigeotalk.R;
 
+import java.util.Objects;
+
 public class SettingsActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    Toolbar Settings_toolbar;
+    Toolbar a_settings_toolbar;
     // endregion
 
     @Override
@@ -22,13 +24,13 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         // region Resource Assignment
-        Settings_toolbar = findViewById(R.id.Settings_toolbar);
+        a_settings_toolbar = findViewById(R.id.a_settings_toolbar);
         // endregion
 
-        setSupportActionBar(Settings_toolbar);
+        setSupportActionBar(a_settings_toolbar);
 
         // Enable back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

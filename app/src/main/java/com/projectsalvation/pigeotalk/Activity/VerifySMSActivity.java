@@ -26,14 +26,15 @@ import com.mukesh.OnOtpCompletionListener;
 import com.mukesh.OtpView;
 import com.projectsalvation.pigeotalk.R;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class VerifySMSActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    TextView VerifySMS_tv_formatted_number;
-    OtpView VerifySMS_otpView_sms_code;
-    Button VerifySMS_btn_resend_sms_code;
+    TextView a_verify_sms_tv_phone_number;
+    OtpView a_verify_sms_otpView_sms_code;
+    Button a_verify_sms_btn_resend_code;
     // endregion
 
     private static final String TAG = "VerifySMSActivity";
@@ -49,6 +50,11 @@ public class VerifySMSActivity extends AppCompatActivity {
     private PhoneAuthProvider.ForceResendingToken mResendToken;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mVerificationCallbacks;
 
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+        // Not calling **super**, disables back button in current screen.
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,21 +62,21 @@ public class VerifySMSActivity extends AppCompatActivity {
         setContentView(R.layout.activity_verify_sms);
 
         // region Resource Assignment
-        VerifySMS_tv_formatted_number = findViewById(R.id.VerifySMS_tv_formatted_number);
-        VerifySMS_otpView_sms_code = findViewById(R.id.VerifySMS_otpView_sms_code);
-        VerifySMS_btn_resend_sms_code = findViewById(R.id.VerifySMS_btn_resend_sms_code);
+        a_verify_sms_tv_phone_number = findViewById(R.id.a_verify_sms_tv_phone_number);
+        a_verify_sms_otpView_sms_code = findViewById(R.id.a_verify_sms_otpView_sms_code);
+        a_verify_sms_btn_resend_code = findViewById(R.id.a_verify_sms_btn_resend_code);
         // endregion
 
         Intent i = getIntent();
         mFormattedPhoneNumber = i.getExtras().getString("formattedPhoneNumber");
         String countryCodeStr = i.getExtras().getString("countryCodeStr");
 
-        VerifySMS_tv_formatted_number.setText(mFormattedPhoneNumber);
+        a_verify_sms_tv_phone_number.setText(mFormattedPhoneNumber);
 
         mPhoneAuthProvider = PhoneAuthProvider.getInstance();
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        VerifySMS_otpView_sms_code.setOtpCompletionListener(new OnOtpCompletionListener() {
+        a_verify_sms_otpView_sms_code.setOtpCompletionListener(new OnOtpCompletionListener() {
             @Override
             public void onOtpCompleted(String otp) {
                 mVerificationCode = otp;
@@ -82,64 +88,64 @@ public class VerifySMSActivity extends AppCompatActivity {
             }
         });
 
-         mVerificationCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    @Override
-                    public void onVerificationCompleted(PhoneAuthCredential credential) {
-                        // This callback will be invoked in two situations:
-                        // 1 - Instant verification. In some cases the phone number can be instantly
-                        //     verified without needing to send or enter a verification code.
-                        // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                        //     detect the incoming verification SMS and perform verification without
-                        //     user action.
+        mVerificationCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential credential) {
+                // This callback will be invoked in two situations:
+                // 1 - Instant verification. In some cases the phone number can be instantly
+                //     verified without needing to send or enter a verification code.
+                // 2 - Auto-retrieval. On some devices Google Play services can automatically
+                //     detect the incoming verification SMS and perform verification without
+                //     user action.
 
-                        Log.d(TAG, "onVerificationCompleted:" + credential);
+                Log.d(TAG, "onVerificationCompleted:" + credential);
 
-                        if (credential.getSmsCode() == null) {
-                            // TODO: Handle instant verification when verification code is null.
-                        } else {
-                            mVerificationCode = credential.getSmsCode();
-                            VerifySMS_otpView_sms_code.setText(mVerificationCode);
+                if (credential.getSmsCode() == null) {
+                    // TODO: Handle instant verification when verification code is null.
+                } else {
+                    mVerificationCode = credential.getSmsCode();
+                    a_verify_sms_otpView_sms_code.setText(mVerificationCode);
 
-                            signInWithPhoneAuthCredential(credential);
+                    signInWithPhoneAuthCredential(credential);
 
-                        }
-                    }
+                }
+            }
 
-                    @Override
-                    public void onVerificationFailed(FirebaseException e) {
-                        // This callback is invoked in an invalid request for verification is made,
-                        // for instance if the the phone number format is not valid.
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+                // This callback is invoked in an invalid request for verification is made,
+                // for instance if the the phone number format is not valid.
 
-                        Log.w(TAG, "onVerificationFailed", e);
+                Log.w(TAG, "onVerificationFailed", e);
 
-                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                            // Invalid request
-                            // ...
-                        } else if (e instanceof FirebaseTooManyRequestsException) {
-                            // The SMS quota for the project has been exceeded
-                            // ...
-                        }
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    // Invalid request
+                    // ...
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+                    // The SMS quota for the project has been exceeded
+                    // ...
+                }
 
-                        // TODO: Show a message and update the UI
-                    }
+                // TODO: Show a message and update the UI
+            }
 
-                    @Override
-                    public void onCodeSent(@NonNull String verificationId,
-                                           @NonNull PhoneAuthProvider.ForceResendingToken token) {
+            @Override
+            public void onCodeSent(@NonNull String verificationId,
+                                   @NonNull PhoneAuthProvider.ForceResendingToken token) {
 
-                        Log.d(TAG, "onCodeSent:" + verificationId);
+                Log.d(TAG, "onCodeSent:" + verificationId);
 
-                        // Save verification ID and resending token so we can use them later
-                        mVerificationId = verificationId;
-                        mResendToken = token;
+                // Save verification ID and resending token so we can use them later
+                mVerificationId = verificationId;
+                mResendToken = token;
 
-                        // ...
-                    }
+                // ...
+            }
 
-                    // TODO: Implement onCodeAutoRetrievalTimeOut?
-                };
+            // TODO: Implement onCodeAutoRetrievalTimeOut?
+        };
 
-        VerifySMS_btn_resend_sms_code.setOnClickListener(new View.OnClickListener() {
+        a_verify_sms_btn_resend_code.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 resendVerificationCode(mFormattedPhoneNumber, mResendToken);
@@ -147,7 +153,7 @@ public class VerifySMSActivity extends AppCompatActivity {
         });
 
         // Match the language of the SMS message to the language of the user
-        mFirebaseAuth.setLanguageCode(countryCodeStr);
+        mFirebaseAuth.setLanguageCode(countryCodeStr != null ? countryCodeStr : "en");
 
         // Send SMS verification code
         sendVerificationCode(mFormattedPhoneNumber);
@@ -162,10 +168,10 @@ public class VerifySMSActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
 
-                            FirebaseUser user = task.getResult().getUser();
+                            FirebaseUser user = Objects.requireNonNull(task.getResult()).getUser();
 
                             Intent i = new Intent(VerifySMSActivity.this, RegisterActivity.class);
-                            i.putExtra("userObj", user);
+                            i.putExtra("userId", Objects.requireNonNull(user).getUid());
                             i.putExtra("formattedPhoneNumber", mFormattedPhoneNumber);
                             startActivity(i);
                         } else {
@@ -181,7 +187,7 @@ public class VerifySMSActivity extends AppCompatActivity {
     }
 
     private void sendVerificationCode(String phoneNumber) {
-        VerifySMS_btn_resend_sms_code.setEnabled(false);
+        a_verify_sms_btn_resend_code.setEnabled(false);
 
         mPhoneAuthProvider.verifyPhoneNumber(
                 phoneNumber,
@@ -194,13 +200,13 @@ public class VerifySMSActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                VerifySMS_btn_resend_sms_code.setEnabled(true);
+                a_verify_sms_btn_resend_code.setEnabled(true);
             }
         }, VERIFICATION_CODE_TIMEOUT_DURATION * 1000);
     }
 
     private void resendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token) {
-        VerifySMS_btn_resend_sms_code.setEnabled(false);
+        a_verify_sms_btn_resend_code.setEnabled(false);
 
         mPhoneAuthProvider.verifyPhoneNumber(
                 phoneNumber,
@@ -214,7 +220,7 @@ public class VerifySMSActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                VerifySMS_btn_resend_sms_code.setEnabled(true);
+                a_verify_sms_btn_resend_code.setEnabled(true);
             }
         }, VERIFICATION_CODE_TIMEOUT_DURATION * 1000);
     }

@@ -7,7 +7,7 @@
     tools:context=".Activity.ValidatePhoneNumberActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/ValidatePN_toolbar"
+        android:id="@+id/a_validate_phone_number_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
@@ -15,12 +15,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/text_verify_your_phone_number"
-        app:titleTextColor="@color/colorAccent">
-
-    </androidx.appcompat.widget.Toolbar>
+        app:titleTextColor="@color/colorAccent" />
 
     <LinearLayout
-        android:id="@+id/ValidatePN_linearLayout"
+        android:id="@+id/a_validate_phone_number_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -28,7 +26,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ValidatePN_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/a_validate_phone_number_toolbar"
         app:layout_constraintVertical_bias="0.0">
 
         <androidx.cardview.widget.CardView
@@ -43,7 +41,7 @@
             app:contentPadding="16dp">
 
             <TextView
-                android:id="@+id/ValidatePN_tv_sms_charge_info"
+                android:id="@+id/a_validate_phone_number_tv_sms_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/text_sms_charge_info"
@@ -68,7 +66,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/ValidatePN_tv_country_code_info"
+                    android:id="@+id/a_validate_phone_number_tv_country_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="32dp"
@@ -76,7 +74,7 @@
                     android:textSize="16sp" />
 
                 <Spinner
-                    android:id="@+id/ValidatePN_spinner_country"
+                    android:id="@+id/a_validate_phone_number_spinner_country"
                     style="@android:style/Widget.Holo.Light.Spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -90,7 +88,7 @@
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/ValidatePN_et_country_code"
+                        android:id="@+id/a_validate_phone_number_et_country_code"
                         android:layout_width="64dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -101,7 +99,7 @@
                         android:textAlignment="center" />
 
                     <EditText
-                        android:id="@+id/ValidatePN_et_phone_number"
+                        android:id="@+id/a_validate_phone_number_et_phone_number"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -112,7 +110,7 @@
                         android:textAlignment="center" />
 
                     <Button
-                        android:id="@+id/ValidatePN_btn_next"
+                        android:id="@+id/a_validate_phone_number_btn_next"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
