@@ -7,30 +7,53 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.projectsalvation.pigeotalk.Database.User;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -46,14 +69,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
-    private static final int PERMISSION_REQUEST_CODE_CAMERA = 100;
-    private static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 200;
-
+    private static final int PERMISSION_REQUEST_CODE_CONTACTS = 205;
+    private static final int PERMISSION_REQUEST_CODE_CAMERA = 201;
+    private static final int INTENT_CHOOSE_PHOTO = 102;
     private static final int INTENT_TAKE_PHOTO = 101;
-    private static final int INTENT_CHOOSE_PHOTO = 201;
 
+    private DatabaseReference mDatabaseReference;
+    private StorageReference mStorageReference;
     private FirebaseAuth mFirebaseAuth;
-    private Bitmap profilePhotoBitmap;
+    private Bitmap mProfilePhotoBitmap;
 
     @Override
     public void onBackPressed() {
@@ -73,11 +97,10 @@ public class RegisterActivity extends AppCompatActivity {
         a_register_btn_next = findViewById(R.id.a_register_btn_next);
         // endregion
 
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
+        mStorageReference = FirebaseStorage.getInstance().getReference();
 
-        // Intent i = getIntent();
-        // Objects.requireNonNull(i.getExtras()).get("userId");
-        // i.getExtras().get("formattedPhoneNumber");
 
         a_register_civ_profile_photo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,49 +114,10 @@ public class RegisterActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
                                     case 0:
-                                        if (!checkPermission(Manifest.permission.CAMERA)) {
-                                            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                                                    RegisterActivity.this, Manifest.permission.CAMERA)) {
-
-                                                // Explain to user why we need this permission
-                                                MaterialAlertDialogBuilder alertDialogBuilder =
-                                                        new MaterialAlertDialogBuilder(RegisterActivity.this)
-                                                                .setMessage(R.string.dialog_permission_camera_explanation)
-                                                                .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
-                                                                    @Override
-                                                                    public void onClick(DialogInterface dialog, int which) {
-                                                                        requestPermission(new String[]{Manifest.permission.CAMERA},
-                                                                                PERMISSION_REQUEST_CODE_CAMERA);
-                                                                    }
-                                                                }).setNegativeButton(R.string.action_not_now, null);
-
-                                                AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
-                                                permissionExplanationDialog.show();
-                                            } else {
-                                                // No explanation needed; request the permission
-                                                requestPermission(new String[]{Manifest.permission.CAMERA},
-                                                        PERMISSION_REQUEST_CODE_CAMERA);
-                                            }
-                                        } else {
-                                            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                                            if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
-                                                startActivityForResult(
-                                                        takePhotoIntent, INTENT_TAKE_PHOTO
-                                                );
-                                            }
-                                        }
+                                        launchCamera();
                                         break;
                                     case 1:
-                                        Intent choosePhotoIntent = new Intent(Intent.ACTION_PICK,
-                                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                                                .setType("image/*");
-
-                                        if (choosePhotoIntent.resolveActivity(getPackageManager()) != null) {
-                                            startActivityForResult(
-                                                    choosePhotoIntent, INTENT_CHOOSE_PHOTO
-                                            );
-                                        }
+                                        launchPhotoLibrary();
                                         break;
                                 } // end switch
                             }
@@ -151,9 +135,111 @@ public class RegisterActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(a_register_et_user_name.getText())) {
                     Snackbar.make(a_register_et_user_name, R.string.text_user_name_cannot_be_empty,
                             BaseTransientBottomBar.LENGTH_LONG).show();
-                }
 
-                // TODO: Handle database operations
+                    // TODO: return here
+                } else {
+                    // Write user profile info to database and update user profile
+                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("name")
+                            .setValue(a_register_et_user_name.getText().toString());
+
+                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
+                            .setValue("Hey there! I'm using PigeoTalk.");
+
+                    // region Upload default profile photo and get its download url
+                    a_register_civ_profile_photo.setDrawingCacheEnabled(true);
+                    a_register_civ_profile_photo.buildDrawingCache();
+                    Bitmap bitmap = ((BitmapDrawable) a_register_civ_profile_photo.getDrawable()).getBitmap();
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, baos);
+                    byte[] data = baos.toByteArray();
+
+                    UploadTask uploadTask = mStorageReference.child(mFirebaseAuth.getUid()
+                            + "/media/profile-photo.png").putBytes(data);
+
+                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            taskSnapshot.getStorage().getDownloadUrl()
+                                    .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Uri> task) {
+                                            String downloadUrl = task.getResult().toString();
+                                            mDatabaseReference.child("users")
+                                                    .child(mFirebaseAuth.getUid()).child("profile_photo_url")
+                                                    .setValue(downloadUrl);
+
+                                            updateUserProfile(mFirebaseAuth.getCurrentUser(),
+                                                    a_register_et_user_name.getText().toString(),
+                                                    Uri.parse(downloadUrl));
+                                        }
+                                    });
+                        }
+                    });
+                    // endregion
+                }
+            }
+        });
+    }
+
+    private void launchCamera() {
+        if (!checkPermission(Manifest.permission.CAMERA)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    RegisterActivity.this, Manifest.permission.CAMERA)) {
+
+                // Explain to user why we need this permission
+                MaterialAlertDialogBuilder alertDialogBuilder =
+                        new MaterialAlertDialogBuilder(RegisterActivity.this)
+                                .setMessage(R.string.dialog_permission_camera_explanation)
+                                .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        requestPermission(new String[]{Manifest.permission.CAMERA},
+                                                PERMISSION_REQUEST_CODE_CAMERA);
+                                    }
+                                }).setNegativeButton(R.string.action_not_now, null);
+
+                AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
+                permissionExplanationDialog.show();
+            } else {
+                // No explanation needed; request the permission
+                requestPermission(new String[]{Manifest.permission.CAMERA},
+                        PERMISSION_REQUEST_CODE_CAMERA);
+            }
+        } else {
+            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+            }
+        }
+    }
+
+    private void launchPhotoLibrary() {
+        Intent choosePhotoIntent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                .setType("image/*");
+
+        if (choosePhotoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(
+                    choosePhotoIntent, INTENT_CHOOSE_PHOTO
+            );
+        }
+    }
+
+    // TODO: Make this a utility method separate from this class
+    private void updateUserProfile(FirebaseUser user, String name, Uri photoUri) {
+        UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest
+                .Builder()
+                .setDisplayName(name)
+                .setPhotoUri(photoUri)
+                .build();
+
+        user.updateProfile(profileChangeRequest).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "User profile is updated.");
+                }
             }
         });
     }
@@ -170,9 +256,8 @@ public class RegisterActivity extends AppCompatActivity {
                         startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
                     }
                 }
-            case PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE:
                 break;
-        } // end switch
+        }
     }
 
     @Override
@@ -181,9 +266,9 @@ public class RegisterActivity extends AppCompatActivity {
             case INTENT_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
                     Bundle extras = Objects.requireNonNull(data).getExtras();
-                    profilePhotoBitmap = (Bitmap) extras.get("data");
+                    mProfilePhotoBitmap = (Bitmap) extras.get("data");
 
-                    a_register_civ_profile_photo.setImageBitmap(profilePhotoBitmap);
+                    a_register_civ_profile_photo.setImageBitmap(mProfilePhotoBitmap);
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
                 }
                 break;
@@ -192,12 +277,12 @@ public class RegisterActivity extends AppCompatActivity {
                     Uri selectedPhotoUri = Objects.requireNonNull(data).getData();
 
                     try {
-                        profilePhotoBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedPhotoUri);
+                        mProfilePhotoBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedPhotoUri);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    a_register_civ_profile_photo.setImageBitmap(profilePhotoBitmap);
+                    a_register_civ_profile_photo.setImageBitmap(mProfilePhotoBitmap);
                     //Picasso.get().load(selectedPhotoUri).noFade().into(a_register_civ_profile_photo);
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
                 }

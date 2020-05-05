@@ -30,11 +30,8 @@
     <string name="text_provide_name_and_photo">Please provide your name and an optional profile photo</string>
     <string name="text_type_your_name">Type your name here</string>
 
-    <string name="dialog_permission_camera_explanation">To capture photos and add a profile photo, allow PigeoTalk
+    <string name="dialog_permission_camera_explanation">To capture photos and videos, allow PigeoTalk
     access to your camera.</string>
-
-    <string name="dialog_permission_read_external_storage_explanation">To select a photo from your Gallery
-    and add a profile photo, allow PigeoTalk access to your photo gallery.</string>
 
     <string name="text_user_name_cannot_be_empty">Please type your name before continuing with registration.</string>
 
