@@ -44,10 +44,13 @@
     <string name="text_choose_from_gallery">Choose from Photo Library</string>
 
     <string name="text_profile_photo_upload_failed">Something went wrong setting your profile photo.
-        Please try again in a second or choose a different photo.</string>
+        Please try again in a minute or try choosing a different photo.</string>
 
     <string name="text_verify_phone_number_failed">Something went wrong verifying your phone number.
         Please try again with a new verification code.</string>
+
+    <string name="text_profile_update_request_failed">Something went wrong setting your profile info.
+    Please try again in a minute.</string>
 
     <string name="text_verify_sms_request_info">You can request a new verification code in %1$d second(s).</string>
     <string name="text_verify_sms_request_now">You can request a new verification code now.</string>

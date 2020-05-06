@@ -8,20 +8,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,15 +43,11 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -70,7 +62,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
-    private static final int PERMISSION_REQUEST_CODE_CONTACTS = 205;
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 201;
     private static final int INTENT_CHOOSE_PHOTO = 102;
     private static final int INTENT_TAKE_PHOTO = 101;
@@ -128,8 +119,10 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (TextUtils.isEmpty(a_register_et_user_name.getText())) {
-                    Snackbar.make(a_register_et_user_name, R.string.text_user_name_cannot_be_empty,
-                            BaseTransientBottomBar.LENGTH_LONG).show();
+                    Snackbar.make(a_register_et_user_name,
+                            R.string.text_user_name_cannot_be_empty,
+                            BaseTransientBottomBar.LENGTH_LONG)
+                            .show();
 
                     return;
                 }
@@ -181,16 +174,20 @@ public class RegisterActivity extends AppCompatActivity {
                                 }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Snackbar.make(a_register_civ_profile_photo, R.string.text_profile_photo_upload_failed,
-                                        BaseTransientBottomBar.LENGTH_LONG).show();
+                                Snackbar.make(a_register_civ_profile_photo,
+                                        R.string.text_profile_photo_upload_failed,
+                                        BaseTransientBottomBar.LENGTH_LONG)
+                                        .show();
                             }
                         });
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(a_register_civ_profile_photo, R.string.text_profile_photo_upload_failed,
-                                BaseTransientBottomBar.LENGTH_LONG).show();
+                        Snackbar.make(a_register_civ_profile_photo,
+                                R.string.text_profile_photo_upload_failed,
+                                BaseTransientBottomBar.LENGTH_LONG)
+                                .show();
                     }
                 });
                 // endregion
@@ -199,23 +196,6 @@ public class RegisterActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
-    }
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                .format(new Date());
-
-        String imageFileName = "JPEG_" + timeStamp + "_";
-
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        return image;
     }
 
     private void launchCamera() {
@@ -246,10 +226,14 @@ public class RegisterActivity extends AppCompatActivity {
             Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
                 File profilePhotoFile = null;
+
                 try {
                     profilePhotoFile = createImageFile();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Snackbar.make(a_register_civ_profile_photo,
+                            R.string.text_profile_photo_upload_failed,
+                            BaseTransientBottomBar.LENGTH_LONG)
+                            .show();
                 }
 
                 if (profilePhotoFile != null) {
@@ -275,6 +259,23 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                .format(new Date());
+
+        String imageFileName = "JPEG_" + timeStamp + "_";
+
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return image;
+    }
+
     // TODO: Make this a utility method separate from this class
     private void updateUserProfile(FirebaseUser user, String name, Uri photoUri) {
         UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest
@@ -292,7 +293,10 @@ public class RegisterActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                // TODO: Handle failed profile update request
+                Snackbar.make(a_register_et_user_name,
+                        R.string.text_profile_update_request_failed,
+                        BaseTransientBottomBar.LENGTH_LONG)
+                        .show();
             }
         });
     }
@@ -325,7 +329,10 @@ public class RegisterActivity extends AppCompatActivity {
                                 .centerInside()
                                 .into(a_register_civ_profile_photo);
                     } else {
-                        // TODO: Handle error.
+                        Snackbar.make(a_register_civ_profile_photo,
+                                R.string.text_profile_photo_upload_failed,
+                                BaseTransientBottomBar.LENGTH_LONG)
+                                .show();
                     }
 
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
