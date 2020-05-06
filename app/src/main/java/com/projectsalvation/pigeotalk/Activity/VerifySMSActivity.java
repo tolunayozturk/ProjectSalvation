@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
@@ -26,6 +29,7 @@ import com.mukesh.OnOtpCompletionListener;
 import com.mukesh.OtpView;
 import com.projectsalvation.pigeotalk.R;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +39,7 @@ public class VerifySMSActivity extends AppCompatActivity {
     TextView a_verify_sms_tv_phone_number;
     OtpView a_verify_sms_otpView_sms_code;
     Button a_verify_sms_btn_resend_code;
+    TextView a_verify_sms_tv_request_info;
     // endregion
 
     private static final String TAG = "VerifySMSActivity";
@@ -51,12 +56,6 @@ public class VerifySMSActivity extends AppCompatActivity {
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mVerificationCallbacks;
 
     @Override
-    public void onBackPressed() {
-        // super.onBackPressed();
-        // Not calling **super**, disables back button in current screen.
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify_sms);
@@ -65,6 +64,7 @@ public class VerifySMSActivity extends AppCompatActivity {
         a_verify_sms_tv_phone_number = findViewById(R.id.a_verify_sms_tv_phone_number);
         a_verify_sms_otpView_sms_code = findViewById(R.id.a_verify_sms_otpView_sms_code);
         a_verify_sms_btn_resend_code = findViewById(R.id.a_verify_sms_btn_resend_code);
+        a_verify_sms_tv_request_info = findViewById(R.id.a_verify_sms_request_info);
         // endregion
 
         Intent i = getIntent();
@@ -81,13 +81,21 @@ public class VerifySMSActivity extends AppCompatActivity {
             public void onOtpCompleted(String otp) {
                 mVerificationCode = otp;
 
-                PhoneAuthCredential credential =
-                        PhoneAuthProvider.getCredential(mVerificationId, mVerificationCode);
+                if (mVerificationId == null || mVerificationCode == null) {
+                    Snackbar.make(a_verify_sms_otpView_sms_code, R.string.text_verify_phone_number_failed,
+                            BaseTransientBottomBar.LENGTH_LONG).show();
+
+                    return;
+                }
+
+                PhoneAuthCredential credential = PhoneAuthProvider
+                        .getCredential(mVerificationId, mVerificationCode);
 
                 signInWithPhoneAuthCredential(credential);
             }
         });
 
+        // region Verification Callbacks
         mVerificationCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential credential) {
@@ -144,11 +152,12 @@ public class VerifySMSActivity extends AppCompatActivity {
 
             // TODO: Implement onCodeAutoRetrievalTimeOut?
         };
+        // endregion
 
         a_verify_sms_btn_resend_code.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resendVerificationCode(mFormattedPhoneNumber, mResendToken);
+                sendVerificationCode(mFormattedPhoneNumber, mResendToken);
             }
         });
 
@@ -183,7 +192,7 @@ public class VerifySMSActivity extends AppCompatActivity {
     }
 
     private void sendVerificationCode(String phoneNumber) {
-        a_verify_sms_btn_resend_code.setEnabled(false);
+        startRequestCountdown();
 
         mPhoneAuthProvider.verifyPhoneNumber(
                 phoneNumber,
@@ -192,17 +201,10 @@ public class VerifySMSActivity extends AppCompatActivity {
                 VerifySMSActivity.this,
                 mVerificationCallbacks
         );
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                a_verify_sms_btn_resend_code.setEnabled(true);
-            }
-        }, VERIFICATION_CODE_TIMEOUT_DURATION * 1000);
     }
 
-    private void resendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token) {
-        a_verify_sms_btn_resend_code.setEnabled(false);
+    private void sendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token) {
+        startRequestCountdown();
 
         mPhoneAuthProvider.verifyPhoneNumber(
                 phoneNumber,
@@ -212,12 +214,25 @@ public class VerifySMSActivity extends AppCompatActivity {
                 mVerificationCallbacks,
                 token
         );
+    }
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+    private void startRequestCountdown() {
+        a_verify_sms_btn_resend_code.setEnabled(false);
+
+        new CountDownTimer(VERIFICATION_CODE_TIMEOUT_DURATION * 1000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                a_verify_sms_tv_request_info.setText(getString(R.string.text_verify_sms_request_info,
+                        millisUntilFinished / 1000));
+            }
+
+            public void onFinish() {
+                a_verify_sms_tv_request_info.setText(R.string.text_verify_sms_request_now);
                 a_verify_sms_btn_resend_code.setEnabled(true);
             }
-        }, VERIFICATION_CODE_TIMEOUT_DURATION * 1000);
+        }.start();
     }
+
+    @Override
+    public void onBackPressed() { }
 }

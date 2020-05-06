@@ -1,68 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:weightSum="10">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/Chats_user_profile_picture"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            tools:srcCompat="@drawable/default_profile_picture" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="8"
-            android:orientation="vertical"
-            android:paddingLeft="8dp">
-
-            <TextView
-                android:id="@+id/Chats_user_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:text="Tolunay"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/Chats_last_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Test message bruh" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="vertical"
-            android:paddingLeft="8dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:id="@+id/Chats_tv_lastMessage_timeStamp"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:gravity="end"
-                android:text="5:00 PM" />
-
-            <TextView
-                android:id="@+id/Chats_tv_newMessage_count"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:gravity="end"
-                android:text="1" />
-        </LinearLayout>
-
-    </LinearLayout>
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

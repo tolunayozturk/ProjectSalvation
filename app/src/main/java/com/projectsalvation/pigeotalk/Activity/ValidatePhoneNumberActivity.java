@@ -45,12 +45,6 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
     private boolean mIsValidPhoneNumber;
 
     @Override
-    public void onBackPressed() {
-        // super.onBackPressed();
-        // Not calling **super**, disables back button in current screen.
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_validate_phone_number);
@@ -180,4 +174,7 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() { }
 }

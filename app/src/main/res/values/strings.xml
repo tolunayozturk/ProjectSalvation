@@ -5,9 +5,22 @@
     <string name="action_ok">OK</string>
     <string name="action_edit">EDIT</string>
     <string name="action_resend_sms_code">RESEND CODE</string>
+    <string name="action_continue">CONTINUE</string>
+    <string name="action_not_now">NOT NOW</string>
+
+    <string name="EMPTY_STRING" />
+    <string name="title_chats">CHATS</string>
+    <string name="title_calls">CALLS</string>
 
     <string name="hint_example_phone_number">E.g. 555 555 1234</string>
     <string name="hint_country_code">+0</string>
+    <string name="hint_type_your_name">Type your name here</string>
+
+    <string name="dialog_confirm_number"><![CDATA[We will be verifying the phone number: <br/><br/><b>
+    %1$s </b><br/><br/> Is this OK, or would you like to edit the number?"]]></string>
+
+    <string name="dialog_permission_camera_explanation">To capture photos and videos, allow PigeoTalk
+    access to your camera.</string>
 
     <string name="text_sms_charge_info">PigeoTalk Messenger will send a one time SMS message to
     verify your phone number. Please note that carrier SMS charges may apply.</string>
@@ -17,9 +30,6 @@
 
     <string name="text_invalid_number">Please enter a valid phone number.</string>
 
-    <string name="dialog_confirm_number"><![CDATA[We will be verifying the phone number: <br/><br/><b>
-    %1$s </b><br/><br/> Is this OK, or would you like to edit the number?"]]></string>
-
     <string name="text_verify_your_phone_number">Verify your phone number</string>
 
     <string name="text_sent_sms_info">We have sent you a one time SMS message with a code to the
@@ -28,24 +38,17 @@
 
     <string name="text_profile_info">Profile Info</string>
     <string name="text_provide_name_and_photo">Please provide your name and an optional profile photo</string>
-    <string name="text_type_your_name">Type your name here</string>
-
-    <string name="dialog_permission_camera_explanation">To capture photos and videos, allow PigeoTalk
-    access to your camera.</string>
-
     <string name="text_user_name_cannot_be_empty">Please type your name before continuing with registration.</string>
 
     <string name="text_take_a_photo">Take a photo</string>
-    <string name="text_choose_from_gallery">Choose from Gallery</string>
+    <string name="text_choose_from_gallery">Choose from Photo Library</string>
 
-    <string name="action_continue">CONTINUE</string>
-    <string name="action_not_now">NOT NOW</string>
+    <string name="text_profile_photo_upload_failed">Something went wrong setting your profile photo.
+        Please try again in a second or choose a different photo.</string>
 
-    <string name="EMPTY_STRING" />
-    <string name="title_chats">CHATS</string>
-    <string name="title_calls">CALLS</string>
+    <string name="text_verify_phone_number_failed">Something went wrong verifying your phone number.
+        Please try again with a new verification code.</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="text_verify_sms_request_info">You can request a new verification code in %1$d second(s).</string>
+    <string name="text_verify_sms_request_now">You can request a new verification code now.</string>
 </resources>

@@ -87,6 +87,14 @@
                     android:freezesText="false"
                     android:text="@string/action_resend_sms_code" />
 
+                <TextView
+                    android:id="@+id/a_verify_sms_request_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:gravity="center"
+                    android:textSize="16sp" />
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>

@@ -5,13 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -26,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,19 +42,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.projectsalvation.pigeotalk.Database.User;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -77,13 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private StorageReference mStorageReference;
     private FirebaseAuth mFirebaseAuth;
-    private Bitmap mProfilePhotoBitmap;
-
-    @Override
-    public void onBackPressed() {
-        // super.onBackPressed();
-        // Not calling **super**, disables back button in current screen.
-    }
+    private Uri mProfilePhotoUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +93,8 @@ public class RegisterActivity extends AppCompatActivity {
         // endregion
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseAuth = FirebaseAuth.getInstance();
         mStorageReference = FirebaseStorage.getInstance().getReference();
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
 
         a_register_civ_profile_photo.setOnClickListener(new View.OnClickListener() {
@@ -136,50 +131,91 @@ public class RegisterActivity extends AppCompatActivity {
                     Snackbar.make(a_register_et_user_name, R.string.text_user_name_cannot_be_empty,
                             BaseTransientBottomBar.LENGTH_LONG).show();
 
-                    // TODO: return here
-                } else {
-                    // Write user profile info to database and update user profile
-                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("name")
-                            .setValue(a_register_et_user_name.getText().toString());
-
-                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
-                            .setValue("Hey there! I'm using PigeoTalk.");
-
-                    // region Upload default profile photo and get its download url
-                    a_register_civ_profile_photo.setDrawingCacheEnabled(true);
-                    a_register_civ_profile_photo.buildDrawingCache();
-                    Bitmap bitmap = ((BitmapDrawable) a_register_civ_profile_photo.getDrawable()).getBitmap();
-
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, baos);
-                    byte[] data = baos.toByteArray();
-
-                    UploadTask uploadTask = mStorageReference.child(mFirebaseAuth.getUid()
-                            + "/media/profile-photo.png").putBytes(data);
-
-                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            taskSnapshot.getStorage().getDownloadUrl()
-                                    .addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Uri> task) {
-                                            String downloadUrl = task.getResult().toString();
-                                            mDatabaseReference.child("users")
-                                                    .child(mFirebaseAuth.getUid()).child("profile_photo_url")
-                                                    .setValue(downloadUrl);
-
-                                            updateUserProfile(mFirebaseAuth.getCurrentUser(),
-                                                    a_register_et_user_name.getText().toString(),
-                                                    Uri.parse(downloadUrl));
-                                        }
-                                    });
-                        }
-                    });
-                    // endregion
+                    return;
                 }
+
+                // Disable the button to avoid multiple user clicks
+                a_register_btn_next.setEnabled(false);
+
+                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("name")
+                        .setValue(a_register_et_user_name.getText().toString());
+
+                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
+                        .setValue("Hey there! I'm using PigeoTalk.");
+
+                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("phone_number")
+                        .setValue(mFirebaseAuth.getCurrentUser().getPhoneNumber());
+
+                // region Upload user profile photo and get its download url
+
+                // Because putBytes() accepts a byte[], it requires our app
+                // to hold the entire contents of a file in memory at once.
+                // Consider using putStream() or putFile() to use less memory.
+                a_register_civ_profile_photo.setDrawingCacheEnabled(true);
+                a_register_civ_profile_photo.buildDrawingCache();
+                Bitmap bitmap = ((BitmapDrawable) a_register_civ_profile_photo.getDrawable()).getBitmap();
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+                UploadTask uploadTask = mStorageReference.child(mFirebaseAuth.getUid()
+                        + "/profile-photo.jpeg").putBytes(data);
+
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        taskSnapshot.getStorage().getDownloadUrl()
+                                .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        String downloadUrl = task.getResult().toString();
+                                        mDatabaseReference.child("users")
+                                                .child(mFirebaseAuth.getUid()).child("profile_photo_url")
+                                                .setValue(downloadUrl);
+
+                                        updateUserProfile(mFirebaseAuth.getCurrentUser(),
+                                                a_register_et_user_name.getText().toString(),
+                                                Uri.parse(downloadUrl));
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Snackbar.make(a_register_civ_profile_photo, R.string.text_profile_photo_upload_failed,
+                                        BaseTransientBottomBar.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Snackbar.make(a_register_civ_profile_photo, R.string.text_profile_photo_upload_failed,
+                                BaseTransientBottomBar.LENGTH_LONG).show();
+                    }
+                });
+                // endregion
+
+                Intent i = new Intent(RegisterActivity.this, HomePageActivity.class);
+                startActivity(i);
             }
         });
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                .format(new Date());
+
+        String imageFileName = "JPEG_" + timeStamp + "_";
+
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return image;
     }
 
     private void launchCamera() {
@@ -209,7 +245,20 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                File profilePhotoFile = null;
+                try {
+                    profilePhotoFile = createImageFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (profilePhotoFile != null) {
+                    mProfilePhotoUri = FileProvider.getUriForFile(this,
+                            "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
+
+                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mProfilePhotoUri);
+                    startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                }
             }
         }
     }
@@ -238,8 +287,12 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "User profile is updated.");
                 }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // TODO: Handle failed profile update request
             }
         });
     }
@@ -265,10 +318,16 @@ public class RegisterActivity extends AppCompatActivity {
         switch (requestCode) {
             case INTENT_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    Bundle extras = Objects.requireNonNull(data).getExtras();
-                    mProfilePhotoBitmap = (Bitmap) extras.get("data");
 
-                    a_register_civ_profile_photo.setImageBitmap(mProfilePhotoBitmap);
+                    if (mProfilePhotoUri != null) {
+                        Picasso.get().load(mProfilePhotoUri).noFade()
+                                .resize(800, 800)
+                                .centerInside()
+                                .into(a_register_civ_profile_photo);
+                    } else {
+                        // TODO: Handle error.
+                    }
+
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
                 }
                 break;
@@ -276,14 +335,11 @@ public class RegisterActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     Uri selectedPhotoUri = Objects.requireNonNull(data).getData();
 
-                    try {
-                        mProfilePhotoBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedPhotoUri);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    Picasso.get().load(selectedPhotoUri).noFade()
+                            .resize(800, 800)
+                            .centerInside()
+                            .into(a_register_civ_profile_photo);
 
-                    a_register_civ_profile_photo.setImageBitmap(mProfilePhotoBitmap);
-                    //Picasso.get().load(selectedPhotoUri).noFade().into(a_register_civ_profile_photo);
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
                 }
                 break;
@@ -307,5 +363,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 }
