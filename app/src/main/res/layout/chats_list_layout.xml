@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/l_chats_list_rl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/l_chats_list_civ_profile_photo"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        tools:src="@drawable/default_profile_picture" />
+
+    <TextView
+        android:id="@+id/l_chats_list_tv_time_stamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/icon_grey"
+        tools:text="12:09 PM" />
+
+    <TextView
+        android:id="@+id/l_chats_list_tv_display_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_toStartOf="@id/l_chats_list_tv_time_stamp"
+        android:layout_toEndOf="@+id/l_chats_list_civ_profile_photo"
+        android:ellipsize="end"
+
+        android:singleLine="true"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        tools:text="KAYKAY KULÜP" />
+
+    <TextView
+        android:id="@+id/l_chats_list_tv_last_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/l_chats_list_tv_display_name"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="22dp"
+        android:layout_toStartOf="@+id/l_chats_list_chip_group"
+        android:layout_toEndOf="@+id/l_chats_list_civ_profile_photo"
+        android:ellipsize="end"
+        android:singleLine="true"
+        tools:text="Erşan: Dışarıda tank görüyorum Faruk hayırdır bi' kutlama mı var?" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/l_chats_list_chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/l_chats_list_tv_time_stamp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="0dp"
+        app:chipSpacingHorizontal="0dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/l_chats_list_chip_mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:textSize="14sp"
+            android:visibility="visible"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@android:color/transparent"
+            app:chipEndPadding="4dp"
+            app:chipIcon="@drawable/ic_mute_black_24dp"
+            app:chipIconSize="16dp"
+            app:chipMinHeight="20dp"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="4dp"
+            app:closeIcon="@color/colorAccent"
+            app:closeIconSize="16dp"
+            app:closeIconStartPadding="2dp"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/l_chats_list_chip_new_message_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:visibility="visible"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/colorAccent"
+            app:chipEndPadding="2dp"
+            app:chipIconVisible="false"
+            app:chipMinHeight="20dp"
+            app:chipMinTouchTargetSize="2dp"
+            app:textStartPadding="4dp"
+            tools:text="19" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+</RelativeLayout>

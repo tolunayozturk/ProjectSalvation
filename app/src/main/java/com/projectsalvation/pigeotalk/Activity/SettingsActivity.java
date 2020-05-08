@@ -1,20 +1,16 @@
 package com.projectsalvation.pigeotalk.Activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.auth.FirebaseAuth;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.projectsalvation.pigeotalk.R;
-import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SettingsActivity extends AppCompatActivity {
 

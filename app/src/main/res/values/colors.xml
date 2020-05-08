@@ -9,4 +9,7 @@
 
     <color name="grey">#7A7A7A</color>
     <color name="black">#000000</color>
+    <color name="icon_grey">#80666666</color>
+
+    <color name="progress_bar_bg">#50000000</color>
 </resources>

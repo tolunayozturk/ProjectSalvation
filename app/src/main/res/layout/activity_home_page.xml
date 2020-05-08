@@ -37,7 +37,7 @@
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/a_home_page_fab_contacts"
+        android:id="@+id/a_home_page_fab_new_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

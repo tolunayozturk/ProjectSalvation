@@ -1,20 +1,23 @@
 package com.projectsalvation.pigeotalk.Activity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
@@ -23,9 +26,8 @@ import com.projectsalvation.pigeotalk.Fragment.CameraFragment;
 import com.projectsalvation.pigeotalk.Fragment.ChatsFragment;
 import com.projectsalvation.pigeotalk.Fragment.StatusFragment;
 import com.projectsalvation.pigeotalk.R;
+import com.projectsalvation.pigeotalk.Utility.Util;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class HomePageActivity extends AppCompatActivity {
@@ -34,10 +36,12 @@ public class HomePageActivity extends AppCompatActivity {
     TabLayout a_home_page_tab_layout;
     Toolbar a_home_page_toolbar;
     ViewPager a_home_page_viewpager;
-    FloatingActionButton a_home_page_fab_contacts;
+    FloatingActionButton a_home_page_fab_new_message;
     // endregion
 
     private static final String TAG = "HomePageActivity";
+
+    private static final int PERMISSION_REQUEST_CODE_READ_CONTACTS = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +52,7 @@ public class HomePageActivity extends AppCompatActivity {
         a_home_page_tab_layout = findViewById(R.id.a_home_page_tab_layout);
         a_home_page_toolbar = findViewById(R.id.a_home_page_toolbar);
         a_home_page_viewpager = findViewById(R.id.a_home_page_viewpager);
-        a_home_page_fab_contacts = findViewById(R.id.a_home_page_fab_contacts);
+        a_home_page_fab_new_message = findViewById(R.id.a_home_page_fab_new_message);
         // endregion
 
         setSupportActionBar(a_home_page_toolbar);
@@ -65,14 +69,15 @@ public class HomePageActivity extends AppCompatActivity {
 
         viewPagerAdapter.addFragment(cameraFragment, getString(R.string.EMPTY_STRING));
         viewPagerAdapter.addFragment(chatsFragment, getString(R.string.title_chats));
-        viewPagerAdapter.addFragment(statusFragment, "STATUS"); // TODO: Implement or convert to GROUPS?
+        viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_status));
         viewPagerAdapter.addFragment(callsFragment, getString(R.string.title_calls));
-
-        a_home_page_viewpager.setAdapter(viewPagerAdapter);
         // endregion
 
+        a_home_page_viewpager.setAdapter(viewPagerAdapter);
+
         // Set camera icon to the first tab of the tab layout
-        Objects.requireNonNull(a_home_page_tab_layout.getTabAt(0)).setIcon(R.drawable.ic_camera_alt_white_24dp);
+        Objects.requireNonNull(a_home_page_tab_layout.getTabAt(0))
+                .setIcon(R.drawable.ic_camera_alt_white_24dp);
 
         // Set starting tab to Chats
         a_home_page_viewpager.setCurrentItem(1);
@@ -100,24 +105,44 @@ public class HomePageActivity extends AppCompatActivity {
 
             }
         });
+
+        a_home_page_fab_new_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!Util.checkPermission(Manifest.permission.READ_CONTACTS, getApplicationContext())) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            HomePageActivity.this, Manifest.permission.READ_CONTACTS)) {
+
+                        // Explain to users why we request this permission
+                        MaterialAlertDialogBuilder alertDialogBuilder =
+                                new MaterialAlertDialogBuilder(HomePageActivity.this)
+                                        .setMessage(R.string.dialog_permission_read_contacts_explanation)
+                                        .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Util.requestPermission(new String[]{Manifest.permission.READ_CONTACTS},
+                                                        HomePageActivity.this,
+                                                        PERMISSION_REQUEST_CODE_READ_CONTACTS);
+                                            }
+                                        })
+                                        .setNegativeButton(R.string.action_not_now, null);
+
+                        AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
+                        permissionExplanationDialog.show();
+                    } else {
+                        // No explanation needed; request the permission
+                        Util.requestPermission(new String[]{Manifest.permission.READ_CONTACTS},
+                                HomePageActivity.this,
+                                PERMISSION_REQUEST_CODE_READ_CONTACTS);
+                    }
+                } else {
+                    // Permission has already been granted
+                    Intent i = new Intent(HomePageActivity.this, ContactsActivity.class);
+                    startActivity(i);
+                }
+            }
+        });
     }
-
-    /* Maybe will use these methods to set and remove new message badge from the tab layout?
-    public void setNewMessageBadge() {
-        BadgeDrawable newMessageBadge = Objects.requireNonNull(HomePage_tabs.getTabAt(1))
-                .getOrCreateBadge();
-
-        int currentNewMessage = newMessageBadge.getNumber();
-        newMessageBadge.setNumber(currentNewMessage + 1);
-        newMessageBadge.setVisible(true);
-    }
-
-    public void removeNewMessageBadge() {
-        BadgeDrawable newMessageBadge = Objects.requireNonNull(HomePage_tabs.getTabAt(1))
-                .getOrCreateBadge();
-
-        newMessageBadge.setVisible(false);
-    } */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,5 +165,23 @@ public class HomePageActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() { }
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE_READ_CONTACTS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent i = new Intent(HomePageActivity.this, ContactsActivity.class);
+                    startActivity(i);
+                } else {
+                    // TODO: Start new message activity or force contacts?
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+    }
 }

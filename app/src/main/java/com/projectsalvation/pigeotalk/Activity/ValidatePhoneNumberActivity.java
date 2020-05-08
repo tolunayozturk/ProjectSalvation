@@ -1,23 +1,22 @@
 package com.projectsalvation.pigeotalk.Activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.text.HtmlCompat;
-
-import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.widget.ArrayAdapter;
+import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.view.View;
-import android.os.Bundle;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.text.HtmlCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.button.MaterialButton;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;

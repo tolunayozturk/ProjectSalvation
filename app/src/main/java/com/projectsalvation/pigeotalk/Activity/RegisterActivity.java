@@ -1,12 +1,5 @@
 package com.projectsalvation.pigeotalk.Activity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,14 +31,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.projectsalvation.pigeotalk.R;
+import com.projectsalvation.pigeotalk.Utility.Util;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
@@ -62,9 +61,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
-    private static final int PERMISSION_REQUEST_CODE_CAMERA = 201;
-    private static final int INTENT_CHOOSE_PHOTO = 102;
-    private static final int INTENT_TAKE_PHOTO = 101;
+    private static final int PERMISSION_REQUEST_CODE_CAMERA = 100;
+    private static final int INTENT_CHOOSE_PHOTO = 200;
+    private static final int INTENT_TAKE_PHOTO = 110;
 
     private DatabaseReference mDatabaseReference;
     private StorageReference mStorageReference;
@@ -139,6 +138,10 @@ public class RegisterActivity extends AppCompatActivity {
                 mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("phone_number")
                         .setValue(mFirebaseAuth.getCurrentUser().getPhoneNumber());
 
+                mDatabaseReference.child("registered_numbers")
+                        .child(mFirebaseAuth.getCurrentUser().getPhoneNumber())
+                        .setValue(mFirebaseAuth.getUid());
+
                 // region Upload user profile photo and get its download url
 
                 // Because putBytes() accepts a byte[], it requires our app
@@ -162,14 +165,17 @@ public class RegisterActivity extends AppCompatActivity {
                                 .addOnCompleteListener(new OnCompleteListener<Uri>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
-                                        String downloadUrl = task.getResult().toString();
+                                        String downloadUrl = Objects.requireNonNull(task.getResult())
+                                                .toString();
+
                                         mDatabaseReference.child("users")
                                                 .child(mFirebaseAuth.getUid()).child("profile_photo_url")
                                                 .setValue(downloadUrl);
 
-                                        updateUserProfile(mFirebaseAuth.getCurrentUser(),
+                                        Util.updateUserProfile(mFirebaseAuth.getCurrentUser(),
                                                 a_register_et_user_name.getText().toString(),
                                                 Uri.parse(downloadUrl));
+
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -199,30 +205,34 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void launchCamera() {
-        if (!checkPermission(Manifest.permission.CAMERA)) {
+        if (!Util.checkPermission(Manifest.permission.CAMERA, getApplicationContext())) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     RegisterActivity.this, Manifest.permission.CAMERA)) {
 
-                // Explain to user why we need this permission
+                // Explain to users why we request this permission
                 MaterialAlertDialogBuilder alertDialogBuilder =
                         new MaterialAlertDialogBuilder(RegisterActivity.this)
                                 .setMessage(R.string.dialog_permission_camera_explanation)
                                 .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        requestPermission(new String[]{Manifest.permission.CAMERA},
+                                        Util.requestPermission(new String[]{Manifest.permission.CAMERA},
+                                                RegisterActivity.this,
                                                 PERMISSION_REQUEST_CODE_CAMERA);
                                     }
-                                }).setNegativeButton(R.string.action_not_now, null);
+                                })
+                                .setNegativeButton(R.string.action_not_now, null);
 
                 AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
                 permissionExplanationDialog.show();
             } else {
                 // No explanation needed; request the permission
-                requestPermission(new String[]{Manifest.permission.CAMERA},
+                Util.requestPermission(new String[]{Manifest.permission.CAMERA},
+                        RegisterActivity.this,
                         PERMISSION_REQUEST_CODE_CAMERA);
             }
         } else {
+            // Permission has already been granted
             Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
                 File profilePhotoFile = null;
@@ -276,33 +286,9 @@ public class RegisterActivity extends AppCompatActivity {
         return image;
     }
 
-    // TODO: Make this a utility method separate from this class
-    private void updateUserProfile(FirebaseUser user, String name, Uri photoUri) {
-        UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest
-                .Builder()
-                .setDisplayName(name)
-                .setPhotoUri(photoUri)
-                .build();
-
-        user.updateProfile(profileChangeRequest).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Snackbar.make(a_register_et_user_name,
-                        R.string.text_profile_update_request_failed,
-                        BaseTransientBottomBar.LENGTH_LONG)
-                        .show();
-            }
-        });
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
@@ -310,7 +296,24 @@ public class RegisterActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                        File profilePhotoFile = null;
+
+                        try {
+                            profilePhotoFile = createImageFile();
+                        } catch (IOException e) {
+                            Snackbar.make(a_register_civ_profile_photo,
+                                    R.string.text_profile_photo_upload_failed,
+                                    BaseTransientBottomBar.LENGTH_LONG)
+                                    .show();
+                        }
+
+                        if (profilePhotoFile != null) {
+                            mProfilePhotoUri = FileProvider.getUriForFile(this,
+                                    "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
+
+                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mProfilePhotoUri);
+                            startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                        }
                     }
                 }
                 break;
@@ -353,23 +356,7 @@ public class RegisterActivity extends AppCompatActivity {
             default:
                 super.onActivityResult(resultCode, resultCode, data);
                 break;
-        } // end switch
-    }
-
-    private void requestPermission(String[] permissions, int requestCode) {
-        ActivityCompat.requestPermissions(
-                this,
-                permissions,
-                requestCode
-        );
-    }
-
-    private boolean checkPermission(String permission) {
-        if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            return false;
         }
-
-        return true;
     }
 
     @Override
