@@ -8,19 +8,20 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/a_contacts_toolbar"
-        app:title="@string/title_select_contact"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
+        app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+        app:title="@string/title_select_contact"
         app:titleTextColor="@color/white" />
 
     <LinearLayout
         android:id="@+id/a_contacts_ll_progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
         android:background="@color/progress_bar_bg"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <ProgressBar
             android:id="@+id/a_contacts_pb"

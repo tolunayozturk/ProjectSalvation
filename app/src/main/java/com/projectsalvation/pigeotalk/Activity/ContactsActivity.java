@@ -2,14 +2,10 @@ package com.projectsalvation.pigeotalk.Activity;
 
 import android.Manifest;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,7 +32,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import java.util.TreeMap;
 
 import jagerfield.mobilecontactslibrary.Contact.Contact;
 import jagerfield.mobilecontactslibrary.ImportContacts;
@@ -52,9 +48,9 @@ public class ContactsActivity extends AppCompatActivity {
     private final String TAG = "ContactsActivity";
 
     private Map<String, String> mRegisteredNumbers;
-    private ArrayList<Contact> mDeviceContacts;
+    private ArrayList<Contact> mContactsOnDevice;
     private ArrayList<ContactDAO> mContactDAOS;
-    private ArrayList<String> mUserContacts;
+    private Map<String, String> mFoundRegisteredContacts;
 
     private DatabaseReference mDatabaseReference;
     private ContactsRVAdapter mContactsRVAdapter;
@@ -83,30 +79,28 @@ public class ContactsActivity extends AppCompatActivity {
 
         setSupportActionBar(a_contacts_toolbar);
 
-        a_contacts_ll_progress.setVisibility(View.VISIBLE);
-
-        // Black magic.
-        a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
-                LinearLayoutManager.VERTICAL, false));
-
         // Enable back button
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mUserContacts = new ArrayList<>();
-        mContactDAOS = new ArrayList<>();
-
         mFirebaseAuth = FirebaseAuth.getInstance();
         mPhoneNumberUtil = PhoneNumberUtil.getInstance();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
-        mContactsRVAdapter = new ContactsRVAdapter(getApplicationContext(), mContactDAOS);
-        a_contacts_rv.setAdapter(mContactsRVAdapter);
+        ImportContacts importContacts = new ImportContacts(ContactsActivity.this);
+        mContactsOnDevice = importContacts.getContacts();
+
+        mFoundRegisteredContacts = new TreeMap<>();
+        mRegisteredNumbers = new HashMap<>();
+        mContactDAOS = new ArrayList<>();
+
+        // Black magic to fix RV's layout error
+        a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
+                LinearLayoutManager.VERTICAL, false));
+
+        // Show the progress bar while loading
+        a_contacts_ll_progress.setVisibility(View.VISIBLE);
 
         // region Import device contacts and compare with registered numbers in our database
-        ImportContacts importContacts = new ImportContacts(ContactsActivity.this);
-        mDeviceContacts = importContacts.getContacts();
-        mRegisteredNumbers = new HashMap<>();
-
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mDatabaseReference.child("registered_numbers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -114,14 +108,14 @@ public class ContactsActivity extends AppCompatActivity {
                     mRegisteredNumbers.put(snapshot.getKey(), snapshot.getValue().toString());
                 }
 
-                for (Contact contact : mDeviceContacts) {
+                for (Contact contact : mContactsOnDevice) {
                     String deviceContactPhoneNumber = contact.getNumbers().getFirst().elementValue();
 
                     try {
-                        Phonenumber.PhoneNumber numberProto = mPhoneNumberUtil.parse(deviceContactPhoneNumber,
+                        final Phonenumber.PhoneNumber numberProto = mPhoneNumberUtil.parse(deviceContactPhoneNumber,
                                 Locale.getDefault().getCountry());
 
-                        for (Map.Entry<String, String> entry : mRegisteredNumbers.entrySet()) {
+                        for (final Map.Entry<String, String> entry : mRegisteredNumbers.entrySet()) {
                             if (mFirebaseAuth.getCurrentUser().getPhoneNumber()
                                     .contains(String.valueOf(numberProto.getNationalNumber()))) {
 
@@ -132,17 +126,26 @@ public class ContactsActivity extends AppCompatActivity {
                                 mDatabaseReference.child("users")
                                         .child(mFirebaseAuth.getCurrentUser().getUid())
                                         .child("contacts")
-                                        .child(entry.getKey()).setValue(entry.getValue());
+                                        .child(entry.getValue()).setValue(contact.getDisplaydName());
 
-                                mUserContacts.add(entry.getValue());
+                                mFoundRegisteredContacts.put(entry.getValue(), contact.getDisplaydName());
                             }
                         }
                     } catch (NumberParseException e) {
-                        e.printStackTrace();
+                        // TODO: Handle error
                     }
                 }
 
+
+
                 loadContacts();
+
+                // Set the toolbar subtitle to the number of contacts in user's device who is using PTalk.
+                a_contacts_toolbar.setSubtitle(
+                        getString(R.string.subtitle_contact_size, mFoundRegisteredContacts.size()));
+
+                // Hide the progress bar after loading
+                a_contacts_ll_progress.setVisibility(View.GONE);
             }
 
             @Override
@@ -151,32 +154,38 @@ public class ContactsActivity extends AppCompatActivity {
             }
         });
         // endregion
+
+        mContactsRVAdapter = new ContactsRVAdapter(getApplicationContext(), mContactDAOS);
+        a_contacts_rv.setAdapter(mContactsRVAdapter);
     }
 
     private void loadContacts() {
-        for (int i = 0; i < mUserContacts.size(); i++) {
-            mDatabaseReference.child("users").child(mUserContacts.get(i))
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            ContactDAO contactDAO = new ContactDAO(
-                                    dataSnapshot.child("name").getValue().toString(),
-                                    dataSnapshot.child("about").getValue().toString(),
-                                    "MOBILE",
-                                    dataSnapshot.child("profile_photo_url").getValue().toString());
+        for (final Map.Entry<String, String> entry : mFoundRegisteredContacts.entrySet()) {
+            ValueEventListener valueEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    ContactDAO contactDAO = new ContactDAO(
+                            entry.getKey(),
+                            entry.getValue(),
+                            dataSnapshot.child("about").getValue().toString(),
+                            "MOBILE",
+                            dataSnapshot.child("profile_photo_url").getValue().toString());
 
-                            mContactDAOS.add(contactDAO);
-                            mContactsRVAdapter.notifyDataSetChanged();
-                        }
+                    mContactDAOS.add(contactDAO);
+                    mContactsRVAdapter.notifyDataSetChanged();
+                }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            // TODO: Handle error
-                        }
-                    });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // TODO: Handle error
+                }
+            };
+
+            mDatabaseReference.child("users").child(entry.getKey())
+                    .addListenerForSingleValueEvent(valueEventListener);
+
+            mDatabaseReference.child("users").keepSynced(true);
         }
-
-        a_contacts_ll_progress.setVisibility(View.GONE);
     }
 
     @Override

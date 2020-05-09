@@ -39,17 +39,18 @@ public class ContactsRVAdapter extends RecyclerView.Adapter<ContactsRVAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ContactDAO contactDAO = mContactDAOS.get(position);
+        final ContactDAO contactDAO = mContactDAOS.get(position);
 
         Picasso.get().load(contactDAO.getProfilePhotoUrl()).into(holder.l_contacts_list_civ_profile_photo);
         holder.l_contacts_list_tv_display_name.setText(contactDAO.getName());
         holder.l_contact_list_tv_about.setText(contactDAO.getAbout());
-        holder.l_contacts_list_tv_num_type.setText("MOBILE");
+        holder.l_contacts_list_tv_num_type.setText(contactDAO.getNumberType());
 
         holder.l_contacts_list_rl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Start new conversation
+                System.out.println(contactDAO.getUserId());
+                // TODO: Start a new chat with this userId
             }
         });
     }

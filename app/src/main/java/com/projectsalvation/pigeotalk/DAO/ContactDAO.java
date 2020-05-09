@@ -2,12 +2,14 @@ package com.projectsalvation.pigeotalk.DAO;
 
 public class ContactDAO {
 
+    private String userId;
     private String name;
     private String about;
     private String numberType;
     private String profilePhotoUrl;
 
-    public ContactDAO(String name, String about, String numberType, String profilePhotoUrl) {
+    public ContactDAO(String userId, String name, String about, String numberType, String profilePhotoUrl) {
+        this.userId = userId;
         this.name = name;
         this.about = about;
         this.numberType = numberType;
@@ -44,5 +46,13 @@ public class ContactDAO {
 
     public void setProfilePhotoUrl(String profilePhotoUrl) {
         this.profilePhotoUrl = profilePhotoUrl;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

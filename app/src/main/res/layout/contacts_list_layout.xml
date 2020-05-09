@@ -5,16 +5,19 @@
     android:id="@+id/l_contacts_list_rl"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:padding="16dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/l_contacts_list_civ_profile_photo"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="0dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         tools:src="@drawable/default_profile_picture" />
 
     <TextView
@@ -25,6 +28,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:textColor="@color/icon_grey"
+        android:textSize="12sp"
         tools:text="MOBILE" />
 
     <TextView
@@ -41,7 +45,7 @@
         android:singleLine="true"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:text="Tolunay ÖZTÜRK" />
+        tools:text="Erşan Kuneri" />
 
     <TextView
         android:id="@+id/l_contacts_list_tv_about"
@@ -54,6 +58,7 @@
         android:layout_toEndOf="@id/l_contacts_list_civ_profile_photo"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="Hey there! I'm using PigeoTalk." />
+        android:textSize="14sp"
+        tools:text="Kaykay Kulüp" />
 
 </RelativeLayout>

@@ -61,4 +61,6 @@
 
     <string name="text_verify_sms_request_info">You can request a new verification code in %1$d second(s).</string>
     <string name="text_verify_sms_request_now">You can request a new verification code now.</string>
+
+    <string name="subtitle_contact_size">%1$d contacts</string>
 </resources>

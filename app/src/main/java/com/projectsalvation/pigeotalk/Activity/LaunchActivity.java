@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class LaunchActivity extends AppCompatActivity {
 
@@ -15,7 +16,10 @@ public class LaunchActivity extends AppCompatActivity {
         super.onStart();
 
         // TODO: FOR TESTING PURPOSES - DO NOT FORGET TO REMOVE
-        // FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
+
+        // Enable offline persistence
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
