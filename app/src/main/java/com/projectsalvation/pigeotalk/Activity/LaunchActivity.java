@@ -28,7 +28,7 @@ public class LaunchActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         } else {
-            Intent i = new Intent(LaunchActivity.this, ValidatePhoneNumberActivity.class);
+            Intent i = new Intent(LaunchActivity.this, ChatActivity.class);
             startActivity(i);
             finish();
         }

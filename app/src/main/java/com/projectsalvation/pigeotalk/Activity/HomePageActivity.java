@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -34,7 +35,7 @@ public class HomePageActivity extends AppCompatActivity {
 
     // region Resource Declaration
     TabLayout a_home_page_tab_layout;
-    Toolbar a_home_page_toolbar;
+    MaterialToolbar a_home_page_toolbar;
     ViewPager a_home_page_viewpager;
     FloatingActionButton a_home_page_fab_new_message;
     // endregion

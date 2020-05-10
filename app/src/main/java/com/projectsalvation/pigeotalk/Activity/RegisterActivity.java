@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -55,6 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
     // region Resource Declaration
     CircleImageView a_register_civ_profile_photo;
     ImageView a_register_iv_add_photo_icon;
+    MaterialToolbar a_register_toolbar;
     EditText a_register_et_user_name;
     Button a_register_btn_next;
     // endregion
@@ -80,7 +82,10 @@ public class RegisterActivity extends AppCompatActivity {
         a_register_iv_add_photo_icon = findViewById(R.id.a_register_iv_add_photo_icon);
         a_register_et_user_name = findViewById(R.id.a_register_et_user_name);
         a_register_btn_next = findViewById(R.id.a_register_btn_next);
+        a_register_toolbar = findViewById(R.id.a_register_toolbar);
         // endregion
+
+        setSupportActionBar(a_register_toolbar);
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mStorageReference = FirebaseStorage.getInstance().getReference();

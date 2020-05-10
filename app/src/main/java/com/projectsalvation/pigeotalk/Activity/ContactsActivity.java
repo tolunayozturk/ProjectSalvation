@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,7 +48,7 @@ public class ContactsActivity extends AppCompatActivity {
     LinearLayout a_contacts_ll_progress;
     TextView a_contacts_tv_no_contacts;
     RecyclerView a_contacts_rv;
-    Toolbar a_contacts_toolbar;
+    MaterialToolbar a_contacts_toolbar;
     //endregion
 
     private final String TAG = "ContactsActivity";
@@ -194,7 +195,7 @@ public class ContactsActivity extends AppCompatActivity {
                             entry.getKey(),
                             entry.getValue(),
                             dataSnapshot.child("about").getValue().toString(),
-                            "MOBILE",
+                            getString(R.string.EMPTY_STRING),
                             dataSnapshot.child("profile_photo_url").getValue().toString());
 
                     mContactDAOS.add(contactDAO);

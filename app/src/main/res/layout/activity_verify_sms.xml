@@ -6,16 +6,28 @@
     android:layout_height="match_parent"
     tools:context=".Activity.VerifySMSActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/a_verify_sms_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/a_verify_sms_abl"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/text_verify_your_phone_number"
-        app:titleTextColor="@color/colorAccent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/a_verify_sms_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="@string/text_verify_your_phone_number"
+            app:titleTextColor="@color/colorAccent" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
 
     <LinearLayout
         android:id="@+id/a_verify_sms_ll"
@@ -26,7 +38,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/a_verify_sms_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/a_verify_sms_abl"
         app:layout_constraintVertical_bias="0.04">
 
         <TextView

@@ -6,16 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".Activity.RegisterActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/a_register_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/a_register_abl"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/text_profile_info"
-        app:titleTextColor="@color/colorAccent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/a_register_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:title="@string/text_profile_info"
+            app:titleTextColor="@color/colorAccent" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:id="@+id/a_register_linear_layout"
@@ -26,7 +34,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/a_register_toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/a_register_abl"
         app:layout_constraintVertical_bias="0.0">
 
         <FrameLayout

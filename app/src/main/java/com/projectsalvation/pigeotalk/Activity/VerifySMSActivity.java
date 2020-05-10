@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseException;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class VerifySMSActivity extends AppCompatActivity {
 
     // region Resource Declaration
+    MaterialToolbar a_verify_sms_toolbar;
     TextView a_verify_sms_tv_phone_number;
     OtpView a_verify_sms_otpView_sms_code;
     Button a_verify_sms_btn_resend_code;
@@ -60,7 +62,10 @@ public class VerifySMSActivity extends AppCompatActivity {
         a_verify_sms_otpView_sms_code = findViewById(R.id.a_verify_sms_otpView_sms_code);
         a_verify_sms_btn_resend_code = findViewById(R.id.a_verify_sms_btn_resend_code);
         a_verify_sms_tv_request_info = findViewById(R.id.a_verify_sms_request_info);
+        a_verify_sms_toolbar = findViewById(R.id.a_verify_sms_toolbar);
         // endregion
+
+        setSupportActionBar(a_verify_sms_toolbar);
 
         Intent i = getIntent();
         mFormattedPhoneNumber = i.getExtras().getString("formattedPhoneNumber");

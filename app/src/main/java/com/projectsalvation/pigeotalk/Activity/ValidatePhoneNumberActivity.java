@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.text.HtmlCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -33,7 +34,7 @@ public class ValidatePhoneNumberActivity extends AppCompatActivity {
     EditText a_validate_phone_number_et_country_code;
     EditText a_validate_phone_number_et_phone_number;
     Button a_validate_phone_number_btn_next;
-    Toolbar a_validate_phone_number_toolbar;
+    MaterialToolbar a_validate_phone_number_toolbar;
     // endregion
 
     private static final String TAG = "ValidatePhoneNumberActivity";

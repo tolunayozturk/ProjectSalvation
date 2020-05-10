@@ -8,25 +8,27 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        app:liftOnScroll="true"> <!-- TODO: Test liftOnScroll -->
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/a_home_page_toolbar"
-            app:title="@string/app_name"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            app:titleTextColor="@color/white" />
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:title="@string/app_name"
+            app:titleTextColor="@color/white" /> <!-- TODO: Test scrollFlags -->
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/a_home_page_tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabBackground="@color/colorPrimary"
-            app:tabSelectedTextColor="@color/white"
+            app:tabIconTint="@color/whiteSmoke"
             app:tabIndicatorColor="@color/white"
-            app:tabTextColor="@color/whiteSmoke"
-            app:tabIconTint="@color/whiteSmoke" />
+            app:tabSelectedTextColor="@color/white"
+            app:tabTextColor="@color/whiteSmoke" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

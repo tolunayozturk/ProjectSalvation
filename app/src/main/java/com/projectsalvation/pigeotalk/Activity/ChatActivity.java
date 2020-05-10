@@ -1,37 +1,38 @@
 package com.projectsalvation.pigeotalk.Activity;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.projectsalvation.pigeotalk.R;
 
 import java.util.Objects;
 
-public class SettingsActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    MaterialToolbar a_settings_toolbar;
+    MaterialToolbar a_chat_toolbar;
     // endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_chat);
 
         // region Resource Assignment
-        a_settings_toolbar = findViewById(R.id.a_settings_toolbar);
+        a_chat_toolbar = findViewById(R.id.a_chat_toolbar);
         // endregion
 
-        setSupportActionBar(a_settings_toolbar);
+        setSupportActionBar(a_chat_toolbar);
 
         // Enable back button
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        getSupportActionBar().setTitle(getString(R.string.EMPTY_STRING));
     }
 
     @Override
