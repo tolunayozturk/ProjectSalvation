@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:background="@color/progress_bar_bg"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <ProgressBar
             android:id="@+id/a_contacts_pb"
@@ -34,6 +34,21 @@
         android:id="@+id/a_contacts_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="?attr/actionBarSize" />
+        android:layout_marginTop="?attr/actionBarSize">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/a_contacts_tv_no_contacts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:drawableTop="@drawable/ic_nocontacts"
+        android:drawablePadding="16dp"
+        android:fontFamily="sans-serif-condensed"
+        android:text="@string/text_no_contacts_using_pigeotalk"
+        android:textAlignment="center"
+        android:visibility="visible" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

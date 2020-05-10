@@ -1,11 +1,15 @@
 package com.projectsalvation.pigeotalk.Activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +45,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     // region Resource Declaration
     LinearLayout a_contacts_ll_progress;
+    TextView a_contacts_tv_no_contacts;
     RecyclerView a_contacts_rv;
     Toolbar a_contacts_toolbar;
     //endregion
@@ -72,6 +77,7 @@ public class ContactsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_contacts);
 
         // region Resource Assignment
+        a_contacts_tv_no_contacts = findViewById(R.id.a_contacts_tv_no_contacts);
         a_contacts_ll_progress = findViewById(R.id.a_contacts_ll_progress);
         a_contacts_toolbar = findViewById(R.id.a_contacts_toolbar);
         a_contacts_rv = findViewById(R.id.a_contacts_rv);
@@ -89,7 +95,7 @@ public class ContactsActivity extends AppCompatActivity {
         ImportContacts importContacts = new ImportContacts(ContactsActivity.this);
         mContactsOnDevice = importContacts.getContacts();
 
-        mFoundRegisteredContacts = new TreeMap<>();
+        mFoundRegisteredContacts = new HashMap<>();
         mRegisteredNumbers = new HashMap<>();
         mContactDAOS = new ArrayList<>();
 
@@ -97,10 +103,29 @@ public class ContactsActivity extends AppCompatActivity {
         a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, false));
 
+        a_contacts_tv_no_contacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.text_invite_message));
+                sendIntent.setType("text/plain");
+
+                Intent shareIntent = Intent.createChooser(sendIntent,
+                        getString(R.string.text_invite_to_pigeotalk));
+                startActivity(shareIntent);
+            }
+        });
+
+        // If any contact is found, this will be set to GONE below
+        a_contacts_tv_no_contacts.setVisibility(View.VISIBLE);
+
+        // region Import device contacts and compare with registered numbers in our database
+        // then load found contacts
+
         // Show the progress bar while loading
         a_contacts_ll_progress.setVisibility(View.VISIBLE);
 
-        // region Import device contacts and compare with registered numbers in our database
         mDatabaseReference.child("registered_numbers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -124,19 +149,20 @@ public class ContactsActivity extends AppCompatActivity {
 
                             if (entry.getKey().contains(String.valueOf(numberProto.getNationalNumber()))) {
                                 mDatabaseReference.child("users")
-                                        .child(mFirebaseAuth.getCurrentUser().getUid())
+                                        .child(mFirebaseAuth.getUid())
                                         .child("contacts")
                                         .child(entry.getValue()).setValue(contact.getDisplaydName());
 
                                 mFoundRegisteredContacts.put(entry.getValue(), contact.getDisplaydName());
+
+                                // Found contact, hide no contact info
+                                a_contacts_tv_no_contacts.setVisibility(View.GONE);
                             }
                         }
                     } catch (NumberParseException e) {
                         // TODO: Handle error
                     }
                 }
-
-
 
                 loadContacts();
 

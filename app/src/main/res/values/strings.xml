@@ -63,4 +63,12 @@
     <string name="text_verify_sms_request_now">You can request a new verification code now.</string>
 
     <string name="subtitle_contact_size">%1$d contacts</string>
+
+    <string name="text_no_contacts_using_pigeotalk">No one in your contact list seems to be on PigeoTalk.\n
+    Tap here to invite your friends and family to PigeoTalk.</string>
+
+    <string name="text_invite_to_pigeotalk">Invite friends and family to PigeoTalk</string>
+    
+    <string name="text_invite_message">Check out PigeoTalk. I use it to message and call the people I care about.
+    Get it for free at https://pigeotalk.com/dl/</string>
 </resources>

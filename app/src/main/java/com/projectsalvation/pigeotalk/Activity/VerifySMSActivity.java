@@ -77,8 +77,10 @@ public class VerifySMSActivity extends AppCompatActivity {
                 mVerificationCode = otp;
 
                 if (mVerificationId == null || mVerificationCode == null) {
-                    Snackbar.make(a_verify_sms_otpView_sms_code, R.string.text_verify_phone_number_failed,
-                            BaseTransientBottomBar.LENGTH_LONG).show();
+                    Snackbar.make(a_verify_sms_otpView_sms_code,
+                            R.string.text_verify_phone_number_failed,
+                            BaseTransientBottomBar.LENGTH_LONG)
+                            .show();
 
                     return;
                 }
@@ -130,6 +132,10 @@ public class VerifySMSActivity extends AppCompatActivity {
                 }
 
                 // TODO: Show a message and update the UI
+                Snackbar.make(a_verify_sms_otpView_sms_code,
+                        R.string.text_verify_phone_number_failed,
+                        BaseTransientBottomBar.LENGTH_LONG)
+                        .show();
             }
 
             @Override
@@ -180,6 +186,10 @@ public class VerifySMSActivity extends AppCompatActivity {
 
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // TODO: Handle the error. The verification code entered was invalid
+                                Snackbar.make(a_verify_sms_otpView_sms_code,
+                                        R.string.text_verify_phone_number_failed,
+                                        BaseTransientBottomBar.LENGTH_LONG)
+                                        .show();
                             }
                         }
                     }

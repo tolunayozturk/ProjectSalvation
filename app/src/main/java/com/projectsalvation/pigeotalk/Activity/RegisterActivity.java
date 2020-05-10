@@ -126,23 +126,38 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
+                if (mFirebaseAuth.getUid() == null ||
+                        mFirebaseAuth.getCurrentUser().getPhoneNumber() == null) {
+
+                    Snackbar.make(a_register_et_user_name,
+                            R.string.text_profile_update_request_failed,
+                            BaseTransientBottomBar.LENGTH_LONG)
+                            .show();
+
+                    return;
+                }
+
                 // Disable the button to avoid multiple user clicks
                 a_register_btn_next.setEnabled(false);
+
+                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("uid")
+                        .setValue(mFirebaseAuth.getUid());
 
                 mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("name")
                         .setValue(a_register_et_user_name.getText().toString());
 
-                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
-                        .setValue("Hey there! I'm using PigeoTalk.");
-
                 mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("phone_number")
                         .setValue(mFirebaseAuth.getCurrentUser().getPhoneNumber());
+
+                mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
+                        .setValue("Hey there! I'm using PigeoTalk.");
 
                 mDatabaseReference.child("registered_numbers")
                         .child(mFirebaseAuth.getCurrentUser().getPhoneNumber())
                         .setValue(mFirebaseAuth.getUid());
 
                 // region Upload user profile photo and get its download url
+                // TODO: Upload the uncompressed photo?
 
                 // Because putBytes() accepts a byte[], it requires our app
                 // to hold the entire contents of a file in memory at once.
@@ -156,7 +171,7 @@ public class RegisterActivity extends AppCompatActivity {
                 byte[] data = baos.toByteArray();
 
                 UploadTask uploadTask = mStorageReference.child(mFirebaseAuth.getUid()
-                        + "/profile-photo.jpeg").putBytes(data);
+                        + "/pp.jpeg").putBytes(data);
 
                 uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -328,7 +343,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (mProfilePhotoUri != null) {
                         Picasso.get().load(mProfilePhotoUri).noFade()
-                                .resize(800, 800)
+                                .fit()
                                 .centerInside()
                                 .into(a_register_civ_profile_photo);
                     } else {
@@ -343,12 +358,19 @@ public class RegisterActivity extends AppCompatActivity {
                 break;
             case INTENT_CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    Uri selectedPhotoUri = Objects.requireNonNull(data).getData();
+                    mProfilePhotoUri = data.getData();
 
-                    Picasso.get().load(selectedPhotoUri).noFade()
-                            .resize(800, 800)
-                            .centerInside()
-                            .into(a_register_civ_profile_photo);
+                    if (mProfilePhotoUri != null) {
+                        Picasso.get().load(mProfilePhotoUri).noFade()
+                                .fit()
+                                .centerInside()
+                                .into(a_register_civ_profile_photo);
+                    } else {
+                        Snackbar.make(a_register_civ_profile_photo,
+                                R.string.text_profile_photo_upload_failed,
+                                BaseTransientBottomBar.LENGTH_LONG)
+                                .show();
+                    }
 
                     a_register_iv_add_photo_icon.setVisibility(View.INVISIBLE);
                 }
