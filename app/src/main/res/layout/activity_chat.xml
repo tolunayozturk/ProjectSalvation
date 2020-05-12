@@ -11,6 +11,7 @@
         android:id="@+id/a_chat_abl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -20,7 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+            app:titleTextColor="@color/white"
+            app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -82,12 +84,13 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="6"
+                    android:autofillHints=""
                     android:background="@null"
                     android:ems="10"
                     android:inputType="textMultiLine|text"
+                    android:maxHeight="156dp"
                     android:padding="4dp"
-                    android:singleLine="false"
-                    android:autofillHints="" />
+                    android:singleLine="false" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/a_chat_chip_attachment"

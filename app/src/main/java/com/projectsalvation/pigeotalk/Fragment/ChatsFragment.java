@@ -11,9 +11,7 @@ import android.view.ViewGroup;
 
 import com.projectsalvation.pigeotalk.R;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class ChatsFragment extends Fragment {
 
 

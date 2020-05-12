@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,13 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
 import com.projectsalvation.pigeotalk.Fragment.CallsFragment;
 import com.projectsalvation.pigeotalk.Fragment.CameraFragment;
@@ -44,6 +52,9 @@ public class HomePageActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE_READ_CONTACTS = 300;
 
+    private FirebaseAuth mFirebaseAuth;
+    private DatabaseReference mDatabaseReference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +68,9 @@ public class HomePageActivity extends AppCompatActivity {
         // endregion
 
         setSupportActionBar(a_home_page_toolbar);
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         // region Set up fragments
         CameraFragment cameraFragment = new CameraFragment();
@@ -107,6 +121,7 @@ public class HomePageActivity extends AppCompatActivity {
             }
         });
 
+        // region New message FAB listener
         a_home_page_fab_new_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,6 +158,7 @@ public class HomePageActivity extends AppCompatActivity {
                 }
             }
         });
+        // endregion
     }
 
     @Override
@@ -183,6 +199,5 @@ public class HomePageActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-    }
+    public void onBackPressed() { }
 }

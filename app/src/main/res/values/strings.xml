@@ -71,4 +71,9 @@
 
     <string name="text_invite_message">Check out PigeoTalk. I use it to message and call the people I care about.
     Get it for free at https://pigeotalk.com/dl/</string>
+
+    <string name="text_menu_refresh">Refresh</string>
+    <string name="text_menu_voice_call">Voice Call</string>
+    <string name="text_menu_video_Call">Video Call</string>
+    <string name="text_menu_contact_info">Contact Info</string>
 </resources>

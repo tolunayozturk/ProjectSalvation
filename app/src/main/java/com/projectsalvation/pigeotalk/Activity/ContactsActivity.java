@@ -3,17 +3,15 @@ package com.projectsalvation.pigeotalk.Activity;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,7 +35,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 
 import jagerfield.mobilecontactslibrary.Contact.Contact;
 import jagerfield.mobilecontactslibrary.ImportContacts;
@@ -53,10 +50,10 @@ public class ContactsActivity extends AppCompatActivity {
 
     private final String TAG = "ContactsActivity";
 
-    private Map<String, String> mRegisteredNumbers;
+    private Map<String, String> mFoundRegisteredContacts;
+    private Map<String, String> mRegisteredPhoneNumbers;
     private ArrayList<Contact> mContactsOnDevice;
     private ArrayList<ContactDAO> mContactDAOS;
-    private Map<String, String> mFoundRegisteredContacts;
 
     private DatabaseReference mDatabaseReference;
     private ContactsRVAdapter mContactsRVAdapter;
@@ -97,12 +94,15 @@ public class ContactsActivity extends AppCompatActivity {
         mContactsOnDevice = importContacts.getContacts();
 
         mFoundRegisteredContacts = new HashMap<>();
-        mRegisteredNumbers = new HashMap<>();
+        mRegisteredPhoneNumbers = new HashMap<>();
         mContactDAOS = new ArrayList<>();
 
         // Black magic to fix RV's layout error
         a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, false));
+
+        // Keep users node in sync with the database
+        mDatabaseReference.child("users").keepSynced(true);
 
         a_contacts_tv_no_contacts.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,30 +118,32 @@ public class ContactsActivity extends AppCompatActivity {
             }
         });
 
-        // If any contact is found, this will be set to GONE below
-        a_contacts_tv_no_contacts.setVisibility(View.VISIBLE);
-
         // region Import device contacts and compare with registered numbers in our database
         // then load found contacts
 
         // Show the progress bar while loading
         a_contacts_ll_progress.setVisibility(View.VISIBLE);
 
-        mDatabaseReference.child("registered_numbers").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.child("user_phone_numbers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    mRegisteredNumbers.put(snapshot.getKey(), snapshot.getValue().toString());
+                    mRegisteredPhoneNumbers.put(snapshot.getKey(), snapshot.getValue().toString());
                 }
 
                 for (Contact contact : mContactsOnDevice) {
+                    if (contact.getNumbers().isEmpty()) {
+                        continue;
+                    }
+
                     String deviceContactPhoneNumber = contact.getNumbers().getFirst().elementValue();
+
 
                     try {
                         final Phonenumber.PhoneNumber numberProto = mPhoneNumberUtil.parse(deviceContactPhoneNumber,
                                 Locale.getDefault().getCountry());
 
-                        for (final Map.Entry<String, String> entry : mRegisteredNumbers.entrySet()) {
+                        for (final Map.Entry<String, String> entry : mRegisteredPhoneNumbers.entrySet()) {
                             if (mFirebaseAuth.getCurrentUser().getPhoneNumber()
                                     .contains(String.valueOf(numberProto.getNationalNumber()))) {
 
@@ -161,7 +163,7 @@ public class ContactsActivity extends AppCompatActivity {
                             }
                         }
                     } catch (NumberParseException e) {
-                        // TODO: Handle error
+                        Log.d(TAG, "NumberParseException()" + e.toString());
                     }
                 }
 
@@ -187,31 +189,34 @@ public class ContactsActivity extends AppCompatActivity {
     }
 
     private void loadContacts() {
+        mContactDAOS.clear();
+
+        if (mFoundRegisteredContacts.size() == 0) {
+            // No contact found, show no contact info
+            a_contacts_tv_no_contacts.setVisibility(View.VISIBLE);
+        }
+
         for (final Map.Entry<String, String> entry : mFoundRegisteredContacts.entrySet()) {
-            ValueEventListener valueEventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    ContactDAO contactDAO = new ContactDAO(
-                            entry.getKey(),
-                            entry.getValue(),
-                            dataSnapshot.child("about").getValue().toString(),
-                            getString(R.string.EMPTY_STRING),
-                            dataSnapshot.child("profile_photo_url").getValue().toString());
-
-                    mContactDAOS.add(contactDAO);
-                    mContactsRVAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // TODO: Handle error
-                }
-            };
-
             mDatabaseReference.child("users").child(entry.getKey())
-                    .addListenerForSingleValueEvent(valueEventListener);
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            ContactDAO contactDAO = new ContactDAO(
+                                    entry.getKey(),
+                                    entry.getValue(),
+                                    dataSnapshot.child("about").getValue().toString(),
+                                    "",
+                                    dataSnapshot.child("profile_photo_url").getValue().toString());
 
-            mDatabaseReference.child("users").keepSynced(true);
+                            mContactDAOS.add(contactDAO);
+                            mContactsRVAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // TODO: Handle error
+                        }
+                    });
         }
     }
 
@@ -220,7 +225,10 @@ public class ContactsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
-                return true;
+                break;
+            case R.id.a_contacts_menuItem_refresh:
+                // TODO: Refresh
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -228,6 +236,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.contacts_menu, menu);
         return true;
     }
 

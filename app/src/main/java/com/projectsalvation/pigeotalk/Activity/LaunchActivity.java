@@ -16,7 +16,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onStart();
 
         // TODO: FOR TESTING PURPOSES - DO NOT FORGET TO REMOVE
-        FirebaseAuth.getInstance().signOut();
+        // FirebaseAuth.getInstance().signOut();
 
         // Enable offline capabilities
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
@@ -28,7 +28,7 @@ public class LaunchActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         } else {
-            Intent i = new Intent(LaunchActivity.this, ChatActivity.class);
+            Intent i = new Intent(LaunchActivity.this, ValidatePhoneNumberActivity.class);
             startActivity(i);
             finish();
         }

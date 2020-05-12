@@ -6,6 +6,7 @@
     tools:context=".Fragment.ChatsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/f_chats_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </RelativeLayout>

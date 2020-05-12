@@ -9,6 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:elevation="0dp"
         app:liftOnScroll="true"> <!-- TODO: Test liftOnScroll -->
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -25,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabBackground="@color/colorPrimary"
+            app:tabGravity="fill"
             app:tabIconTint="@color/whiteSmoke"
             app:tabIndicatorColor="@color/white"
             app:tabSelectedTextColor="@color/white"

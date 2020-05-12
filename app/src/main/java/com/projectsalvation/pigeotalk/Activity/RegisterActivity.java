@@ -157,7 +157,7 @@ public class RegisterActivity extends AppCompatActivity {
                 mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
                         .setValue("Hey there! I'm using PigeoTalk.");
 
-                mDatabaseReference.child("registered_numbers")
+                mDatabaseReference.child("user_phone_numbers")
                         .child(mFirebaseAuth.getCurrentUser().getPhoneNumber())
                         .setValue(mFirebaseAuth.getUid());
 
