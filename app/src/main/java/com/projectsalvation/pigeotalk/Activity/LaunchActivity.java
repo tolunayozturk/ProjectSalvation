@@ -19,7 +19,7 @@ public class LaunchActivity extends AppCompatActivity {
         // FirebaseAuth.getInstance().signOut();
 
         // Enable offline capabilities
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        // FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 

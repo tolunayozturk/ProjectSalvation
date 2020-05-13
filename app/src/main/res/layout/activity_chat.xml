@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="6dp"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -87,6 +87,7 @@
                     android:autofillHints=""
                     android:background="@null"
                     android:ems="10"
+                    android:hint="@string/text_type_a_message"
                     android:inputType="textMultiLine|text"
                     android:maxHeight="156dp"
                     android:padding="4dp"

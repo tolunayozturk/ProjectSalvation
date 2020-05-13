@@ -11,5 +11,7 @@
     <color name="black">#000000</color>
     <color name="icon_grey">#80666666</color>
 
+    <color name="blue_double_tick">#61bee0</color>
+
     <color name="progress_bar_bg">#50000000</color>
 </resources>
