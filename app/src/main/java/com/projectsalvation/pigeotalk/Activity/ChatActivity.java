@@ -3,6 +3,7 @@ package com.projectsalvation.pigeotalk.Activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,9 +11,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -63,20 +66,19 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
 
-    private int flag = 0;
-
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
 
     private ArrayList<MessageDAO> mMessageDAOS;
-    private ValueEventListener mMessageListener;
     private MessagesRVAdapter mMessageRVAdapter;
+    private ValueEventListener mMessageListener;
 
     private String mChatID;
     private String mUserID;
     private String mUserName;
     private String mUserPhotoUrl;
-    private String previousActivity;
+
+    private boolean isFirstTime = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,49 +109,47 @@ public class ChatActivity extends AppCompatActivity {
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
-
         mMessageDAOS = new ArrayList<>();
 
-        // Make RV stack from bottom to top
+        // region Make RV stack from bottom to top
         LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, false);
 
         llm.setStackFromEnd(true);
         a_chat_rv_messages.setLayoutManager(llm);
+        // endregion
+
+        // region Add extra padding to bottom of RV
+        float scale = getResources().getDisplayMetrics().density;
+        int dpAsPixels = (int) (4 * scale + 0.5f);
+        a_chat_rv_messages.setPadding(0, dpAsPixels, 0, dpAsPixels);
+        // endregion
 
         Intent i = getIntent();
-        if (!i.hasExtra("userID")) {
-            Log.d(TAG, "!i.hasExtra(\"userID\"): false");
-            return;
-        }
-
-        if (!i.hasExtra("prevActivity")) {
-            Log.d(TAG, "!i.hasExtra(\"prevActivity\"): false");
-            return;
-        }
 
         if (i.hasExtra("chatID")) {
             mChatID = i.getExtras().getString("chatID");
+
+            retrieveMessages(mChatID);
+            listenMessages(mChatID);
         }
 
-        previousActivity = i.getExtras().getString("prevActivity");
         mUserID = i.getExtras().getString("userID");
         mUserName = i.getExtras().getString("contactName");
         mUserPhotoUrl = i.getExtras().getString("contactPhotoUrl");
 
-        // region If user is coming from ContactsActivity, check if there is an existing chat between
-        // the user and the clicked user. If no, create one, if yes, get the existing chatUID
-        if (previousActivity.equals("ContactsActivity")) {
+        if (mChatID == null) {
             mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 if (snapshot.getValue().toString().equals(mUserID)) {
-                                    // Found existing chat between users
+                                    // Found existing chat
                                     mChatID = snapshot.getKey();
-                                    Log.d(TAG, "Got existing chat with the chatID: " + mChatID);
-                                    loadMessages(mChatID);
+                                    Log.d(TAG, "Found chat! ChatID: " + mChatID);
+
+                                    retrieveMessages(mChatID);
                                     listenMessages(mChatID);
                                 }
                             }
@@ -161,12 +161,6 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     });
         }
-
-        if (previousActivity.equals("HomePageActivity")) {
-            loadMessages(mChatID);
-            listenMessages(mChatID);
-        }
-        // endregion
 
         a_chat_chip_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,8 +179,8 @@ public class ChatActivity extends AppCompatActivity {
 
                 String newMessageID = messageReference.push().getKey();
 
-                Long tsLong = System.currentTimeMillis() / 1000;
-                String timestamp = tsLong.toString();
+                long tsLong = System.currentTimeMillis();
+                String timestamp = Long.toString(tsLong);
 
                 MessageDAO newMessage = new MessageDAO(
                         a_chat_et_message.getText().toString(),
@@ -199,30 +193,30 @@ public class ChatActivity extends AppCompatActivity {
                         mChatID
                 );
 
-                messageReference.child(newMessageID).setValue(newMessage);
+                messageReference.child(Objects.requireNonNull(newMessageID)).setValue(newMessage);
 
                 mDatabaseReference.child("chats").child(mChatID)
                         .child("last_message_id").setValue(newMessageID);
 
+                a_chat_et_message.setText("");
+
                 if (mMessageListener == null) {
-                    Log.d(TAG, "mMessageListener is null. Start listening messages.");
-                    loadMessages(mChatID);
+                    Log.d(TAG, "MessageListener is null!");
+                    retrieveMessages(mChatID);
                     listenMessages(mChatID);
                 }
-
-                a_chat_et_message.setText("");
             }
         });
 
-        // region Set toolbar title to contact's name
+        // region Set toolbar title to contact name
         mDatabaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.child(mFirebaseAuth.getUid()).child("contacts").child(mUserID).exists()) {
+                if (dataSnapshot.child(mFirebaseAuth.getUid()).child("contacts").child(mUserID).exists()) {
                     getSupportActionBar().setTitle(mUserName);
                 } else {
-                    getSupportActionBar().setTitle(dataSnapshot.child(mFirebaseAuth.getUid())
-                            .child("contacts").child(mUserID).getValue().toString());
+                    getSupportActionBar().setTitle(
+                            dataSnapshot.child(mUserID).child("phone_number").getValue().toString());
                 }
             }
 
@@ -238,36 +232,34 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void listenMessages(String chatID) {
+        Log.d(TAG, String.valueOf(isFirstTime));
         mMessageListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (flag == 0) {
-                    flag++;
-                    return;
-                }
-
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     if (snapshot == null) {
                         return;
                     }
 
-                    MessageDAO messageDAO = new MessageDAO(
-                            snapshot.child("message").getValue().toString(),
-                            snapshot.child("messageType").getValue().toString(),
-                            snapshot.child("timestamp").getValue().toString(),
-                            snapshot.child("recipient").getValue().toString(),
-                            snapshot.child("sender").getValue().toString(),
-                            snapshot.child("read").getValue().toString(),
-                            snapshot.child("messageId").getValue().toString(),
-                            mChatID
-                    );
+                    if (!isFirstTime) {
+                        MessageDAO messageDAO = new MessageDAO(
+                                snapshot.child("message").getValue().toString(),
+                                snapshot.child("messageType").getValue().toString(),
+                                snapshot.child("timestamp").getValue().toString(),
+                                snapshot.child("recipient").getValue().toString(),
+                                snapshot.child("sender").getValue().toString(),
+                                snapshot.child("read").getValue().toString(),
+                                snapshot.child("messageId").getValue().toString(),
+                                mChatID
+                        );
 
-                    Log.d(TAG, "Add item");
-
-                    mMessageDAOS.add(messageDAO);
-                    a_chat_rv_messages.smoothScrollToPosition(mMessageRVAdapter.getItemCount() - 1);
-                    mMessageRVAdapter.notifyDataSetChanged();
+                        mMessageDAOS.add(messageDAO);
+                        mMessageRVAdapter.notifyDataSetChanged();
+                        a_chat_rv_messages.smoothScrollToPosition(mMessageRVAdapter.getItemCount() - 1);
+                    }
                 }
+
+                isFirstTime = false;
             }
 
             @Override
@@ -280,7 +272,7 @@ public class ChatActivity extends AppCompatActivity {
                 .addValueEventListener(mMessageListener);
     }
 
-    private void loadMessages(String chatID) {
+    private void retrieveMessages(String chatID) {
         mMessageListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -300,11 +292,9 @@ public class ChatActivity extends AppCompatActivity {
                             mChatID
                     );
 
-                    Log.d(TAG, "Add item");
-
                     mMessageDAOS.add(messageDAO);
-                    a_chat_rv_messages.smoothScrollToPosition(mMessageRVAdapter.getItemCount() - 1);
                     mMessageRVAdapter.notifyDataSetChanged();
+                    a_chat_rv_messages.smoothScrollToPosition(mMessageRVAdapter.getItemCount() - 1);
                 }
             }
 
@@ -334,7 +324,7 @@ public class ChatActivity extends AppCompatActivity {
                 .child(newChatUID).setValue(mFirebaseAuth.getUid());
 
         mChatID = newChatUID;
-        Log.d(TAG, "Created chat with the UID: " + mChatID);
+        Log.d(TAG, "Created chat! ChatID: " + mChatID);
     }
 
     @Override

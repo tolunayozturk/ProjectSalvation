@@ -32,6 +32,7 @@ import com.projectsalvation.pigeotalk.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.ViewHolder> {
 
@@ -63,60 +64,50 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
             newHolder.l_chat_message_fl.setVisibility(View.GONE);
             newHolder.l_chat_message_btn_voice_attachment.setVisibility(View.GONE);
 
+            // If message_type is plaintext, move timestamp to end
+            newHolder.L_chat_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+
+            // If self message, move it to end and set its bg color
             if (messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
                 newHolder.l_chat_messages_ll.setGravity(Gravity.END);
+                newHolder.l_chat_messages_cv.setCardBackgroundColor(
+                        ContextCompat.getColor(mContext, R.color.message_bg));
             }
 
             newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
-            Calendar calendar = Calendar.getInstance();
+
+            String time;
+            Calendar calendar = Calendar.getInstance(Locale.getDefault());
             calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
-            String time = DateFormat.format("hh:mm", calendar).toString();
+
+            int ampm = calendar.get(Calendar.AM_PM);
+            if (ampm == Calendar.AM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " AM";
+            } else if (ampm == Calendar.PM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+            } else {
+                time = DateFormat.format("hh:mm", calendar).toString();
+            }
+
+            // Remove check mark from recipient
+            if (messageDAO.getRecipient().equals(FirebaseAuth.getInstance().getUid())) {
+                newHolder.l_chat_message_tv_timestamp.
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                null, null, null, null);
+            }
 
             newHolder.l_chat_message_tv_timestamp.setText(time);
-
-            listenMessageReadState(messageDAO, newHolder);
         }
     }
 
-    private void listenMessageReadState(final MessageDAO messageDAO, final ViewHolder holder) {
-        mDatabaseReference
-                .child("chat_messages").child(messageDAO.getChatId())
-                .child(messageDAO.getMessageId()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getKey().equals("false")) {
-                    mDatabaseReference.child("chat_messages").child(messageDAO.getChatId())
-                            .child(messageDAO.getMessageId()).addListenerForSingleValueEvent(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    if (!messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
-                                        holder.l_chat_message_tv_timestamp.
-                                                setCompoundDrawablesWithIntrinsicBounds(
-                                                null, null, null, null);
-                                    } else {
-                                        holder.l_chat_message_tv_timestamp
-                                                .setCompoundDrawablesWithIntrinsicBounds(
-                                                        null, null,
-                                                        ContextCompat.getDrawable(mContext,
-                                                                R.drawable.ic_checkmark_24dp)
-                                                , null);
-                                    }
-                                }
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+    @Override
+    public long getItemId(int position) {
+        return (long) position;
     }
 
     @Override
@@ -128,6 +119,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
         // region Resource Declaration
         LinearLayout l_chat_messages_ll;
+        LinearLayout L_chat_messages_ll_child;
         CardView l_chat_messages_cv;
         Button l_chat_message_btn_voice_attachment;
         FrameLayout l_chat_message_fl;
@@ -142,6 +134,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
             // region Resource Assignment
             l_chat_messages_ll = itemView.findViewById(R.id.l_chat_messages_ll);
+            L_chat_messages_ll_child = itemView.findViewById(R.id.l_chat_messages_ll_child);
             l_chat_messages_cv = itemView.findViewById(R.id.l_chat_messages_cv);
             l_chat_message_btn_voice_attachment = itemView.findViewById(R.id.l_chat_message_btn_voice_attachment);
             l_chat_message_fl = itemView.findViewById(R.id.l_chat_message_fl);

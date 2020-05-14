@@ -6,22 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="6dp">
+    android:padding="4dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/l_chat_messages_cv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="0dp"
-        app:cardBackgroundColor="#d8f4c6"
+        app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp">
 
         <LinearLayout
+            android:id="@+id/l_chat_messages_ll_child"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:gravity="end"
+            android:orientation="horizontal"
             android:padding="4dp">
 
             <Button
@@ -76,24 +77,29 @@
                 android:layout_gravity="start"
                 android:autoLink="all"
                 android:linksClickable="true"
-                android:maxWidth="296dp"
-                android:minWidth="64dp"
+                android:maxWidth="216dp"
+                android:minWidth="32dp"
                 android:paddingLeft="8dp"
-                android:paddingTop="8dp"
+                android:paddingTop="0dp"
                 android:paddingRight="8dp"
                 android:text="@{chatMessageVM.iMessage.message}"
+                android:textColor="#3c3c3c"
                 android:textIsSelectable="true"
-                tools:text="Lorem ipsum dotsem expecto patronum" />
+                tools:text="Dışarıda tank görüyorum Faruk, hayırdır bi' kutlama mı var?" />
 
             <TextView
                 android:id="@+id/l_chat_message_tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginBottom="2dp"
-                android:gravity="center_vertical"
+                android:drawableEnd="@drawable/ic_checkmark_24dp"
+                android:drawablePadding="4dp"
+                android:drawableTint="#8c8c8c"
+                android:gravity="bottom|end"
+                android:minWidth="48dp"
+                android:textColor="#8c8c8c"
                 android:textSize="12sp"
                 tools:text="11:21 AM" />
 

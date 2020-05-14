@@ -55,8 +55,6 @@ public class ContactsRVAdapter extends RecyclerView.Adapter<ContactsRVAdapter.Vi
             public void onClick(View v) {
                 Intent i = new Intent(mContext.getApplicationContext(), ChatActivity.class);
                 i.putExtra("userID", contactDAO.getUserId());
-                i.putExtra("prevActivity", "ContactsActivity");
-
                 i.putExtra("contactName", contactDAO.getName());
                 i.putExtra("contactPhotoUrl", contactDAO.getProfilePhotoUrl());
 

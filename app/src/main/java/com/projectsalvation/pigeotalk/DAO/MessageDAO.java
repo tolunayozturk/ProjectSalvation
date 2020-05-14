@@ -1,5 +1,9 @@
 package com.projectsalvation.pigeotalk.DAO;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
 public class MessageDAO {
 
     private String message;
