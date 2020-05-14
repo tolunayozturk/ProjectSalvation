@@ -12,6 +12,8 @@
     <color name="icon_grey">#80666666</color>
 
     <color name="message_bg">#d8f4c6</color>
+    <color name="message_text_color">#3c3c3c</color>
+    <color name="message_time_color">#8c8c8c</color>
 
     <color name="blue_double_tick">#61bee0</color>
 

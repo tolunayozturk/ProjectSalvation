@@ -1,9 +1,7 @@
 package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,17 +15,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
-
 import com.projectsalvation.pigeotalk.R;
 
 import java.util.ArrayList;
@@ -76,17 +69,19 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
             newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
 
-            String time;
+            String time = "";
             Calendar calendar = Calendar.getInstance(Locale.getDefault());
             calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
 
             int ampm = calendar.get(Calendar.AM_PM);
-            if (ampm == Calendar.AM) {
-                time = DateFormat.format("hh:mm", calendar).toString() + " AM";
-            } else if (ampm == Calendar.PM) {
-                time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+            if (DateFormat.is24HourFormat(mContext)) {
+                time = DateFormat.format("HH:mm", calendar).toString();
             } else {
-                time = DateFormat.format("hh:mm", calendar).toString();
+                if (ampm == Calendar.AM) {
+                    time = DateFormat.format("hh:mm", calendar).toString() + " AM";
+                } else if (ampm == Calendar.PM) {
+                    time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+                }
             }
 
             // Remove check mark from recipient

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".Activity.ContactsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -16,8 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
-            app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            app:subtitleTextAppearance="@style/ToolbarSubtitleCustomFontStyle"
             app:title="@string/title_select_contact"
             app:titleTextColor="@color/white" />
 

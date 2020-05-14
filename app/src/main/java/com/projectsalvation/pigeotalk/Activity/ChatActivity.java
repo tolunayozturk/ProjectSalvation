@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -38,9 +41,13 @@ import com.projectsalvation.pigeotalk.Adapter.MessagesRVAdapter;
 import com.projectsalvation.pigeotalk.DAO.ContactDAO;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,13 +55,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ChatActivity extends AppCompatActivity {
 
     // region Resource Declaration
+    CircleImageView a_chat_civ_photo;
+    TextView a_chat_tv_name;
     MaterialToolbar a_chat_toolbar;
     RecyclerView a_chat_rv_messages;
     LinearLayout a_chat_ll_footer;
     CardView a_chat_cv_footer;
+    TextView a_chat_tv_presence;
 
     EditText a_chat_et_message;
 
@@ -72,6 +84,7 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<MessageDAO> mMessageDAOS;
     private MessagesRVAdapter mMessageRVAdapter;
     private ValueEventListener mMessageListener;
+    private ValueEventListener mPresenceListener;
 
     private String mChatID;
     private String mUserID;
@@ -90,6 +103,9 @@ public class ChatActivity extends AppCompatActivity {
         a_chat_rv_messages = findViewById(R.id.a_chat_rv_messages);
         a_chat_ll_footer = findViewById(R.id.a_chat_ll_footer);
         a_chat_cv_footer = findViewById(R.id.a_chat_cv_footer);
+        a_chat_civ_photo = findViewById(R.id.a_chat_civ_photo);
+        a_chat_tv_name = findViewById(R.id.a_chat_tv_name);
+        a_chat_tv_presence = findViewById(R.id.a_chat_tv_presence);
 
         a_chat_et_message = findViewById(R.id.a_chat_et_message);
 
@@ -103,9 +119,7 @@ public class ChatActivity extends AppCompatActivity {
 
         // Enable back button
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        getSupportActionBar().setTitle(getString(R.string.EMPTY_STRING));
-        getSupportActionBar().setSubtitle(getString(R.string.EMPTY_STRING));
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -125,6 +139,8 @@ public class ChatActivity extends AppCompatActivity {
         a_chat_rv_messages.setPadding(0, dpAsPixels, 0, dpAsPixels);
         // endregion
 
+        a_chat_tv_presence.setSelected(true);
+
         Intent i = getIntent();
 
         if (i.hasExtra("chatID")) {
@@ -137,6 +153,22 @@ public class ChatActivity extends AppCompatActivity {
         mUserID = i.getExtras().getString("userID");
         mUserName = i.getExtras().getString("contactName");
         mUserPhotoUrl = i.getExtras().getString("contactPhotoUrl");
+
+        Picasso.get().load(mUserPhotoUrl)
+                .fit()
+                .centerCrop()
+                .into(a_chat_civ_photo, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Picasso.get().load(mUserPhotoUrl).into(
+                                a_chat_civ_photo);
+                    }
+                });
 
         if (mChatID == null) {
             mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
@@ -162,6 +194,7 @@ public class ChatActivity extends AppCompatActivity {
                     });
         }
 
+        // region Send button onClick()
         a_chat_chip_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -207,16 +240,23 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+        // endregion
+
+        a_chat_chip_attachment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         // region Set toolbar title to contact name
         mDatabaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.child(mFirebaseAuth.getUid()).child("contacts").child(mUserID).exists()) {
-                    getSupportActionBar().setTitle(mUserName);
+                    a_chat_tv_name.setText(mUserName);
                 } else {
-                    getSupportActionBar().setTitle(
-                            dataSnapshot.child(mUserID).child("phone_number").getValue().toString());
+                    a_chat_tv_name.setText(dataSnapshot.child(mUserID).child("phone_number").getValue().toString());
                 }
             }
 
@@ -227,12 +267,53 @@ public class ChatActivity extends AppCompatActivity {
         });
         // endregion
 
+        listenPresence();
+
         mMessageRVAdapter = new MessagesRVAdapter(getApplicationContext(), mMessageDAOS);
         a_chat_rv_messages.setAdapter(mMessageRVAdapter);
     }
 
+    private void listenPresence() {
+        mPresenceListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child("isOnline").getValue().toString().equals("false")) {
+
+                    String time = "";
+                    Calendar calendar = Calendar.getInstance(Locale.getDefault());
+                    calendar.setTimeInMillis(Long.parseLong(
+                            dataSnapshot.child("last_seen").getValue().toString()));
+
+                    int ampm = calendar.get(Calendar.AM_PM);
+                    if (DateFormat.is24HourFormat(getApplicationContext())) {
+                        time = DateFormat.format("HH:mm", calendar).toString();
+                    } else {
+                        if (ampm == Calendar.AM) {
+                            time = DateFormat.format("hh:mm", calendar).toString() + " AM";
+                        } else if (ampm == Calendar.PM) {
+                            time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+                        }
+                    }
+
+                    if (DateUtils.isToday((Long) dataSnapshot.child("last_seen").getValue())) {
+                        a_chat_tv_presence.setText(getString(R.string.text_last_seen, "today", time));
+                    }
+                } else {
+                    a_chat_tv_presence.setText(getString(R.string.text_online));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        mDatabaseReference.child("users").child(mUserID).child("presence")
+                .addValueEventListener(mPresenceListener);
+    }
+
     private void listenMessages(String chatID) {
-        Log.d(TAG, String.valueOf(isFirstTime));
         mMessageListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -242,14 +323,18 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     if (!isFirstTime) {
+                        if (snapshot.child("isRead").getValue().toString().equals("true")) {
+                            return;
+                        }
+
                         MessageDAO messageDAO = new MessageDAO(
                                 snapshot.child("message").getValue().toString(),
                                 snapshot.child("messageType").getValue().toString(),
                                 snapshot.child("timestamp").getValue().toString(),
                                 snapshot.child("recipient").getValue().toString(),
                                 snapshot.child("sender").getValue().toString(),
-                                snapshot.child("read").getValue().toString(),
                                 snapshot.child("messageId").getValue().toString(),
+                                snapshot.child("isRead").getValue().toString(),
                                 mChatID
                         );
 
@@ -287,8 +372,8 @@ public class ChatActivity extends AppCompatActivity {
                             snapshot.child("timestamp").getValue().toString(),
                             snapshot.child("recipient").getValue().toString(),
                             snapshot.child("sender").getValue().toString(),
-                            snapshot.child("read").getValue().toString(),
                             snapshot.child("messageId").getValue().toString(),
+                            snapshot.child("isRead").getValue().toString(),
                             mChatID
                     );
 
@@ -312,16 +397,25 @@ public class ChatActivity extends AppCompatActivity {
         String newChatUID = UUID.randomUUID().toString().replace("-", "");
 
         mDatabaseReference.child("chats").child(newChatUID).child("members")
-                .child(mFirebaseAuth.getUid()).setValue(true);
+                .child(mFirebaseAuth.getUid()).setValue("true");
 
         mDatabaseReference.child("chats").child(newChatUID).child("members")
-                .child(mUserID).setValue(true);
+                .child(mUserID).setValue("true");
+
+        mDatabaseReference.child("chats").child(newChatUID).child("chatId")
+                .setValue(newChatUID);
 
         mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
                 .child(newChatUID).setValue(mUserID);
 
         mDatabaseReference.child("user_chats").child(mUserID)
                 .child(newChatUID).setValue(mFirebaseAuth.getUid());
+
+        mDatabaseReference.child("chat_members").child(newChatUID)
+                .child(mFirebaseAuth.getUid()).setValue("true");
+
+        mDatabaseReference.child("chat_members").child(newChatUID)
+                .child(mUserID).setValue("true");
 
         mChatID = newChatUID;
         Log.d(TAG, "Created chat! ChatID: " + mChatID);
@@ -347,5 +441,18 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.chat_menu, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mDatabaseReference.child("users").child(mUserID).child("presence")
+                .removeEventListener(mPresenceListener);
+
+        if (mChatID != null) {
+            mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
+                    .addValueEventListener(mMessageListener);
+        }
     }
 }

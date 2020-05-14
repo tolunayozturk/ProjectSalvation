@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.projectsalvation.pigeotalk.Activity.ChatActivity;
 import com.projectsalvation.pigeotalk.DAO.ContactDAO;
 import com.projectsalvation.pigeotalk.R;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -42,10 +43,26 @@ public class ContactsRVAdapter extends RecyclerView.Adapter<ContactsRVAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         final ContactDAO contactDAO = mContactDAOS.get(position);
 
-        Picasso.get().load(contactDAO.getProfilePhotoUrl()).into(holder.l_contacts_list_civ_profile_photo);
+        Picasso.get().load(contactDAO.getProfilePhotoUrl())
+                .fit()
+                .centerCrop()
+                .into(
+                holder.l_contacts_list_civ_profile_photo, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Picasso.get().load(contactDAO.getProfilePhotoUrl()).into(
+                                holder.l_contacts_list_civ_profile_photo);
+                    }
+                });
+
         holder.l_contacts_list_tv_display_name.setText(contactDAO.getName());
         holder.l_contact_list_tv_about.setText(contactDAO.getAbout());
         holder.l_contacts_list_tv_num_type.setText(contactDAO.getNumberType());

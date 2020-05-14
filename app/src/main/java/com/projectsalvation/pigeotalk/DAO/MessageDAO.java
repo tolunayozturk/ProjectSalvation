@@ -15,7 +15,10 @@ public class MessageDAO {
     private String isRead;
     private String chatId;
 
-    public MessageDAO(String message, String messageType, String timestamp, String recipient, String sender, String messageId, String isRead, String chatId) {
+    public MessageDAO(String message, String messageType,
+                      String timestamp, String recipient,
+                      String sender, String messageId,
+                      String isRead, String chatId) {
         this.message = message;
         this.messageType = messageType;
         this.timestamp = timestamp;
@@ -74,19 +77,19 @@ public class MessageDAO {
         this.messageId = messageId;
     }
 
+    public String getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(String isRead) {
+        this.isRead = isRead;
+    }
+
     public String getChatId() {
         return chatId;
     }
 
     public void setChatId(String chatId) {
         this.chatId = chatId;
-    }
-
-    public String getRead() {
-        return isRead;
-    }
-
-    public void setRead(String read) {
-        isRead = read;
     }
 }
