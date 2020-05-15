@@ -91,9 +91,21 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
                     time = DateFormat.format("hh:mm", calendar).toString() + " PM";
                 }
             }
+
             newHolder.l_chat_message_tv_timestamp.setText(time);
 
-            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
+            // Remove checkmark from recipient
+            if (messageDAO.getRecipient().equals(mFirebaseAuth.getUid())) {
+                holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                        null,
+                        null,
+                        null,
+                        null
+                );
+            }
+
+            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())
+                    && messageDAO.getIsRead().equals("true")) {
                 holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                         null,
                         null,

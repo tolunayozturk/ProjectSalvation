@@ -96,7 +96,6 @@ public class ChatActivity extends AppCompatActivity {
     private String mUserPhotoUrl;
 
     private boolean isFirstTime = true;
-    private boolean isSeen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -330,14 +329,12 @@ public class ChatActivity extends AppCompatActivity {
                 );
 
                 if (messageDAO.getRecipient().equals(mFirebaseAuth.getUid())) {
-                    if (dataSnapshot.child("isRead").equals(false)) {
+                    if (dataSnapshot.child("isRead").getValue().toString().equals("false")) {
                         messageDAO.setIsRead("true");
                         messageDAO.setSeenAt(Long.toString(System.currentTimeMillis()));
                         dataSnapshot.getRef().child("isRead").setValue("true");
                         dataSnapshot.getRef().child("seenAt").setValue(Long.toString(System.currentTimeMillis()));
                     }
-
-                    isSeen = true;
                 }
 
                 if (!isFirstTime) {
@@ -455,10 +452,10 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//
-//        if (mChatID != null) {
-//            mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
-//                    .removeEventListener(mMessageListener);
-//        }
+
+        if (mChatID != null) {
+            mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
+                    .removeEventListener(mMessageListener);
+        }
     }
 }
