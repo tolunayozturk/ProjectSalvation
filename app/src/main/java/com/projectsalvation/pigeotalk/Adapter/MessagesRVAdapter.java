@@ -2,6 +2,7 @@ package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,13 +14,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 
@@ -33,6 +39,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
     private ArrayList<MessageDAO> messageDAOS;
 
     private DatabaseReference mDatabaseReference;
+    private FirebaseAuth mFirebaseAuth;
 
     public MessagesRVAdapter(Context mContext, ArrayList<MessageDAO> messageDAOS) {
         this.mContext = mContext;
@@ -49,9 +56,10 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        final ViewHolder newHolder = holder;
+        ViewHolder newHolder = holder;
         final MessageDAO messageDAO = messageDAOS.get(position);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
         if (messageDAO.getMessageType().equals("plaintext")) {
             newHolder.l_chat_message_fl.setVisibility(View.GONE);
@@ -83,16 +91,58 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
                     time = DateFormat.format("hh:mm", calendar).toString() + " PM";
                 }
             }
+            newHolder.l_chat_message_tv_timestamp.setText(time);
 
-            // Remove check mark from recipient
-            if (messageDAO.getRecipient().equals(FirebaseAuth.getInstance().getUid())) {
-                newHolder.l_chat_message_tv_timestamp.
-                        setCompoundDrawablesWithIntrinsicBounds(
-                                null, null, null, null);
+            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
+                holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                        null,
+                        null,
+                        ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                        null
+                );
             }
 
-            newHolder.l_chat_message_tv_timestamp.setText(time);
+            listenMessageSeenState(messageDAO, newHolder);
         }
+    }
+
+    private void listenMessageSeenState(final MessageDAO messageDAO, final ViewHolder holder) {
+        mDatabaseReference.child("chat_messages").child(messageDAO.getChatId()).limitToLast(1)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                        if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
+                            holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                                    null,
+                                    null,
+                                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                                    null
+                            );
+                        }
+
+                        mDatabaseReference.child("chat_messages").child(messageDAO.getChatId()).limitToLast(1)
+                                .removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     @Override

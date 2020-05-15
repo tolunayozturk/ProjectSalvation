@@ -13,12 +13,13 @@ public class MessageDAO {
     private String sender;
     private String messageId;
     private String isRead;
+    private String seenAt;
     private String chatId;
 
     public MessageDAO(String message, String messageType,
                       String timestamp, String recipient,
                       String sender, String messageId,
-                      String isRead, String chatId) {
+                      String isRead, String seenAt, String chatId) {
         this.message = message;
         this.messageType = messageType;
         this.timestamp = timestamp;
@@ -26,6 +27,7 @@ public class MessageDAO {
         this.sender = sender;
         this.messageId = messageId;
         this.isRead = isRead;
+        this.seenAt = seenAt;
         this.chatId = chatId;
     }
 
@@ -91,5 +93,13 @@ public class MessageDAO {
 
     public void setChatId(String chatId) {
         this.chatId = chatId;
+    }
+
+    public String getSeenAt() {
+        return seenAt;
+    }
+
+    public void setSeenAt(String seenAt) {
+        this.seenAt = seenAt;
     }
 }
