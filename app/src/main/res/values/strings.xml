@@ -79,6 +79,6 @@
     <string name="text_menu_video_Call">Video Call</string>
     <string name="text_menu_contact_info">Contact Info</string>
 
-    <string name="text_online">Online</string>
-    <string name="text_last_seen">Last seen %1$s %2$s</string>
+    <string name="text_online">online</string>
+    <string name="text_last_seen">last seen %1$s</string>
 </resources>

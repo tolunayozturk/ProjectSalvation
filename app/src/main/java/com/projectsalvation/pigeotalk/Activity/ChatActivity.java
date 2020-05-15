@@ -85,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
     private MessagesRVAdapter mMessageRVAdapter;
     private ValueEventListener mMessageListener;
     private ValueEventListener mPresenceListener;
+    private ValueEventListener mChatListener;
 
     private String mChatID;
     private String mUserID;
@@ -171,8 +172,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
 
         if (mChatID == null) {
-            mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
+            mChatListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -180,6 +180,9 @@ public class ChatActivity extends AppCompatActivity {
                                     // Found existing chat
                                     mChatID = snapshot.getKey();
                                     Log.d(TAG, "Found chat! ChatID: " + mChatID);
+
+                                    mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                                            .removeEventListener(this);
 
                                     retrieveMessages(mChatID);
                                     listenMessages(mChatID);
@@ -191,7 +194,10 @@ public class ChatActivity extends AppCompatActivity {
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
                         }
-                    });
+                    };
+
+            mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                    .addValueEventListener(mChatListener);
         }
 
         // region Send button onClick()
@@ -206,6 +212,10 @@ public class ChatActivity extends AppCompatActivity {
                     createChat();
                 }
 
+                if (mChatListener != null) {
+                    mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                            .removeEventListener(mChatListener);
+                }
 
                 DatabaseReference messageReference = mDatabaseReference
                         .child("chat_messages").child(mChatID);
@@ -228,10 +238,10 @@ public class ChatActivity extends AppCompatActivity {
 
                 messageReference.child(Objects.requireNonNull(newMessageID)).setValue(newMessage);
 
+                a_chat_et_message.setText("");
+
                 mDatabaseReference.child("chats").child(mChatID)
                         .child("last_message_id").setValue(newMessageID);
-
-                a_chat_et_message.setText("");
 
                 if (mMessageListener == null) {
                     Log.d(TAG, "MessageListener is null!");
@@ -279,25 +289,13 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.child("isOnline").getValue().toString().equals("false")) {
 
-                    String time = "";
+                    String timestamp = dataSnapshot.child("last_seen").getValue().toString();
                     Calendar calendar = Calendar.getInstance(Locale.getDefault());
-                    calendar.setTimeInMillis(Long.parseLong(
-                            dataSnapshot.child("last_seen").getValue().toString()));
+                    calendar.setTimeInMillis(Long.parseLong(timestamp));
 
-                    int ampm = calendar.get(Calendar.AM_PM);
-                    if (DateFormat.is24HourFormat(getApplicationContext())) {
-                        time = DateFormat.format("HH:mm", calendar).toString();
-                    } else {
-                        if (ampm == Calendar.AM) {
-                            time = DateFormat.format("hh:mm", calendar).toString() + " AM";
-                        } else if (ampm == Calendar.PM) {
-                            time = DateFormat.format("hh:mm", calendar).toString() + " PM";
-                        }
-                    }
+                    a_chat_tv_presence.setText(getString(R.string.text_last_seen,
+                            DateUtils.getRelativeTimeSpanString(Long.parseLong(timestamp))));
 
-                    if (DateUtils.isToday((Long) dataSnapshot.child("last_seen").getValue())) {
-                        a_chat_tv_presence.setText(getString(R.string.text_last_seen, "today", time));
-                    }
                 } else {
                     a_chat_tv_presence.setText(getString(R.string.text_online));
                 }
@@ -411,12 +409,6 @@ public class ChatActivity extends AppCompatActivity {
         mDatabaseReference.child("user_chats").child(mUserID)
                 .child(newChatUID).setValue(mFirebaseAuth.getUid());
 
-        mDatabaseReference.child("chat_members").child(newChatUID)
-                .child(mFirebaseAuth.getUid()).setValue("true");
-
-        mDatabaseReference.child("chat_members").child(newChatUID)
-                .child(mUserID).setValue("true");
-
         mChatID = newChatUID;
         Log.d(TAG, "Created chat! ChatID: " + mChatID);
     }
@@ -441,18 +433,5 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.chat_menu, menu);
         return true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mDatabaseReference.child("users").child(mUserID).child("presence")
-                .removeEventListener(mPresenceListener);
-
-        if (mChatID != null) {
-            mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
-                    .addValueEventListener(mMessageListener);
-        }
     }
 }
