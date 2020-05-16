@@ -17,25 +17,13 @@ public class LaunchActivity extends AppCompatActivity {
         super.onStart();
 
         // TODO: FOR TESTING PURPOSES - DO NOT FORGET TO REMOVE
-        // FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance().signOut();
 
         // Enable offline capabilities
         // FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-        databaseReference.child("users").child(firebaseUser.getUid()).child("presence")
-                .child("isOnline").setValue("true");
-
-        databaseReference.child("users").child(firebaseUser.getUid()).child("presence")
-                .child("isOnline").onDisconnect().setValue("false");
-
-        databaseReference.child("users").child(firebaseUser.getUid()).child("presence")
-                .child("last_seen").setValue(System.currentTimeMillis());
-
-        databaseReference.child("users").child(firebaseUser.getUid()).child("presence")
-                .child("last_seen").onDisconnect().setValue(System.currentTimeMillis());
 
         if (firebaseUser != null) {
             Intent i = new Intent(LaunchActivity.this, HomePageActivity.class);

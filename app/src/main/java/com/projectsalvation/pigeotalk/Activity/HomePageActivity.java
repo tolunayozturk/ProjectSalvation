@@ -72,6 +72,18 @@ public class HomePageActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").setValue("true");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").onDisconnect().setValue("false");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").setValue(System.currentTimeMillis());
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").onDisconnect().setValue(System.currentTimeMillis());
+
         // region Set up fragments
         CameraFragment cameraFragment = new CameraFragment();
         ChatsFragment chatsFragment = new ChatsFragment();
