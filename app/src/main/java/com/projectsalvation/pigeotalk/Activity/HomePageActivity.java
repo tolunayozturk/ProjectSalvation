@@ -76,10 +76,10 @@ public class HomePageActivity extends AppCompatActivity {
                 .child("isOnline").setValue("true");
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
-                .child("isOnline").onDisconnect().setValue("false");
+                .child("last_seen").setValue(System.currentTimeMillis());
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
-                .child("last_seen").setValue(System.currentTimeMillis());
+                .child("isOnline").onDisconnect().setValue("false");
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
                 .child("last_seen").onDisconnect().setValue(System.currentTimeMillis());

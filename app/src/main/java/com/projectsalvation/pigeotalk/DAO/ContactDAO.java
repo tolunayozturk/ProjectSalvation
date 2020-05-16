@@ -8,7 +8,11 @@ public class ContactDAO {
     private String numberType;
     private String profilePhotoUrl;
 
-    public ContactDAO(String userId, String name, String about, String numberType, String profilePhotoUrl) {
+    public ContactDAO(String userId,
+                      String name,
+                      String about,
+                      String numberType,
+                      String profilePhotoUrl) {
         this.userId = userId;
         this.name = name;
         this.about = about;

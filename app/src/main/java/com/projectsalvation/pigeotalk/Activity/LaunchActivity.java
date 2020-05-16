@@ -17,7 +17,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onStart();
 
         // TODO: FOR TESTING PURPOSES - DO NOT FORGET TO REMOVE
-        FirebaseAuth.getInstance().signOut();
+        // FirebaseAuth.getInstance().signOut();
 
         // Enable offline capabilities
         // FirebaseDatabase.getInstance().setPersistenceEnabled(true);

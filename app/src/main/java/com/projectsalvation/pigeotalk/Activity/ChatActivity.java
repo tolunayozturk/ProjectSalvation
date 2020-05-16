@@ -40,6 +40,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.Adapter.ContactsRVAdapter;
 import com.projectsalvation.pigeotalk.Adapter.MessagesRVAdapter;
+import com.projectsalvation.pigeotalk.DAO.ChatDAO;
 import com.projectsalvation.pigeotalk.DAO.ContactDAO;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
@@ -409,10 +410,10 @@ public class ChatActivity extends AppCompatActivity {
         String newChatUID = UUID.randomUUID().toString().replace("-", "");
 
         mDatabaseReference.child("chats").child(newChatUID).child("members")
-                .child(mFirebaseAuth.getUid()).setValue("true");
+                .child(mFirebaseAuth.getUid()).setValue("");
 
         mDatabaseReference.child("chats").child(newChatUID).child("members")
-                .child(mUserID).setValue("true");
+                .child(mUserID).setValue("");
 
         mDatabaseReference.child("chats").child(newChatUID).child("chatId")
                 .setValue(newChatUID);
@@ -457,5 +458,33 @@ public class ChatActivity extends AppCompatActivity {
             mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
                     .removeEventListener(mMessageListener);
         }
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").setValue("false");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").setValue(System.currentTimeMillis());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").setValue("false");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").setValue(System.currentTimeMillis());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").setValue("true");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").setValue(System.currentTimeMillis());
     }
 }
