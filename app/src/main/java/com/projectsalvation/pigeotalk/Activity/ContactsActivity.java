@@ -156,6 +156,9 @@ public class ContactsActivity extends AppCompatActivity {
                                         .child("contacts")
                                         .child(entry.getValue()).setValue(contact.getDisplaydName());
 
+                                mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                        .child(entry.getValue()).setValue(contact.getDisplaydName());
+
                                 mFoundRegisteredContacts.put(entry.getValue(), contact.getDisplaydName());
 
                                 // Found contact, hide no contact info

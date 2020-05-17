@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/default_chat_bg"
+    tools:context=".Activity.GroupChatActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/a_group_chat_abl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/a_group_chat_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:contentInsetStart="0dp"
+            android:contentInsetLeft="0dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:titleTextAppearance="@style/ToolbarChatTitleCustomFontStyle"
+            app:titleTextColor="@color/white">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/a_group_chat_civ_photo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/default_profile_picture" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/a_group_chat_tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tolunay"
+                    android:textColor="@color/white"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/a_group_chat_tv_members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="You, Dean, Sam, Bobby, Ellen"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    tools:visibility="gone" />
+            </LinearLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/a_group_chat_rv_messages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:paddingBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@id/a_group_chat_ll_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/a_group_chat_abl">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:id="@+id/a_group_chat_ll_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/a_group_chat_cv_footer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0.8"
+            android:elevation="2dp"
+            android:orientation="horizontal"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="22dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/a_group_chat_chip_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_gravity="bottom"
+                    app:chipBackgroundColor="@android:color/transparent"
+                    app:chipEndPadding="4dp"
+                    app:chipIcon="@drawable/ic_smile_24dp"
+                    app:chipIconSize="24dp"
+                    app:chipStartPadding="4dp"
+                    app:textEndPadding="0dp"
+                    app:textStartPadding="0dp" />
+
+                <EditText
+                    android:id="@+id/a_group_chat_et_message"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="6"
+                    android:autofillHints=""
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="@string/text_type_a_message"
+                    android:inputType="textMultiLine|text"
+                    android:maxHeight="156dp"
+                    android:padding="4dp"
+                    android:singleLine="false" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/a_group_chat_chip_attachment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="-4dp"
+                    android:layout_marginEnd="0dp"
+                    android:rotation="320"
+                    app:chipBackgroundColor="@android:color/transparent"
+                    app:chipEndPadding="4dp"
+                    app:chipIcon="@drawable/ic_attach_file_black_24dp"
+                    app:chipIconSize="24dp"
+                    app:chipStartPadding="4dp"
+                    app:textEndPadding="0dp"
+                    app:textStartPadding="0dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/a_group_chat_chip_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginEnd="6dp"
+                    app:chipBackgroundColor="@android:color/transparent"
+                    app:chipEndPadding="4dp"
+                    app:chipIcon="@drawable/ic_camera_alt_white_24dp"
+                    app:chipIconSize="24dp"
+                    app:chipIconTint="#666666"
+                    app:chipStartPadding="4dp"
+                    app:textEndPadding="0dp"
+                    app:textStartPadding="0dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/a_group_chat_chip_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            app:chipBackgroundColor="@color/colorPrimary"
+            app:chipEndPadding="8dp"
+            app:chipIcon="@drawable/ic_send_black_24dp"
+            app:chipIconSize="28dp"
+            app:chipMinHeight="50dp"
+            app:chipStartPadding="12dp"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

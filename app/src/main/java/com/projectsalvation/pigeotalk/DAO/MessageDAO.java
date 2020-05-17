@@ -31,6 +31,20 @@ public class MessageDAO {
         this.chatId = chatId;
     }
 
+    public MessageDAO(String message, String messageType,
+                      String timestamp,
+                      String sender, String messageId,
+                      String isRead, String seenAt, String chatId) {
+        this.message = message;
+        this.messageType = messageType;
+        this.timestamp = timestamp;
+        this.sender = sender;
+        this.messageId = messageId;
+        this.isRead = isRead;
+        this.seenAt = seenAt;
+        this.chatId = chatId;
+    }
+
     public String getMessage() {
         return message;
     }

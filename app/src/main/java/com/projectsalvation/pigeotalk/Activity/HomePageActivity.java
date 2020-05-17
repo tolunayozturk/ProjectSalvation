@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -96,7 +99,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         viewPagerAdapter.addFragment(cameraFragment, getString(R.string.EMPTY_STRING));
         viewPagerAdapter.addFragment(chatsFragment, getString(R.string.title_chats));
-        viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_status));
+        viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_groups));
         viewPagerAdapter.addFragment(callsFragment, getString(R.string.title_calls));
         // endregion
 
@@ -183,9 +186,65 @@ public class HomePageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.a_home_page_menuItem_new_group:
+                Intent i = new Intent(HomePageActivity.this, NewGroupActivity.class);
+                startActivity(i);
+                break;
+            case R.id.a_home_page_menuItem_join_group:
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setMessage("Paste the ID of the group you want to join.");
+
+                // Set an EditText view to get user input
+                final EditText input = new EditText(this);
+                input.requestFocus();
+                alert.setView(input);
+
+                alert.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        mDatabaseReference.child("groups").addListenerForSingleValueEvent(
+                                new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.hasChild(input.getText().toString())) {
+                                            mDatabaseReference.child("groups").child(input.getText().toString())
+                                                    .child("members").child(mFirebaseAuth.getUid()).setValue("");
+
+                                            mDatabaseReference.child("user_groups").child(mFirebaseAuth.getUid())
+                                                    .child(input.getText().toString()).setValue("");
+
+                                            Intent i = new Intent(HomePageActivity.this, GroupChatActivity.class);
+                                            i.putExtra("groupID", input.getText().toString());
+                                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(i);
+
+                                            return;
+                                        } else {
+                                            Snackbar.make(a_home_page_toolbar,
+                                                    "There is no group with that ID!",
+                                                    BaseTransientBottomBar.LENGTH_LONG)
+                                                    .show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                }
+                        );
+
+                    }
+                });
+
+                alert.setNegativeButton(R.string.action_not_now, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
                 break;
             case R.id.a_home_page_menuItem_settings:
-                Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
+                i = new Intent(HomePageActivity.this, SettingsActivity.class);
                 startActivity(i);
                 break;
         }
@@ -203,13 +262,12 @@ public class HomePageActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Intent i = new Intent(HomePageActivity.this, ContactsActivity.class);
                     startActivity(i);
-                } else {
-                    // TODO: Start new message activity or force contacts?
                 }
                 break;
         }
     }
 
     @Override
-    public void onBackPressed() { }
+    public void onBackPressed() {
+    }
 }

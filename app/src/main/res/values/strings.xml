@@ -12,9 +12,12 @@
     <string name="title_chats">CHATS</string>
     <string name="title_calls">CALLS</string>
     <string name="title_status">STATUS</string>
+    <string name="title_groups">GROUPS</string>
 
     <string name="title_settings">Settings</string>
     <string name="title_select_contact">Select contact</string>
+    <string name="title_select_participants">Select participants</string>
+    <string name="title_create_new_group">Create a new group</string>
 
     <string name="hint_example_phone_number">E.g. 555 555 1234</string>
     <string name="hint_country_code">+0</string>
@@ -46,6 +49,7 @@
     <string name="text_profile_info">Profile Info</string>
     <string name="text_provide_name_and_photo">Please provide your name and an optional profile photo</string>
     <string name="text_user_name_cannot_be_empty">Please type your name before continuing with registration.</string>
+    <string name="text_group_name_cannot_be_empty">Please provide a group name.</string>
 
     <string name="text_take_a_photo">Take a photo</string>
     <string name="text_choose_from_gallery">Choose from Photo Library</string>
@@ -81,4 +85,7 @@
 
     <string name="text_online">online</string>
     <string name="text_last_seen">last seen %1$s</string>
+
+    <string name="text_provide_group_name">Provide a group name and optional group photo</string>
+    <string name="text_type_your_group_name_here">Type your group name here</string>
 </resources>

@@ -435,10 +435,6 @@ public class ChatActivity extends AppCompatActivity {
                 finish();
             case R.id.a_chat_menuItem_contact_info:
                 break;
-            case R.id.a_chat_menuItem_voice_call:
-                break;
-            case R.id.a_chat_menuItem_video_call:
-                break;
         }
 
         return super.onOptionsItemSelected(item);

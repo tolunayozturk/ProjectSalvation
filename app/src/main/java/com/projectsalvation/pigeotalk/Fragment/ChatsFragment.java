@@ -27,6 +27,8 @@ import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import static android.icu.util.ULocale.getName;
 
@@ -79,11 +81,16 @@ public class ChatsFragment extends Fragment {
     private void loadChats() {
         mChatDAOS.clear();
         f_chats_rv.removeAllViewsInLayout();
+
         mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         for (DataSnapshot chat : dataSnapshot.getChildren()) {
+                            if (chat == null) {
+                                return;
+                            }
+
                             final ChatDAO chatDAO = new ChatDAO(null,
                                     null,
                                     null,
@@ -128,10 +135,20 @@ public class ChatsFragment extends Fragment {
 
                             Log.d(TAG, "updateUI - Add item to RV");
                             mChatDAOS.add(chatDAO);
+                            Collections.sort(mChatDAOS, new Comparator<ChatDAO>() {
+                                @Override
+                                public int compare(ChatDAO o1, ChatDAO o2) {
+                                    return Long.valueOf(o2.getTimestamp()).compareTo(Long.valueOf(o1.getTimestamp()));
+                                }
+                            });
                             mChatListRVAdapter.notifyDataSetChanged();
 
-                            listenNewMessages(chatDAO.getChatId());
+                            if (isFirstTime) {
+                                listenNewMessages(chatDAO.getChatId());
+                            }
                         }
+
+                        isFirstTime = false;
                     }
 
                     @Override
@@ -151,7 +168,18 @@ public class ChatsFragment extends Fragment {
 
                             Log.d(TAG, "updateDisplayName - DisplayName: " + chatDAO.getName());
                         } else {
-                            // TODO: If user is not in the contact list, get it's PT name
+                            mDatabaseReference.child("users").child(userID)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            chatDAO.setName(dataSnapshot.child("name").getValue().toString());
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
                         }
 
 
@@ -164,7 +192,7 @@ public class ChatsFragment extends Fragment {
                 });
     }
 
-    private void updatePhoto(final ChatDAO chatDAO, String userID) {
+    private void updatePhoto(final ChatDAO chatDAO, final String userID) {
         mDatabaseReference.child("users").child(userID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -186,7 +214,6 @@ public class ChatsFragment extends Fragment {
         mNewMessageListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Log.d(TAG, "onChildAdded: " + s);
             }
 
             @Override
@@ -194,9 +221,6 @@ public class ChatsFragment extends Fragment {
                 loadChats();
 
                 Log.d(TAG, "onChildChanged: " + s);
-
-                mDatabaseReference.child("chats").child(chatID)
-                        .removeEventListener(mNewMessageListener);
             }
 
             @Override

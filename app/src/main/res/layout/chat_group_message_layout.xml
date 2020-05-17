@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/l_chat_messages_ll"
+    android:id="@+id/l_chat_group_messages_ll"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="4dp">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/l_chat_messages_cv"
+        android:id="@+id/l_chat_group_messages_cv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/white"
@@ -18,15 +18,25 @@
         app:cardMaxElevation="0dp">
 
         <LinearLayout
-            android:id="@+id/l_chat_messages_ll_child"
+            android:id="@+id/l_chat_group_messages_ll_child"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="4dp">
 
+            <TextView
+                android:id="@+id/l_chat_group_message_tv_sender_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/helveticaneue_it"
+                android:padding="2dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="You" />
+
             <Button
-                android:id="@+id/l_chat_message_btn_voice_attachment"
+                android:id="@+id/l_chat_group_message_btn_voice_attachment"
                 style="@style/Widget.App.Button.IconOnly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -42,14 +52,14 @@
                 tools:visibility="gone" />
 
             <FrameLayout
-                android:id="@+id/l_chat_message_fl"
+                android:id="@+id/l_chat_group_message_fl"
                 android:layout_width="296dp"
                 android:layout_height="296dp"
                 android:layout_gravity="center"
                 tools:visibility="gone">
 
                 <ImageView
-                    android:id="@+id/l_chat_message_iv_image_attachment"
+                    android:id="@+id/l_chat_group_message_iv_image_attachment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:adjustViewBounds="true"
@@ -58,7 +68,7 @@
                     tools:srcCompat="@drawable/default_profile_picture" />
 
                 <Button
-                    android:id="@+id/l_chat_message_btn_video_play"
+                    android:id="@+id/l_chat_group_message_btn_video_play"
                     style="@style/Widget.App.Button.IconOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -71,7 +81,7 @@
             </FrameLayout>
 
             <TextView
-                android:id="@+id/l_chat_message_tv_message"
+                android:id="@+id/l_chat_group_message_tv_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -90,16 +100,16 @@
                 tools:text="Lemme out" />
 
             <TextView
-                android:id="@+id/l_chat_message_tv_timestamp"
+                android:id="@+id/l_chat_group_message_tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginBottom="2dp"
                 android:drawableEnd="@drawable/ic_checkmark_24dp"
                 android:drawablePadding="4dp"
                 android:drawableTint="@color/message_time_color"
-                android:gravity="bottom|end"
                 android:minWidth="48dp"
                 android:textColor="@color/message_time_color"
                 android:textSize="12sp"
