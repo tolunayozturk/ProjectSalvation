@@ -10,14 +10,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.projectsalvation.pigeotalk.Activity.ChatActivity;
 import com.projectsalvation.pigeotalk.DAO.ChatDAO;
+import com.projectsalvation.pigeotalk.Fragment.ChatsFragment;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -63,7 +68,6 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
                 .into(newHolder.l_chats_list_civ_photo, new Callback() {
                     @Override
                     public void onSuccess() {
-
                     }
 
                     @Override
@@ -94,7 +98,12 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         }
 
         newHolder.l_chats_list_tv_time.setText(time);
-        newHolder.l_chats_list_chip_mute.setVisibility(View.GONE);
+
+        if (chatDAO.getIsMuted().equals("false")) {
+            newHolder.l_chats_list_chip_mute.setVisibility(View.GONE);
+        } else {
+            newHolder.l_chats_list_chip_mute.setVisibility(View.VISIBLE);
+        }
 
         newHolder.l_chats_list_rl.setOnClickListener(new View.OnClickListener() {
             @Override

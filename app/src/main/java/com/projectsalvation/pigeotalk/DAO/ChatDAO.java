@@ -56,7 +56,7 @@ public class ChatDAO {
         return lastMessage;
     }
 
-    public void setLastMessageId(String lastMessage) {
+    public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
     }
 
