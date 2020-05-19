@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager.widget.ViewPager;
 
@@ -30,10 +28,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
-import com.projectsalvation.pigeotalk.Fragment.CallsFragment;
+import com.projectsalvation.pigeotalk.Fragment.GroupsFragment;
 import com.projectsalvation.pigeotalk.Fragment.CameraFragment;
 import com.projectsalvation.pigeotalk.Fragment.ChatsFragment;
 import com.projectsalvation.pigeotalk.Fragment.StatusFragment;
@@ -91,7 +88,7 @@ public class HomePageActivity extends AppCompatActivity {
         CameraFragment cameraFragment = new CameraFragment();
         ChatsFragment chatsFragment = new ChatsFragment();
         StatusFragment statusFragment = new StatusFragment();
-        CallsFragment callsFragment = new CallsFragment();
+        GroupsFragment groupsFragment = new GroupsFragment();
 
         a_home_page_tab_layout.setupWithViewPager(a_home_page_viewpager);
 
@@ -99,8 +96,8 @@ public class HomePageActivity extends AppCompatActivity {
 
         viewPagerAdapter.addFragment(cameraFragment, getString(R.string.EMPTY_STRING));
         viewPagerAdapter.addFragment(chatsFragment, getString(R.string.title_chats));
-        viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_groups));
-        viewPagerAdapter.addFragment(callsFragment, getString(R.string.title_calls));
+        viewPagerAdapter.addFragment(groupsFragment, getString(R.string.title_groups));
+        viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_status));
         // endregion
 
         a_home_page_viewpager.setAdapter(viewPagerAdapter);

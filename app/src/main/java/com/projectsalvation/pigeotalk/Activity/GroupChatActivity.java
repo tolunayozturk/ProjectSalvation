@@ -2,11 +2,17 @@ package com.projectsalvation.pigeotalk.Activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -20,6 +26,7 @@ import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -121,10 +128,34 @@ public class GroupChatActivity extends AppCompatActivity {
         a_group_chat_rv_messages.setPadding(0, dpAsPixels, 0, dpAsPixels);
         // endregion
 
-        a_group_chat_tv_members.setSelected(true);
+        // TODO:
+        // a_group_chat_tv_members.setSelected(true);
 
         Intent i = getIntent();
         mGroupID = i.getExtras().getString("groupID");
+
+        MaterialAlertDialogBuilder alertDialogBuilder =
+                new MaterialAlertDialogBuilder(GroupChatActivity.this)
+                        .setMessage(HtmlCompat.fromHtml(getString(R.string.text_share_group_id, mGroupID),
+                                HtmlCompat.FROM_HTML_MODE_LEGACY))
+                        .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setNegativeButton("COPY", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ClipboardManager clipboard = (ClipboardManager)
+                                        getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("GroupID", mGroupID);
+                                clipboard.setPrimaryClip(clip);
+                            }
+                        });
+
+        AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
+        permissionExplanationDialog.show();
 
         if (i.hasExtra("photoUrl")) {
             mGroupPhotoUrl = i.getExtras().getString("photoUrl");
@@ -174,7 +205,6 @@ public class GroupChatActivity extends AppCompatActivity {
                         }
                     });
         }
-
 
 
         // region Send button onClick()

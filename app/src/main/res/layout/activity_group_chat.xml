@@ -43,7 +43,6 @@
                     android:id="@+id/a_group_chat_tv_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tolunay"
                     android:textColor="@color/white"
                     android:textSize="18sp" />
 
@@ -55,7 +54,6 @@
                     android:marqueeRepeatLimit="marquee_forever"
                     android:scrollHorizontally="true"
                     android:singleLine="true"
-                    android:text="You, Dean, Sam, Bobby, Ellen"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     tools:visibility="gone" />

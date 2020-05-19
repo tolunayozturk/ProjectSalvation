@@ -147,28 +147,6 @@ public class NewGroupActivity extends AppCompatActivity {
 
                 final String newGroupUID = UUID.randomUUID().toString().replace("-", "");
 
-                MaterialAlertDialogBuilder alertDialogBuilder =
-                        new MaterialAlertDialogBuilder(NewGroupActivity.this)
-                                .setMessage("Share this code with your friends so they can join your group!")
-                                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                })
-                                .setNegativeButton("COPY", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        ClipboardManager clipboard = (ClipboardManager)
-                                                getSystemService(Context.CLIPBOARD_SERVICE);
-                                        ClipData clip = ClipData.newPlainText("GroupID", newGroupUID);
-                                        clipboard.setPrimaryClip(clip);
-                                    }
-                                });
-
-                AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
-                permissionExplanationDialog.show();
-
                 mDatabaseReference.child("groups").child(newGroupUID).child("members")
                         .child(mFirebaseAuth.getUid()).setValue("");
 
@@ -210,7 +188,7 @@ public class NewGroupActivity extends AppCompatActivity {
                                         Intent i = new Intent(NewGroupActivity.this, GroupChatActivity.class);
                                         i.putExtra("groupID", newGroupUID);
                                         i.putExtra("photoUrl", downloadUrl);
-                                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         startActivity(i);
 
                                     }

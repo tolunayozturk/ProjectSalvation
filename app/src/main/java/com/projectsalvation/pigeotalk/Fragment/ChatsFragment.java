@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -69,16 +70,24 @@ public class ChatsFragment extends Fragment {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mChatDAOS = new ArrayList<>();
 
-        f_chats_rv.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext(),
-                LinearLayoutManager.VERTICAL, false));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext(),
+                LinearLayoutManager.VERTICAL, false);
+
+        f_chats_rv.setLayoutManager(layoutManager);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(f_chats_rv.getContext(),
+                layoutManager.getOrientation());
+        f_chats_rv.addItemDecoration(dividerItemDecoration);
 
         mChatListRVAdapter = new ChatListRVAdapter(getActivity().getApplicationContext(), mChatDAOS);
         f_chats_rv.setAdapter(mChatListRVAdapter);
 
+        retrieveChats();
+
         return view;
     }
 
-    private void loadChats() {
+    private void retrieveChats() {
         mChatDAOS.clear();
         f_chats_rv.removeAllViewsInLayout();
 
@@ -86,11 +95,7 @@ public class ChatsFragment extends Fragment {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot chat : dataSnapshot.getChildren()) {
-                            if (chat == null) {
-                                return;
-                            }
-
+                        for (final DataSnapshot chat : dataSnapshot.getChildren()) {
                             final ChatDAO chatDAO = new ChatDAO(null,
                                     null,
                                     null,
@@ -106,73 +111,75 @@ public class ChatsFragment extends Fragment {
                             Log.d(TAG, "onDataChange - ChatID: " + chatDAO.getChatId());
                             Log.d(TAG, "onDataChange - RecipientID " + chatDAO.getUserId());
 
-                            updatePhoto(chatDAO, chatDAO.getUserId());
-                            updateDisplayName(chatDAO, chatDAO.getUserId());
-                            updateUI(chatDAO, chatDAO.getChatId());
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-    }
-
-    private void updateUI(final ChatDAO chatDAO, String chatID) {
-        mDatabaseReference.child("chat_messages").child(chatID).limitToLast(1)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot msgSnapshot : dataSnapshot.getChildren()) {
-                            chatDAO.setLastMessage(msgSnapshot.child("message").getValue().toString());
-                            chatDAO.setTimestamp(msgSnapshot.child("timestamp").getValue().toString());
-                            chatDAO.setUnreadMessageCount("0");
-                            chatDAO.setIsMuted("false");
-
-                            Log.d(TAG, "updateUI - LastMessage: " + chatDAO.getLastMessage());
-                            Log.d(TAG, "updateUI - Timestamp: " + chatDAO.getTimestamp());
-
-                            Log.d(TAG, "updateUI - Add item to RV");
-                            mChatDAOS.add(chatDAO);
-                            Collections.sort(mChatDAOS, new Comparator<ChatDAO>() {
-                                @Override
-                                public int compare(ChatDAO o1, ChatDAO o2) {
-                                    return Long.valueOf(o2.getTimestamp()).compareTo(Long.valueOf(o1.getTimestamp()));
-                                }
-                            });
-                            mChatListRVAdapter.notifyDataSetChanged();
-
-                            if (isFirstTime) {
-                                listenNewMessages(chatDAO.getChatId());
-                            }
-                        }
-
-                        isFirstTime = false;
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-    }
-
-    private void updateDisplayName(final ChatDAO chatDAO, final String userID) {
-        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("contacts")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.hasChild(userID)) {
-                            chatDAO.setName(dataSnapshot.child(userID).getValue().toString());
-
-                            Log.d(TAG, "updateDisplayName - DisplayName: " + chatDAO.getName());
-                        } else {
-                            mDatabaseReference.child("users").child(userID)
+                            mDatabaseReference.child("users").child(chatDAO.getUserId())
                                     .addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            chatDAO.setName(dataSnapshot.child("name").getValue().toString());
+                                        public void onDataChange(@NonNull final DataSnapshot userData) {
+                                            chatDAO.setPhotoUrl(userData.child("profile_photo_url")
+                                                    .getValue().toString());
+
+                                            Log.d(TAG, "onDataChange - " + chatDAO.getPhotoUrl());
+
+                                            mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            if (dataSnapshot.hasChild(chatDAO.getUserId())) {
+                                                                chatDAO.setName(dataSnapshot.child(chatDAO
+                                                                        .getUserId()).getValue().toString());
+                                                            } else {
+                                                                chatDAO.setName(userData.child("phone_number").getValue().toString());
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+
+                                            mDatabaseReference.child("chat_messages").child(chatDAO.getChatId())
+                                                    .limitToLast(1)
+                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            for (DataSnapshot msg : dataSnapshot.getChildren()) {
+                                                                chatDAO.setLastMessage(msg.child("message")
+                                                                        .getValue().toString());
+
+                                                                chatDAO.setTimestamp(msg.child("timestamp")
+                                                                        .getValue().toString());
+
+                                                                mDatabaseReference.child("user_chats_unread_messages")
+                                                                        .child(mFirebaseAuth.getUid())
+                                                                        .child(chatDAO.getChatId())
+                                                                        .addListenerForSingleValueEvent(
+                                                                                new ValueEventListener() {
+                                                                                    @Override
+                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                        chatDAO.setUnreadMessageCount(
+                                                                                                String.valueOf(dataSnapshot.getChildrenCount()));
+
+                                                                                        chatDAO.setIsMuted("false");
+
+                                                                                        mChatDAOS.add(0, chatDAO);
+                                                                                        mChatListRVAdapter.notifyDataSetChanged();
+                                                                                    }
+
+                                                                                    @Override
+                                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                    }
+                                                                                }
+                                                                        );
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
                                         }
 
                                         @Override
@@ -181,8 +188,6 @@ public class ChatsFragment extends Fragment {
                                         }
                                     });
                         }
-
-
                     }
 
                     @Override
@@ -190,64 +195,10 @@ public class ChatsFragment extends Fragment {
 
                     }
                 });
-    }
-
-    private void updatePhoto(final ChatDAO chatDAO, final String userID) {
-        mDatabaseReference.child("users").child(userID)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        chatDAO.setPhotoUrl(
-                                dataSnapshot.child("profile_photo_url").getValue().toString());
-
-                        Log.d(TAG, "updatePhoto - PhotoUrl: " + chatDAO.getPhotoUrl());
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-    }
-
-    private void listenNewMessages(final String chatID) {
-        mNewMessageListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                loadChats();
-
-                Log.d(TAG, "onChildChanged: " + s);
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-
-        Log.d(TAG, "listenNewMessages: " + chatID);
-        mDatabaseReference.child("chats").child(chatID)
-                .addChildEventListener(mNewMessageListener);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        loadChats();
     }
 }

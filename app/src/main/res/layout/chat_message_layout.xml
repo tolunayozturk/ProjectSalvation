@@ -48,6 +48,15 @@
                 android:layout_gravity="center"
                 tools:visibility="gone">
 
+                <ProgressBar
+                    android:id="@+id/l_chat_message_pb"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:progressTint="@color/colorPrimary"
+                    tools:visibility="gone" />
+
                 <ImageView
                     android:id="@+id/l_chat_message_iv_image_attachment"
                     android:layout_width="match_parent"
@@ -55,7 +64,8 @@
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/EMPTY_STRING"
                     android:scaleType="centerCrop"
-                    tools:srcCompat="@drawable/default_profile_picture" />
+                    tools:srcCompat="@drawable/default_profile_picture"
+                    tools:visibility="gone" />
 
                 <Button
                     android:id="@+id/l_chat_message_btn_video_play"

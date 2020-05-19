@@ -153,6 +153,21 @@ public class ChatActivity extends AppCompatActivity {
 
             retrieveMessages(mChatID);
             listenMessages(mChatID);
+
+            mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                        unreadMsg.getRef().removeValue();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
 
         mUserID = i.getExtras().getString("userID");
@@ -190,6 +205,21 @@ public class ChatActivity extends AppCompatActivity {
 
                             retrieveMessages(mChatID);
                             listenMessages(mChatID);
+
+                            mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                                        unreadMsg.getRef().removeValue();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
                         }
                     }
                 }
@@ -245,10 +275,28 @@ public class ChatActivity extends AppCompatActivity {
                 mDatabaseReference.child("chats").child(mChatID)
                         .child("last_message_id").setValue(newMessageID);
 
+                mDatabaseReference.child("user_chats_unread_messages").child(mUserID)
+                        .child(mChatID).child(newMessageID).setValue("");
+
                 if (mMessageListener == null) {
                     Log.d(TAG, "MessageListener is null!");
                     retrieveMessages(mChatID);
                     listenMessages(mChatID);
+
+                    mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                            .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                                unreadMsg.getRef().removeValue();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
         });
@@ -258,6 +306,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // TODO: Attachments
+            }
+        });
+
+        a_chat_chip_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
             }
         });
 
@@ -331,8 +386,10 @@ public class ChatActivity extends AppCompatActivity {
 
                 if (messageDAO.getRecipient().equals(mFirebaseAuth.getUid())) {
                     if (dataSnapshot.child("isRead").getValue().toString().equals("false")) {
+
                         messageDAO.setIsRead("true");
                         messageDAO.setSeenAt(Long.toString(System.currentTimeMillis()));
+
                         dataSnapshot.getRef().child("isRead").setValue("true");
                         dataSnapshot.getRef().child("seenAt").setValue(Long.toString(System.currentTimeMillis()));
                     }
@@ -454,17 +511,6 @@ public class ChatActivity extends AppCompatActivity {
             mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
                     .removeEventListener(mMessageListener);
         }
-
-        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
-                .child("isOnline").setValue("false");
-
-        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
-                .child("last_seen").setValue(System.currentTimeMillis());
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
                 .child("isOnline").setValue("false");

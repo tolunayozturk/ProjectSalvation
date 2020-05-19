@@ -22,18 +22,47 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:padding="4dp">
 
-            <TextView
-                android:id="@+id/l_chat_group_message_tv_sender_name"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/helveticaneue_it"
-                android:padding="2dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="You" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/l_chat_group_message_tv_sender_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="You" />
+
+                <TextView
+                    android:id="@+id/l_chat_group_message_tv_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:autoLink="all"
+                    android:fontFamily="sans-serif"
+                    android:linksClickable="true"
+                    android:maxWidth="216dp"
+                    android:minWidth="32dp"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="0dp"
+                    android:paddingRight="8dp"
+                    android:text="@{chatMessageVM.iMessage.message}"
+                    android:textColor="@color/message_text_color"
+                    android:textIsSelectable="true"
+                    android:textSize="15sp"
+                    tools:text="Lemme out lemme out this is not a dance" />
+
+            </LinearLayout>
 
             <Button
                 android:id="@+id/l_chat_group_message_btn_voice_attachment"
@@ -81,32 +110,12 @@
             </FrameLayout>
 
             <TextView
-                android:id="@+id/l_chat_group_message_tv_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:autoLink="all"
-                android:fontFamily="sans-serif"
-                android:linksClickable="true"
-                android:maxWidth="216dp"
-                android:minWidth="32dp"
-                android:paddingLeft="8dp"
-                android:paddingTop="0dp"
-                android:paddingRight="8dp"
-                android:text="@{chatMessageVM.iMessage.message}"
-                android:textColor="@color/message_text_color"
-                android:textIsSelectable="true"
-                android:textSize="15sp"
-                tools:text="Lemme out" />
-
-            <TextView
                 android:id="@+id/l_chat_group_message_tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="0dp"
                 android:layout_marginEnd="4dp"
-                android:layout_marginBottom="2dp"
                 android:drawableEnd="@drawable/ic_checkmark_24dp"
                 android:drawablePadding="4dp"
                 android:drawableTint="@color/message_time_color"

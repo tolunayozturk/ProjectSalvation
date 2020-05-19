@@ -1,6 +1,7 @@
 package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,10 +29,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
+import com.projectsalvation.pigeotalk.Utility.Util;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 
 public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRVAdapter.ViewHolder> {
 
@@ -60,6 +63,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
+        final Random rnd = new Random();
 
         if (messageDAO.getMessageType().equals("plaintext")) {
             newHolder.l_chat_group_message_fl.setVisibility(View.GONE);
@@ -80,16 +84,27 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.hasChild(messageDAO.getSender())) {
+                                    String uid = messageDAO.getSender();
                                     newHolder.l_chat_group_message_tv_sender_name.setText(
                                             dataSnapshot.child(messageDAO.getSender()).getValue().toString());
+
+                                    newHolder.l_chat_group_message_tv_sender_name.setTextColor(
+                                            Util.ColorFromString(uid));
 
                                 } else {
                                     mDatabaseReference.child("users").child(messageDAO.getSender())
                                             .addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    String phoneNumber = dataSnapshot.child("phone_number").getValue().toString();
+                                                    String name = dataSnapshot.child("name").getValue().toString();
+                                                    String uid = dataSnapshot.child("uid").getValue().toString();
                                                     newHolder.l_chat_group_message_tv_sender_name.setText(
-                                                            dataSnapshot.child("name").getValue().toString());
+                                                            mContext.getString(R.string.text_colored_name, phoneNumber, name)
+                                                    );
+
+                                                    newHolder.l_chat_group_message_tv_sender_name.setTextColor(
+                                                            Util.ColorFromString(uid));
                                                 }
 
                                                 @Override

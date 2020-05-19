@@ -51,6 +51,11 @@
     <string name="text_user_name_cannot_be_empty">Please type your name before continuing with registration.</string>
     <string name="text_group_name_cannot_be_empty">Please provide a group name.</string>
 
+    <string name="text_share_group_id"><![CDATA[Share this code with your friends so they can join your group!
+    <br/><br/><b>%1$s</b><br/>]]></string>
+
+    <string name="text_colored_name">%1$s ~%2$s</string>
+
     <string name="text_take_a_photo">Take a photo</string>
     <string name="text_choose_from_gallery">Choose from Photo Library</string>
 

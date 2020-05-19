@@ -29,7 +29,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -65,22 +67,17 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         Picasso.get().load(chatDAO.getPhotoUrl())
                 .fit()
                 .centerCrop()
-                .into(newHolder.l_chats_list_civ_photo, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        Picasso.get().load(chatDAO.getPhotoUrl())
-                                .fit()
-                                .centerCrop()
-                                .into(newHolder.l_chats_list_civ_photo);
-                    }
-                });
+                .into(newHolder.l_chats_list_civ_photo);
 
         newHolder.l_chats_list_tv_display_name.setText(chatDAO.getName());
         newHolder.l_chats_list_tv_last_message.setText(chatDAO.getLastMessage());
+
+        if (!chatDAO.getUnreadMessageCount().equals("0")) {
+            newHolder.l_chats_list_chip_new_message_count.setVisibility(View.VISIBLE);
+            newHolder.l_chats_list_chip_new_message_count.setText(chatDAO.getUnreadMessageCount());
+        } else {
+            newHolder.l_chats_list_chip_new_message_count.setVisibility(View.GONE);
+        }
 
         String time = "";
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -123,6 +120,20 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
     @Override
     public int getItemCount() {
         return mChatDAOS.size();
+    }
+
+    public Map<ChatDAO, Integer> getItemFromMessage(String msg) {
+        int i = 0;
+        for (ChatDAO chatDAO : mChatDAOS) {
+            if (chatDAO.getLastMessage().equals(msg)) {
+                Map<ChatDAO, Integer> map = new HashMap<>();
+                map.put(chatDAO, i);
+                return map;
+            }
+            i++;
+        }
+
+        return null;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

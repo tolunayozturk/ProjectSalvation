@@ -2,7 +2,6 @@ package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,7 +25,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 
@@ -66,57 +65,70 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
             newHolder.l_chat_message_fl.setVisibility(View.GONE);
             newHolder.l_chat_message_btn_voice_attachment.setVisibility(View.GONE);
 
+            newHolder.l_chat_message_tv_message.setVisibility(View.VISIBLE);
+
             // If message_type is plaintext, move timestamp to end
-            newHolder.L_chat_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+            newHolder.l_chat_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+        } else if (messageDAO.getMessageType().equals("image")) {
+            newHolder.l_chat_message_tv_message.setVisibility(View.GONE);
+            newHolder.l_chat_message_btn_voice_attachment.setVisibility(View.GONE);
+            newHolder.l_chat_message_btn_video_play.setVisibility(View.GONE);
 
-            // If self message, move it to end and set its bg color
-            if (messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
-                newHolder.l_chat_messages_ll.setGravity(Gravity.END);
-                newHolder.l_chat_messages_cv.setCardBackgroundColor(
-                        ContextCompat.getColor(mContext, R.color.message_bg));
-            }
+            newHolder.l_chat_message_fl.setVisibility(View.VISIBLE);
+            newHolder.l_chat_message_iv_image_attachment.setVisibility(View.VISIBLE);
+            newHolder.l_chat_message_pb.setVisibility(View.VISIBLE);
 
-            newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
-
-            String time = "";
-            Calendar calendar = Calendar.getInstance(Locale.getDefault());
-            calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
-
-            int ampm = calendar.get(Calendar.AM_PM);
-            if (DateFormat.is24HourFormat(mContext)) {
-                time = DateFormat.format("HH:mm", calendar).toString();
-            } else {
-                if (ampm == Calendar.AM) {
-                    time = DateFormat.format("hh:mm", calendar).toString() + " AM";
-                } else if (ampm == Calendar.PM) {
-                    time = DateFormat.format("hh:mm", calendar).toString() + " PM";
-                }
-            }
-
-            newHolder.l_chat_message_tv_timestamp.setText(time);
-
-            // Remove checkmark from recipient
-            if (messageDAO.getRecipient().equals(mFirebaseAuth.getUid())) {
-                holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
-                        null,
-                        null,
-                        null,
-                        null
-                );
-            }
-
-            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())
-                    && messageDAO.getIsRead().equals("true")) {
-                holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
-                        null,
-                        null,
-                        ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
-                        null
-                );
-            }
-
-            listenMessageSeenState(messageDAO, newHolder);
+            // If message_type is image, move timestamp to bottom
+            newHolder.l_chat_messages_ll_child.setOrientation(LinearLayout.VERTICAL);
         }
+
+        // If self message, move it to end and set its bg color
+        if (messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
+            newHolder.l_chat_messages_ll.setGravity(Gravity.END);
+            newHolder.l_chat_messages_cv.setCardBackgroundColor(
+                    ContextCompat.getColor(mContext, R.color.message_bg));
+        }
+
+        newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
+
+        String time = "";
+        Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
+
+        int ampm = calendar.get(Calendar.AM_PM);
+        if (DateFormat.is24HourFormat(mContext)) {
+            time = DateFormat.format("HH:mm", calendar).toString();
+        } else {
+            if (ampm == Calendar.AM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " AM";
+            } else if (ampm == Calendar.PM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+            }
+        }
+
+        newHolder.l_chat_message_tv_timestamp.setText(time);
+
+        // Remove checkmark from recipient
+        if (messageDAO.getRecipient().equals(mFirebaseAuth.getUid())) {
+            holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        if (messageDAO.getSender().equals(mFirebaseAuth.getUid())
+                && messageDAO.getIsRead().equals("true")) {
+            holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                    null,
+                    null,
+                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                    null
+            );
+        }
+
+        listenMessageSeenState(messageDAO, newHolder);
     }
 
     private void listenMessageSeenState(final MessageDAO messageDAO, final ViewHolder holder) {
@@ -177,7 +189,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
         // region Resource Declaration
         LinearLayout l_chat_messages_ll;
-        LinearLayout L_chat_messages_ll_child;
+        LinearLayout l_chat_messages_ll_child;
         CardView l_chat_messages_cv;
         Button l_chat_message_btn_voice_attachment;
         FrameLayout l_chat_message_fl;
@@ -185,14 +197,15 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
         Button l_chat_message_btn_video_play;
         TextView l_chat_message_tv_message;
         TextView l_chat_message_tv_timestamp;
-
+        ProgressBar l_chat_message_pb;
         // endregion
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             // region Resource Assignment
             l_chat_messages_ll = itemView.findViewById(R.id.l_chat_messages_ll);
-            L_chat_messages_ll_child = itemView.findViewById(R.id.l_chat_messages_ll_child);
+            l_chat_messages_ll_child = itemView.findViewById(R.id.l_chat_messages_ll_child);
             l_chat_messages_cv = itemView.findViewById(R.id.l_chat_messages_cv);
             l_chat_message_btn_voice_attachment = itemView.findViewById(R.id.l_chat_message_btn_voice_attachment);
             l_chat_message_fl = itemView.findViewById(R.id.l_chat_message_fl);
@@ -200,6 +213,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
             l_chat_message_btn_video_play = itemView.findViewById(R.id.l_chat_message_btn_video_play);
             l_chat_message_tv_message = itemView.findViewById(R.id.l_chat_message_tv_message);
             l_chat_message_tv_timestamp = itemView.findViewById(R.id.l_chat_message_tv_timestamp);
+            l_chat_message_pb = itemView.findViewById(R.id.l_chat_message_pb);
             // endregion
         }
     }
