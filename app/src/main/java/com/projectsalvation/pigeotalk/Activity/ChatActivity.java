@@ -312,7 +312,7 @@ public class ChatActivity extends AppCompatActivity {
         a_chat_chip_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+
             }
         });
 
@@ -511,9 +511,6 @@ public class ChatActivity extends AppCompatActivity {
             mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
                     .removeEventListener(mMessageListener);
         }
-
-        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
-                .child("isOnline").setValue("false");
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
                 .child("last_seen").setValue(System.currentTimeMillis());

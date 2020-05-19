@@ -45,8 +45,8 @@ public class ChatsFragment extends Fragment {
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
 
-    private ChildEventListener mChatListener;
-    private ChildEventListener mNewMessageListener;
+    private ValueEventListener mChatListener;
+    private ValueEventListener mNewMessageListener;
 
     private ChatListRVAdapter mChatListRVAdapter;
     private ArrayList<ChatDAO> mChatDAOS;
@@ -88,113 +88,121 @@ public class ChatsFragment extends Fragment {
     }
 
     private void retrieveChats() {
-        mChatDAOS.clear();
-        f_chats_rv.removeAllViewsInLayout();
+
+        mNewMessageListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mChatDAOS.clear();
+
+                for (final DataSnapshot chat : dataSnapshot.getChildren()) {
+                    final ChatDAO chatDAO = new ChatDAO(null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null);
+
+                    chatDAO.setChatId(chat.getKey());
+                    chatDAO.setUserId(chat.getValue().toString());
+
+                    Log.d(TAG, "onDataChange - ChatID: " + chatDAO.getChatId());
+                    Log.d(TAG, "onDataChange - RecipientID " + chatDAO.getUserId());
+
+                    mDatabaseReference.child("users").child(chatDAO.getUserId())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull final DataSnapshot userData) {
+                                    chatDAO.setPhotoUrl(userData.child("profile_photo_url")
+                                            .getValue().toString());
+
+                                    Log.d(TAG, "onDataChange - " + chatDAO.getPhotoUrl());
+
+                                    mDatabaseReference.child("chat_messages").child(chatDAO.getChatId())
+                                            .limitToLast(1)
+                                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    for (DataSnapshot msg : dataSnapshot.getChildren()) {
+                                                        chatDAO.setLastMessage(msg.child("message")
+                                                                .getValue().toString());
+
+                                                        chatDAO.setTimestamp(msg.child("timestamp")
+                                                                .getValue().toString());
+
+                                                        mDatabaseReference.child("user_chats_unread_messages")
+                                                                .child(mFirebaseAuth.getUid())
+                                                                .child(chatDAO.getChatId())
+                                                                .addListenerForSingleValueEvent(
+                                                                        new ValueEventListener() {
+                                                                            @Override
+                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                chatDAO.setUnreadMessageCount(
+                                                                                        String.valueOf(dataSnapshot.getChildrenCount()));
+
+                                                                                chatDAO.setIsMuted("false");
+
+                                                                                mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                                                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                            @Override
+                                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                                if (dataSnapshot.hasChild(chatDAO.getUserId())) {
+                                                                                                    String name = dataSnapshot.child(chatDAO
+                                                                                                            .getUserId()).getValue().toString();
+
+                                                                                                    chatDAO.setName(name);
+                                                                                                } else {
+                                                                                                    chatDAO.setName(userData.child("phone_number").getValue().toString());
+                                                                                                }
+
+                                                                                                Log.d(TAG, "onDataChange: " + chatDAO.getName());
+
+                                                                                                mChatDAOS.add(chatDAO);
+                                                                                                mChatListRVAdapter.notifyDataSetChanged();
+                                                                                            }
+
+                                                                                            @Override
+                                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                            }
+                                                                                        });
+
+
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                            }
+                                                                        }
+                                                                );
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
 
         mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (final DataSnapshot chat : dataSnapshot.getChildren()) {
-                            final ChatDAO chatDAO = new ChatDAO(null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null);
-
-                            chatDAO.setChatId(chat.getKey());
-                            chatDAO.setUserId(chat.getValue().toString());
-
-                            Log.d(TAG, "onDataChange - ChatID: " + chatDAO.getChatId());
-                            Log.d(TAG, "onDataChange - RecipientID " + chatDAO.getUserId());
-
-                            mDatabaseReference.child("users").child(chatDAO.getUserId())
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull final DataSnapshot userData) {
-                                            chatDAO.setPhotoUrl(userData.child("profile_photo_url")
-                                                    .getValue().toString());
-
-                                            Log.d(TAG, "onDataChange - " + chatDAO.getPhotoUrl());
-
-                                            mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
-                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                        @Override
-                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                            if (dataSnapshot.hasChild(chatDAO.getUserId())) {
-                                                                chatDAO.setName(dataSnapshot.child(chatDAO
-                                                                        .getUserId()).getValue().toString());
-                                                            } else {
-                                                                chatDAO.setName(userData.child("phone_number").getValue().toString());
-                                                            }
-                                                        }
-
-                                                        @Override
-                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                        }
-                                                    });
-
-                                            mDatabaseReference.child("chat_messages").child(chatDAO.getChatId())
-                                                    .limitToLast(1)
-                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                        @Override
-                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                            for (DataSnapshot msg : dataSnapshot.getChildren()) {
-                                                                chatDAO.setLastMessage(msg.child("message")
-                                                                        .getValue().toString());
-
-                                                                chatDAO.setTimestamp(msg.child("timestamp")
-                                                                        .getValue().toString());
-
-                                                                mDatabaseReference.child("user_chats_unread_messages")
-                                                                        .child(mFirebaseAuth.getUid())
-                                                                        .child(chatDAO.getChatId())
-                                                                        .addListenerForSingleValueEvent(
-                                                                                new ValueEventListener() {
-                                                                                    @Override
-                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                        chatDAO.setUnreadMessageCount(
-                                                                                                String.valueOf(dataSnapshot.getChildrenCount()));
-
-                                                                                        chatDAO.setIsMuted("false");
-
-                                                                                        mChatDAOS.add(0, chatDAO);
-                                                                                        mChatListRVAdapter.notifyDataSetChanged();
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                                                    }
-                                                                                }
-                                                                        );
-                                                            }
-                                                        }
-
-                                                        @Override
-                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                        }
-                                                    });
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+                .addValueEventListener(mNewMessageListener);
     }
 
     @Override
