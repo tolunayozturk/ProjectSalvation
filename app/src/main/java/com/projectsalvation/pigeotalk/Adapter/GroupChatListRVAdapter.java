@@ -71,6 +71,11 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+        Picasso.get().load(groupChatDAO.getPhotoUrl())
+                .fit()
+                .centerCrop()
+                .into(newHolder.l_chats_list_civ_photo);
+
         mNewMessageListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -145,8 +150,6 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
                                     }
                                 });
                     }
-
-
                 } else if (groupChatDAO.getMessageType().equals("system")) {
                     newHolder.l_chats_list_tv_last_message.setText(groupChatDAO.getLastMessage());
                 }
@@ -223,11 +226,6 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
 
         mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
                 .child(groupChatDAO.getChatId()).addChildEventListener(mNewMessageCountListener);
-
-        Picasso.get().load(groupChatDAO.getPhotoUrl())
-                .fit()
-                .centerCrop()
-                .into(newHolder.l_chats_list_civ_photo);
 
         if (groupChatDAO.getIsMuted().equals("false")) {
             newHolder.l_chats_list_chip_mute.setVisibility(View.GONE);

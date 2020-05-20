@@ -71,6 +71,11 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+        Picasso.get().load(chatDAO.getPhotoUrl())
+                .fit()
+                .centerCrop()
+                .into(newHolder.l_chats_list_civ_photo);
+
         mNewMessageListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -180,11 +185,6 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
 
         mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
                 .child(chatDAO.getChatId()).addChildEventListener(mNewMessageCountListener);
-
-        Picasso.get().load(chatDAO.getPhotoUrl())
-                .fit()
-                .centerCrop()
-                .into(newHolder.l_chats_list_civ_photo);
 
         if (chatDAO.getIsMuted().equals("false")) {
             newHolder.l_chats_list_chip_mute.setVisibility(View.GONE);

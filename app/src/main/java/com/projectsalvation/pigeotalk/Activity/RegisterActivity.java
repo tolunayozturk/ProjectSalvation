@@ -1,6 +1,7 @@
 package com.projectsalvation.pigeotalk.Activity;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -43,7 +44,10 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -90,7 +94,6 @@ public class RegisterActivity extends AppCompatActivity {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mStorageReference = FirebaseStorage.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
-
 
         a_register_civ_profile_photo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,19 +167,22 @@ public class RegisterActivity extends AppCompatActivity {
                 // region Upload user profile photo and get its download url
                 // TODO: Upload the uncompressed photo?
 
-                // Because putBytes() accepts a byte[], it requires our app
-                // to hold the entire contents of a file in memory at once.
-                // Consider using putStream() or putFile() to use less memory.
-                a_register_civ_profile_photo.setDrawingCacheEnabled(true);
-                a_register_civ_profile_photo.buildDrawingCache();
-                Bitmap bitmap = ((BitmapDrawable) a_register_civ_profile_photo.getDrawable()).getBitmap();
+                if (mProfilePhotoUri == null) {
+                    mProfilePhotoUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+                            "://" + getResources().getResourcePackageName(R.drawable.default_profile_picture)
+                            + '/' + getResources().getResourceTypeName(R.drawable.default_profile_picture) + '/' +
+                            getResources().getResourceEntryName(R.drawable.default_profile_picture));
+                }
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] data = baos.toByteArray();
+                InputStream stream = null;
+                try {
+                    stream = getContentResolver().openInputStream(mProfilePhotoUri);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
 
                 UploadTask uploadTask = mStorageReference.child(mFirebaseAuth.getUid()
-                        + "/pp.jpeg").putBytes(data);
+                        + "/pp.jpeg").putStream(stream);
 
                 uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -348,8 +354,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (mProfilePhotoUri != null) {
                         Picasso.get().load(mProfilePhotoUri).noFade()
-                                .fit()
-                                .centerInside()
                                 .into(a_register_civ_profile_photo);
                     } else {
                         Snackbar.make(a_register_civ_profile_photo,
@@ -367,8 +371,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (mProfilePhotoUri != null) {
                         Picasso.get().load(mProfilePhotoUri).noFade()
-                                .fit()
-                                .centerInside()
                                 .into(a_register_civ_profile_photo);
                     } else {
                         Snackbar.make(a_register_civ_profile_photo,
