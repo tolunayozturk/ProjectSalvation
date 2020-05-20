@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -63,106 +64,141 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
-        final Random rnd = new Random();
 
         if (messageDAO.getMessageType().equals("plaintext")) {
             newHolder.l_chat_group_message_fl.setVisibility(View.GONE);
             newHolder.l_chat_group_message_btn_voice_attachment.setVisibility(View.GONE);
 
-            // If self message, move it to end and set its bg color
-            if (messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
-                newHolder.l_chat_group_messages_ll.setGravity(Gravity.END);
-                newHolder.l_chat_group_messages_cv.setCardBackgroundColor(
-                        ContextCompat.getColor(mContext, R.color.message_bg));
-            }
+            newHolder.l_chat_group_message_tv_message.setVisibility(View.VISIBLE);
 
-            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
-                newHolder.l_chat_group_message_tv_sender_name.setText("You");
-            } else {
-                mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.hasChild(messageDAO.getSender())) {
-                                    String uid = messageDAO.getSender();
-                                    newHolder.l_chat_group_message_tv_sender_name.setText(
-                                            dataSnapshot.child(messageDAO.getSender()).getValue().toString());
+            // If message_type is plaintext, move timestamp to end
+            newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+        } else if (messageDAO.getMessageType().equals("image")) {
+            newHolder.l_chat_group_message_tv_message.setVisibility(View.GONE);
+            newHolder.l_chat_group_message_btn_voice_attachment.setVisibility(View.GONE);
+            newHolder.l_chat_group_message_btn_video_play.setVisibility(View.GONE);
 
-                                    newHolder.l_chat_group_message_tv_sender_name.setTextColor(
-                                            Util.ColorFromString(uid));
+            newHolder.l_chat_group_message_fl.setVisibility(View.VISIBLE);
+            newHolder.l_chat_group_message_iv_image_attachment.setVisibility(View.VISIBLE);
+            newHolder.l_chat_group_message_pb.setVisibility(View.VISIBLE);
 
-                                } else {
-                                    mDatabaseReference.child("users").child(messageDAO.getSender())
-                                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                    String phoneNumber = dataSnapshot.child("phone_number").getValue().toString();
-                                                    String name = dataSnapshot.child("name").getValue().toString();
-                                                    String uid = dataSnapshot.child("uid").getValue().toString();
-                                                    newHolder.l_chat_group_message_tv_sender_name.setText(
-                                                            mContext.getString(R.string.text_colored_name, phoneNumber, name)
-                                                    );
+            // If message_type is image, move timestamp to bottom
+            newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.VERTICAL);
+        } else if (messageDAO.getMessageType().equals("system")) {
+            newHolder.l_chat_group_message_fl.setVisibility(View.GONE);
+            newHolder.l_chat_group_message_btn_voice_attachment.setVisibility(View.GONE);
+            newHolder.l_chat_group_message_tv_timestamp.setVisibility(View.GONE);
+            newHolder.l_chat_group_message_tv_sender_name.setVisibility(View.GONE);
 
-                                                    newHolder.l_chat_group_message_tv_sender_name.setTextColor(
-                                                            Util.ColorFromString(uid));
-                                                }
+            newHolder.l_chat_group_message_tv_message.setVisibility(View.VISIBLE);
 
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+            newHolder.l_chat_group_messages_ll.setGravity(Gravity.CENTER);
 
-                                                }
-                                            });
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-            }
+            newHolder.l_chat_group_messages_cv.setCardBackgroundColor(
+                    ContextCompat.getColor(mContext, R.color.colorAccent));
+            newHolder.l_chat_group_message_tv_message.setTextColor(
+                    ContextCompat.getColor(mContext, R.color.white));
 
             newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
 
-            String time = "";
-            Calendar calendar = Calendar.getInstance(Locale.getDefault());
-            calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
-
-            int ampm = calendar.get(Calendar.AM_PM);
-            if (DateFormat.is24HourFormat(mContext)) {
-                time = DateFormat.format("HH:mm", calendar).toString();
-            } else {
-                if (ampm == Calendar.AM) {
-                    time = DateFormat.format("hh:mm", calendar).toString() + " AM";
-                } else if (ampm == Calendar.PM) {
-                    time = DateFormat.format("hh:mm", calendar).toString() + " PM";
-                }
-            }
-
-            newHolder.l_chat_group_message_tv_timestamp.setText(time);
-
-            // Remove checkmark from recipient
-            if (!messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
-                holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
-                        null,
-                        null,
-                        null,
-                        null
-                );
-            }
-
-            if (messageDAO.getSender().equals(mFirebaseAuth.getUid())
-                    && messageDAO.getIsRead().equals("true")) {
-                holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
-                        null,
-                        null,
-                        ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
-                        null
-                );
-            }
-
-            listenMessageSeenState(messageDAO, newHolder);
+            return;
         }
+
+        // If self message, move it to end and set its bg color
+        if (messageDAO.getSender().equals(FirebaseAuth.getInstance().getUid())) {
+            newHolder.l_chat_group_messages_ll.setGravity(Gravity.END);
+            newHolder.l_chat_group_messages_cv.setCardBackgroundColor(
+                    ContextCompat.getColor(mContext, R.color.message_bg));
+        }
+
+        if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
+            newHolder.l_chat_group_message_tv_sender_name.setText("You");
+        } else {
+            mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.hasChild(messageDAO.getSender())) {
+                                String uid = messageDAO.getSender();
+                                newHolder.l_chat_group_message_tv_sender_name.setText(
+                                        dataSnapshot.child(messageDAO.getSender()).getValue().toString());
+
+                                newHolder.l_chat_group_message_tv_sender_name.setTextColor(
+                                        Util.ColorFromString(uid));
+
+                            } else {
+                                mDatabaseReference.child("users").child(messageDAO.getSender())
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                String phoneNumber = dataSnapshot.child("phone_number").getValue().toString();
+                                                String name = dataSnapshot.child("name").getValue().toString();
+                                                String uid = dataSnapshot.child("uid").getValue().toString();
+                                                // TODO: Maybe append the public name to number?
+                                                newHolder.l_chat_group_message_tv_sender_name.setText(
+                                                        mContext.getString(R.string.text_colored_name, phoneNumber)
+                                                );
+
+                                                newHolder.l_chat_group_message_tv_sender_name.setTextColor(
+                                                        Util.ColorFromString(uid));
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+        }
+
+        newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
+
+        String time = "";
+        Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
+
+        int ampm = calendar.get(Calendar.AM_PM);
+        if (DateFormat.is24HourFormat(mContext)) {
+            time = DateFormat.format("HH:mm", calendar).toString();
+        } else {
+            if (ampm == Calendar.AM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " AM";
+            } else if (ampm == Calendar.PM) {
+                time = DateFormat.format("hh:mm", calendar).toString() + " PM";
+            }
+        }
+
+        newHolder.l_chat_group_message_tv_timestamp.setText(time);
+
+        // Remove checkmark from recipient
+        if (!messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
+            holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        if (messageDAO.getSender().equals(mFirebaseAuth.getUid())
+                && messageDAO.getIsRead().equals("true")) {
+            holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
+                    null,
+                    null,
+                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                    null
+            );
+        }
+
+        listenMessageSeenState(messageDAO, newHolder);
+
     }
 
     private void listenMessageSeenState(final MessageDAO messageDAO, final ViewHolder holder) {
@@ -232,6 +268,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
         TextView l_chat_group_message_tv_message;
         TextView l_chat_group_message_tv_timestamp;
         TextView l_chat_group_message_tv_sender_name;
+        ProgressBar l_chat_group_message_pb;
         // endregion
 
         public ViewHolder(@NonNull View itemView) {
@@ -248,6 +285,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
             l_chat_group_message_tv_message = itemView.findViewById(R.id.l_chat_group_message_tv_message);
             l_chat_group_message_tv_timestamp = itemView.findViewById(R.id.l_chat_group_message_tv_timestamp);
             l_chat_group_message_tv_sender_name = itemView.findViewById(R.id.l_chat_group_message_tv_sender_name);
+            l_chat_group_message_pb = itemView.findViewById(R.id.l_chat_group_message_pb);
             // endregion
         }
     }

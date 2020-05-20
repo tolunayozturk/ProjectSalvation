@@ -52,9 +52,12 @@
     <string name="text_group_name_cannot_be_empty">Please provide a group name.</string>
 
     <string name="text_share_group_id"><![CDATA[Share this code with your friends so they can join your group!
-    <br/><br/><b>%1$s</b><br/>]]></string>
+    <br/><br/><b>%1$s</b><br/><br/>You can find the PigeoID of your group in the group info.]]></string>
 
-    <string name="text_colored_name">%1$s ~%2$s</string>
+    <string name="text_colored_name">%1$s</string>
+
+    <string name="text_paste_the_group_id">Paste here the PigeoID of the group you want to join.</string>
+    <string name="text_invalid_pigeoid">This is not a valid PigeoID.</string>
 
     <string name="text_take_a_photo">Take a photo</string>
     <string name="text_choose_from_gallery">Choose from Photo Library</string>
@@ -87,6 +90,7 @@
     <string name="text_menu_voice_call">Voice Call</string>
     <string name="text_menu_video_Call">Video Call</string>
     <string name="text_menu_contact_info">Contact Info</string>
+    <string name="text_menu_group_info">Group Info</string>
 
     <string name="text_online">online</string>
     <string name="text_last_seen">last seen %1$s</string>

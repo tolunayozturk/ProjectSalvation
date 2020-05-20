@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            app:subtitleTextAppearance="@style/ToolbarSubtitleCustomFontStyle"
+            app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Body2"
             app:title="@string/title_select_contact"
             app:titleTextColor="@color/white" />
 

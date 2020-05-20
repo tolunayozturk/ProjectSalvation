@@ -4,7 +4,6 @@ package com.projectsalvation.pigeotalk.Fragment;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,14 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.Adapter.ChatListRVAdapter;
 import com.projectsalvation.pigeotalk.DAO.ChatDAO;
-import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import static android.icu.util.ULocale.getName;
 
 
 public class ChatsFragment extends Fragment {
@@ -45,13 +38,10 @@ public class ChatsFragment extends Fragment {
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
 
-    private ValueEventListener mChatListener;
     private ValueEventListener mNewMessageListener;
 
     private ChatListRVAdapter mChatListRVAdapter;
     private ArrayList<ChatDAO> mChatDAOS;
-
-    private boolean isFirstTime = true;
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -102,6 +92,7 @@ public class ChatsFragment extends Fragment {
                             null,
                             null,
                             null,
+                            null,
                             null);
 
                     chatDAO.setChatId(chat.getKey());
@@ -126,6 +117,9 @@ public class ChatsFragment extends Fragment {
                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                     for (DataSnapshot msg : dataSnapshot.getChildren()) {
                                                         chatDAO.setLastMessage(msg.child("message")
+                                                                .getValue().toString());
+
+                                                        chatDAO.setMessageType(msg.child("messageType")
                                                                 .getValue().toString());
 
                                                         chatDAO.setTimestamp(msg.child("timestamp")

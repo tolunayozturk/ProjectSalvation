@@ -43,6 +43,41 @@
                     android:textStyle="bold"
                     tools:text="You" />
 
+                <FrameLayout
+                    android:id="@+id/l_chat_group_message_fl"
+                    android:layout_width="296dp"
+                    android:layout_height="296dp"
+                    android:layout_gravity="center"
+                    tools:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/l_chat_group_message_iv_image_attachment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/EMPTY_STRING"
+                        android:scaleType="centerCrop"
+                        tools:srcCompat="@drawable/default_profile_picture" />
+
+                    <ProgressBar
+                        android:id="@+id/l_chat_group_message_pb"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+
+                    <Button
+                        android:id="@+id/l_chat_group_message_btn_video_play"
+                        style="@style/Widget.App.Button.IconOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:icon="@drawable/ic_play_circle_filled_black_24dp"
+                        app:iconSize="48dp"
+                        app:iconTint="#000000" />
+
+                </FrameLayout>
+
                 <TextView
                     android:id="@+id/l_chat_group_message_tv_message"
                     android:layout_width="wrap_content"
@@ -80,46 +115,16 @@
                 tools:text="1:35"
                 tools:visibility="gone" />
 
-            <FrameLayout
-                android:id="@+id/l_chat_group_message_fl"
-                android:layout_width="296dp"
-                android:layout_height="296dp"
-                android:layout_gravity="center"
-                tools:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/l_chat_group_message_iv_image_attachment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/EMPTY_STRING"
-                    android:scaleType="centerCrop"
-                    tools:srcCompat="@drawable/default_profile_picture" />
-
-                <Button
-                    android:id="@+id/l_chat_group_message_btn_video_play"
-                    style="@style/Widget.App.Button.IconOnly"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    app:icon="@drawable/ic_play_circle_filled_black_24dp"
-                    app:iconSize="48dp"
-                    app:iconTint="#000000"
-                    tools:visibility="gone" />
-
-            </FrameLayout>
-
             <TextView
                 android:id="@+id/l_chat_group_message_tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_marginTop="0dp"
                 android:layout_marginEnd="4dp"
-                android:drawableEnd="@drawable/ic_checkmark_24dp"
+                android:drawableEnd="@drawable/ic_singletick_24dp"
                 android:drawablePadding="4dp"
                 android:drawableTint="@color/message_time_color"
-                android:minWidth="48dp"
+                android:minWidth="32dp"
                 android:textColor="@color/message_time_color"
                 android:textSize="12sp"
                 tools:text="11:21 AM" />

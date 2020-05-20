@@ -1,33 +1,34 @@
 package com.projectsalvation.pigeotalk.DAO;
 
-public class ChatDAO {
+public class GroupChatDAO {
 
     private String chatId;
     private String photoUrl;
-    private String name;
+    private String groupName;
     private String lastMessage;
     private String messageType;
     private String timestamp;
     private String unreadMessageCount;
     private String isMuted;
-    private String userId;
+    private String senderId;
 
-    public ChatDAO(String chatId,
-                   String photoUrl,
-                   String name,
-                   String lastMessage,
-                   String messageType, String timestamp,
-                   String unreadMessageCount,
-                   String isMuted, String userId) {
+    public GroupChatDAO(String chatId,
+                        String photoUrl,
+                        String groupName,
+                        String lastMessage,
+                        String messageType, String timestamp,
+                        String unreadMessageCount,
+                        String isMuted,
+                        String senderId) {
         this.chatId = chatId;
         this.photoUrl = photoUrl;
-        this.name = name;
+        this.groupName = groupName;
         this.lastMessage = lastMessage;
         this.messageType = messageType;
         this.timestamp = timestamp;
         this.unreadMessageCount = unreadMessageCount;
         this.isMuted = isMuted;
-        this.userId = userId;
+        this.senderId = senderId;
     }
 
     public String getChatId() {
@@ -46,12 +47,12 @@ public class ChatDAO {
         this.photoUrl = photoUrl;
     }
 
-    public String getName() {
-        return name;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getLastMessage() {
@@ -86,12 +87,12 @@ public class ChatDAO {
         this.isMuted = isMuted;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
     public String getMessageType() {

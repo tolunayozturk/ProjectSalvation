@@ -1,10 +1,14 @@
 package com.projectsalvation.pigeotalk.Activity;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +22,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -42,7 +47,7 @@ import java.util.Objects;
 public class HomePageActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    TabLayout a_home_page_tab_layout;
+    static TabLayout a_home_page_tab_layout;
     MaterialToolbar a_home_page_toolbar;
     ViewPager a_home_page_viewpager;
     FloatingActionButton a_home_page_fab_new_message;
@@ -121,7 +126,7 @@ public class HomePageActivity extends AppCompatActivity {
             }
         });
 
-        // region New message FAB listener
+        // region New message FAB onClick()
         a_home_page_fab_new_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,6 +166,16 @@ public class HomePageActivity extends AppCompatActivity {
         // endregion
     }
 
+    public static void setBadge(int count, int index) {
+        BadgeDrawable badge = a_home_page_tab_layout.getTabAt(index).getOrCreateBadge();
+        badge.setNumber(count);
+        badge.setVisible(true);
+    }
+
+    public static void removeBadge(int index) {
+        a_home_page_tab_layout.getTabAt(index).removeBadge();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home_page_menu, menu);
@@ -176,7 +191,7 @@ public class HomePageActivity extends AppCompatActivity {
                 break;
             case R.id.a_home_page_menuItem_join_group:
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setMessage("Paste the ID of the group you want to join.");
+                alert.setMessage(getString(R.string.text_paste_the_group_id));
 
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
@@ -189,6 +204,15 @@ public class HomePageActivity extends AppCompatActivity {
                                 new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (TextUtils.isEmpty(input.getText()) || input.length() < 32) {
+                                            Snackbar.make(a_home_page_toolbar,
+                                                    getString(R.string.text_invalid_pigeoid),
+                                                    BaseTransientBottomBar.LENGTH_LONG)
+                                                    .show();
+
+                                            return;
+                                        }
+
                                         if (dataSnapshot.hasChild(input.getText().toString())) {
                                             mDatabaseReference.child("groups").child(input.getText().toString())
                                                     .child("members").child(mFirebaseAuth.getUid()).setValue("");
@@ -198,13 +222,13 @@ public class HomePageActivity extends AppCompatActivity {
 
                                             Intent i = new Intent(HomePageActivity.this, GroupChatActivity.class);
                                             i.putExtra("groupID", input.getText().toString());
-                                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             startActivity(i);
 
                                             return;
                                         } else {
                                             Snackbar.make(a_home_page_toolbar,
-                                                    "There is no group with that ID!",
+                                                    getString(R.string.text_invalid_pigeoid),
                                                     BaseTransientBottomBar.LENGTH_LONG)
                                                     .show();
                                         }
@@ -254,6 +278,7 @@ public class HomePageActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        finish();
     }
 
     @Override

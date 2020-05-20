@@ -35,6 +35,7 @@ dependencies {
     implementation 'com.github.mukeshsolanki:android-otpview-pinview:2.1.0'
     implementation 'com.github.Jagerfield:Mobile-Contacts-Library:v1.7'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation("com.squareup.okhttp3:okhttp:4.7.1")
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
 

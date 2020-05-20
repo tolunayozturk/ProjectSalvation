@@ -16,9 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -27,8 +25,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.Activity.ChatActivity;
+import com.projectsalvation.pigeotalk.Activity.GroupChatActivity;
 import com.projectsalvation.pigeotalk.Activity.HomePageActivity;
-import com.projectsalvation.pigeotalk.DAO.ChatDAO;
+import com.projectsalvation.pigeotalk.DAO.GroupChatDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Picasso;
 
@@ -38,22 +37,22 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.ViewHolder> {
+public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRVAdapter.ViewHolder> {
 
-    private static final String TAG = "ChatListRVAdapter";
+    private static final String TAG = "GroupChatListRVAdapter";
 
-    private FirebaseAuth mFirebaseAuth;
     private DatabaseReference mDatabaseReference;
+    private FirebaseAuth mFirebaseAuth;
 
     private ChildEventListener mNewMessageListener;
     private ChildEventListener mNewMessageCountListener;
 
     private Context mContext;
-    private ArrayList<ChatDAO> mChatDAOS;
+    private ArrayList<GroupChatDAO> mGroupChatDAOS;
 
-    public ChatListRVAdapter(Context mContext, ArrayList<ChatDAO> mChatDAOS) {
+    public GroupChatListRVAdapter(Context mContext, ArrayList<GroupChatDAO> mGroupChatDAOS) {
         this.mContext = mContext;
-        this.mChatDAOS = mChatDAOS;
+        this.mGroupChatDAOS = mGroupChatDAOS;
     }
 
     @NonNull
@@ -66,7 +65,8 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final ViewHolder newHolder = holder;
-        final ChatDAO chatDAO = mChatDAOS.get(position);
+        final GroupChatDAO groupChatDAO = mGroupChatDAOS.get(position);
+        Log.d(TAG, "onBindViewHolder: " + "LINE 68");
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -74,8 +74,8 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         mNewMessageListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Log.d(TAG, "onChildAdded: " + s);
-                String lastMessage = dataSnapshot.child("message").getValue().toString();
+                Log.d(TAG, "onChildAdded: " + dataSnapshot.toString());
+                final String lastMessage = dataSnapshot.child("message").getValue().toString();
                 String timestamp = dataSnapshot.child("timestamp").getValue().toString();
 
                 String time = "";
@@ -99,14 +99,57 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
                     newHolder.l_chats_list_tv_time.setText(DateUtils.getRelativeTimeSpanString(Long.parseLong(timestamp)));
                 }
 
+                newHolder.l_chats_list_tv_display_name.setText(groupChatDAO.getGroupName());
 
-                newHolder.l_chats_list_tv_display_name.setText(chatDAO.getName());
+                final StringBuilder message = new StringBuilder();
+                if (groupChatDAO.getMessageType().equals("plaintext")) {
+                    if (groupChatDAO.getSenderId().equals(mFirebaseAuth.getUid())) {
+                        message.setLength(0);
+                        message.append("You: ").append(lastMessage);
+                        newHolder.l_chats_list_tv_last_message.setText(message);
+                    } else {
+                        mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.hasChild(groupChatDAO.getSenderId())) {
+                                            message.setLength(0);
+                                            message.append(dataSnapshot.child(groupChatDAO.getSenderId())
+                                                    .getValue().toString() + ": " + lastMessage);
 
-                if (chatDAO.getMessageType().equals("plaintext")) {
-                    newHolder.l_chats_list_tv_last_message.setText(lastMessage);
+                                            newHolder.l_chats_list_tv_last_message.setText(message);
+                                        } else {
+                                            mDatabaseReference.child("users").child(groupChatDAO.getSenderId())
+                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            message.setLength(0);
+                                                            message.append(dataSnapshot.child("phone_number")
+                                                                    .getValue().toString()).append(": ")
+                                                                    .append(lastMessage);
+
+                                                            newHolder.l_chats_list_tv_last_message.setText(message);
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                    }
+
+
+                } else if (groupChatDAO.getMessageType().equals("system")) {
+                    newHolder.l_chats_list_tv_last_message.setText(groupChatDAO.getLastMessage());
                 }
-
-                // TODO: Handle images and other attachments
             }
 
             @Override
@@ -130,7 +173,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
             }
         };
 
-        mDatabaseReference.child("chat_messages").child(chatDAO.getChatId())
+        mDatabaseReference.child("group_messages").child(groupChatDAO.getChatId())
                 .addChildEventListener(mNewMessageListener);
 
         mNewMessageCountListener = new ChildEventListener() {
@@ -138,13 +181,13 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
                 mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
-                        .child(chatDAO.getChatId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        .child(groupChatDAO.getChatId()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Long unreadMessageCount = dataSnapshot.getChildrenCount();
-                        chatDAO.setUnreadMessageCount(String.valueOf(unreadMessageCount));
+                        groupChatDAO.setUnreadMessageCount(String.valueOf(unreadMessageCount));
                         newHolder.l_chats_list_chip_new_message_count.setText(String.valueOf(unreadMessageCount));
-                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 1);
+                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 2);
                     }
 
                     @Override
@@ -162,9 +205,9 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                chatDAO.setUnreadMessageCount(String.valueOf(dataSnapshot.getChildrenCount()));
-                HomePageActivity.removeBadge(1);
+                groupChatDAO.setUnreadMessageCount(String.valueOf(dataSnapshot.getChildrenCount()));
                 newHolder.l_chats_list_chip_new_message_count.setVisibility(View.GONE);
+                HomePageActivity.removeBadge(2);
             }
 
             @Override
@@ -179,14 +222,14 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         };
 
         mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
-                .child(chatDAO.getChatId()).addChildEventListener(mNewMessageCountListener);
+                .child(groupChatDAO.getChatId()).addChildEventListener(mNewMessageCountListener);
 
-        Picasso.get().load(chatDAO.getPhotoUrl())
+        Picasso.get().load(groupChatDAO.getPhotoUrl())
                 .fit()
                 .centerCrop()
                 .into(newHolder.l_chats_list_civ_photo);
 
-        if (chatDAO.getIsMuted().equals("false")) {
+        if (groupChatDAO.getIsMuted().equals("false")) {
             newHolder.l_chats_list_chip_mute.setVisibility(View.GONE);
         } else {
             newHolder.l_chats_list_chip_mute.setVisibility(View.VISIBLE);
@@ -201,11 +244,11 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
                 newHolder.l_chats_list_tv_time.setTypeface(
                         newHolder.l_chats_list_tv_time.getTypeface(), Typeface.NORMAL);
 
-                Intent i = new Intent(mContext.getApplicationContext(), ChatActivity.class);
-                i.putExtra("userID", chatDAO.getUserId());
-                i.putExtra("contactName", chatDAO.getName());
-                i.putExtra("contactPhotoUrl", chatDAO.getPhotoUrl());
-                i.putExtra("chatID", chatDAO.getChatId());
+                Intent i = new Intent(mContext.getApplicationContext(), GroupChatActivity.class);
+                // TODO: Send members to group chat activity here
+                i.putExtra("groupID", groupChatDAO.getChatId());
+                i.putExtra("photoUrl", groupChatDAO.getPhotoUrl());
+                i.putExtra("groupName", groupChatDAO.getGroupName());
 
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.getApplicationContext().startActivity(i);
@@ -215,7 +258,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return mChatDAOS.size();
+        return mGroupChatDAOS.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -241,7 +284,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
             l_chats_list_tv_time = itemView.findViewById(R.id.l_chats_list_tv_time);
             l_chats_list_chip_mute = itemView.findViewById(R.id.l_chats_list_chip_mute);
             l_chats_list_chip_new_message_count = itemView.findViewById(R.id.l_chats_list_chip_new_message_count);
-            // endregion
+            // ednregion
         }
     }
 }

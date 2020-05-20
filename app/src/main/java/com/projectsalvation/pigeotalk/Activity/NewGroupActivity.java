@@ -185,9 +185,14 @@ public class NewGroupActivity extends AppCompatActivity {
                                         mDatabaseReference.child("groups").child(newGroupUID)
                                                 .child("groupPhotoUrl").setValue(downloadUrl);
 
-                                        Intent i = new Intent(NewGroupActivity.this, GroupChatActivity.class);
+                                        GroupChatActivity.setGroupCreatedMessage(mDatabaseReference,
+                                                mFirebaseAuth, newGroupUID);
+
+                                        Intent i = new Intent(NewGroupActivity.this,
+                                                GroupChatActivity.class);
                                         i.putExtra("groupID", newGroupUID);
                                         i.putExtra("photoUrl", downloadUrl);
+                                        i.putExtra("groupName", a_new_group_et_group_name.getText().toString());
                                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         startActivity(i);
 

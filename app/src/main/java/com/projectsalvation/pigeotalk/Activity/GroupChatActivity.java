@@ -1,14 +1,6 @@
 package com.projectsalvation.pigeotalk.Activity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.core.text.HtmlCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -23,6 +15,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.text.HtmlCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
@@ -43,6 +44,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.MissingFormatArgumentException;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -74,12 +76,14 @@ public class GroupChatActivity extends AppCompatActivity {
 
     private ChildEventListener mMessageListener;
     private ValueEventListener mRetMessageListener;
+    private ChildEventListener mMemberListener;
 
     private ArrayList<MessageDAO> mMessageDAOS;
     private GroupMessagesRVAdapter mGroupMessagesRVAdapter;
 
     private String mGroupID;
     private String mGroupPhotoUrl;
+    private String mGroupName;
 
     private boolean isFirstTime = true;
 
@@ -91,7 +95,7 @@ public class GroupChatActivity extends AppCompatActivity {
         // region Resource Assignment
         a_group_chat_civ_photo = findViewById(R.id.a_group_chat_civ_photo);
         a_group_chat_tv_members = findViewById(R.id.a_group_chat_tv_members);
-        a_group_chat_toolbar = findViewById(R.id.a_new_group_toolbar);
+        a_group_chat_toolbar = findViewById(R.id.a_group_chat_toolbar);
         a_group_chat_rv_messages = findViewById(R.id.a_group_chat_rv_messages);
         a_group_chat_ll_footer = findViewById(R.id.a_group_chat_ll_footer);
         a_group_chat_cv_footer = findViewById(R.id.a_group_chat_cv_footer);
@@ -104,9 +108,12 @@ public class GroupChatActivity extends AppCompatActivity {
         // endregion
 
         setSupportActionBar(a_group_chat_toolbar);
-//
-//        // Enable back button
-//        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        // Enable back button
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        // Remove title from toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -133,29 +140,8 @@ public class GroupChatActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         mGroupID = i.getExtras().getString("groupID");
-
-        MaterialAlertDialogBuilder alertDialogBuilder =
-                new MaterialAlertDialogBuilder(GroupChatActivity.this)
-                        .setMessage(HtmlCompat.fromHtml(getString(R.string.text_share_group_id, mGroupID),
-                                HtmlCompat.FROM_HTML_MODE_LEGACY))
-                        .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        })
-                        .setNegativeButton("COPY", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ClipboardManager clipboard = (ClipboardManager)
-                                        getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("GroupID", mGroupID);
-                                clipboard.setPrimaryClip(clip);
-                            }
-                        });
-
-        AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
-        permissionExplanationDialog.show();
+        retrieveMessages(mGroupID);
+        listenMessages(mGroupID);
 
         if (i.hasExtra("photoUrl")) {
             mGroupPhotoUrl = i.getExtras().getString("photoUrl");
@@ -206,6 +192,43 @@ public class GroupChatActivity extends AppCompatActivity {
                     });
         }
 
+        // region Set toolbar title to group name
+        if (i.hasExtra("groupName")) {
+            mGroupName = i.getExtras().getString("groupName");
+            a_group_chat_tv_name.setText(mGroupName);
+        } else {
+            mDatabaseReference.child("groups").child(mGroupID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            a_group_chat_tv_name.setText(dataSnapshot.child("groupName").getValue().toString());
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+        }
+        // endregion
+
+        mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                .child(mGroupID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                    unreadMsg.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        // TODO: Remove this and find a way to show this once on group creation
+
 
         // region Send button onClick()
         a_group_chat_chip_send.setOnClickListener(new View.OnClickListener() {
@@ -218,7 +241,7 @@ public class GroupChatActivity extends AppCompatActivity {
                 DatabaseReference messageReference = mDatabaseReference
                         .child("group_messages").child(mGroupID);
 
-                String newMessageID = messageReference.push().getKey();
+                final String newMessageID = messageReference.push().getKey();
 
                 MessageDAO newMessage = new MessageDAO(
                         a_group_chat_et_message.getText().toString(),
@@ -238,21 +261,16 @@ public class GroupChatActivity extends AppCompatActivity {
                 mDatabaseReference.child("groups").child(mGroupID)
                         .child("last_message_id").setValue(newMessageID);
 
-                if (mMessageListener == null) {
-                    Log.d(TAG, "MessageListener is null!");
-                    retrieveMessages(mGroupID);
-                    listenMessages(mGroupID);
-                }
-            }
-        });
-        // endregion
-
-        // region Set toolbar title to group name
-        mDatabaseReference.child("groups").child(mGroupID)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabaseReference.child("groups").child(mGroupID)
+                        .child("members").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        a_group_chat_tv_name.setText(dataSnapshot.child("groupName").getValue().toString());
+                        for (DataSnapshot member : dataSnapshot.getChildren()) {
+                            if (!member.getKey().equals(mFirebaseAuth.getUid())) {
+                                mDatabaseReference.child("user_chats_unread_messages").child(member.getKey())
+                                        .child(mGroupID).child(newMessageID).setValue("");
+                            }
+                        }
                     }
 
                     @Override
@@ -260,12 +278,128 @@ public class GroupChatActivity extends AppCompatActivity {
 
                     }
                 });
+
+                if (mMessageListener == null) {
+                    Log.d(TAG, "MessageListener is null!");
+                    retrieveMessages(mGroupID);
+                    listenMessages(mGroupID);
+
+                    mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                            .child(mGroupID).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                                unreadMsg.getRef().removeValue();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        });
         // endregion
+
+        mDatabaseReference.child("groups").child(mGroupID).child("members")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        final StringBuilder sb = new StringBuilder();
+                        for (final DataSnapshot user : dataSnapshot.getChildren()) {
+                            Log.d(TAG, "onDataChange: " + user.getKey());
+
+                            if (user.getKey().equals(mFirebaseAuth.getUid())) {
+                                sb.append("You");
+                                a_group_chat_tv_members.setText(sb);
+                                continue;
+                            }
+
+                            mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.hasChild(user.getKey())) {
+                                                sb.append(", ");
+                                                sb.append(dataSnapshot.child(user.getKey()).getValue().toString());
+                                            } else {
+                                                mDatabaseReference.child("users").child(user.getKey())
+                                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                sb.append(", ");
+                                                                sb.append(dataSnapshot.child("phone_number").getValue().toString());
+
+                                                                a_group_chat_tv_members.setText(sb);
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                            }
+                                                        });
+                                            }
+                                            a_group_chat_tv_members.setText(sb);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+        // Show how PigeoID sharing works
+        mDatabaseReference.child("group_messages").child(mGroupID).addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getChildrenCount() == 1) {
+                            MaterialAlertDialogBuilder alertDialogBuilder =
+                                    new MaterialAlertDialogBuilder(GroupChatActivity.this)
+                                            .setMessage(HtmlCompat.fromHtml(getApplicationContext()
+                                                            .getString(R.string.text_share_group_id, mGroupID),
+                                                    HtmlCompat.FROM_HTML_MODE_LEGACY))
+
+                                            .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+
+                                                }
+                                            })
+                                            .setNegativeButton("COPY", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    ClipboardManager clipboard = (ClipboardManager)
+                                                            getApplicationContext()
+                                                                    .getSystemService(Context.CLIPBOARD_SERVICE);
+                                                    ClipData clip = ClipData.newPlainText("GroupID", mGroupID);
+                                                    clipboard.setPrimaryClip(clip);
+                                                }
+                                            });
+
+                            AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
+                            permissionExplanationDialog.show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
 
         mGroupMessagesRVAdapter = new GroupMessagesRVAdapter(mMessageDAOS, getApplicationContext());
         a_group_chat_rv_messages.setAdapter(mGroupMessagesRVAdapter);
-
-        retrieveMessages(mGroupID);
     }
 
     private void listenMessages(String groupID) {
@@ -356,6 +490,30 @@ public class GroupChatActivity extends AppCompatActivity {
 
         mDatabaseReference.child("group_messages").child(chatID)
                 .addListenerForSingleValueEvent(mRetMessageListener);
+    }
+
+    public static void setGroupCreatedMessage(DatabaseReference databaseReference,
+                                              FirebaseAuth firebaseAuth, String groupID) {
+        DatabaseReference messageReference = databaseReference
+                .child("group_messages").child(groupID);
+
+        final String newMessageID = messageReference.push().getKey();
+
+        MessageDAO newMessage = new MessageDAO(
+                firebaseAuth.getCurrentUser().getDisplayName() + " created this group!",
+                "system",
+                Long.toString(System.currentTimeMillis()),
+                "system",
+                newMessageID,
+                "false",
+                "",
+                groupID
+        );
+
+        messageReference.child(Objects.requireNonNull(newMessageID)).setValue(newMessage);
+
+        databaseReference.child("groups").child(groupID)
+                .child("last_message_id").setValue(newMessageID);
     }
 
     @Override

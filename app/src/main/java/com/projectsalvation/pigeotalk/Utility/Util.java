@@ -14,6 +14,8 @@ import androidx.core.app.ActivityCompat;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.Random;
+
 public final class Util {
 
     private Util() {
@@ -46,13 +48,13 @@ public final class Util {
     }
 
     public static int ColorFromString(String str) {
+        Random rnd = new Random();
         byte[] bytes = str.getBytes();
 
-        int r = Math.abs(bytes[2]);
-        int g = Math.abs(bytes[4]);
-        int b = Math.abs(bytes[8]);
+        int r = Math.abs(bytes[27]);
+        int g = Math.abs(bytes[14]);
+        int b = Math.abs(bytes[0]);
 
-        Log.d("UTIL", "ColorFromString: " + r + g + b);
-        return Color.argb(255, 256-r+128, 256-g+32, 256-b+64);
+        return Color.argb(255, 256-r, 256-g, 256-b);
     }
 }

@@ -33,9 +33,4 @@
         <item name="fontFamily">@font/helveticaneue_med</item>
         <item name="android:textSize">18sp</item>
     </style>
-
-    <style name="ToolbarSubtitleCustomFontStyle" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="fontFamily">@font/helveticaneu_light</item>
-        <item name="android:textSize">14sp</item>
-    </style>
 </resources>

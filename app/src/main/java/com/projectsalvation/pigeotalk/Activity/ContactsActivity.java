@@ -101,9 +101,6 @@ public class ContactsActivity extends AppCompatActivity {
         a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, false));
 
-        // Keep users node in sync with the database
-        mDatabaseReference.child("users").keepSynced(true);
-
         a_contacts_tv_no_contacts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

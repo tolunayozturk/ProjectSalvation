@@ -43,7 +43,7 @@
         android:singleLine="true"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:text="KAYKAY KULÜP" />
+        tools:text="Erşan Kuneri" />
 
     <TextView
         android:id="@+id/l_chats_list_tv_last_message"
@@ -57,7 +57,7 @@
         android:layout_toEndOf="@+id/l_chats_list_civ_photo"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="Erşan: Dışarıda tank görüyorum Faruk hayırdır bi' kutlama mı var?" />
+        tools:text="Dışarıda tank görüyorum Faruk hayırdır bi' kutlama mı var?" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/l_chats_list_chip_group"
