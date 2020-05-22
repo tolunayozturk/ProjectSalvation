@@ -165,8 +165,6 @@ public class RegisterActivity extends AppCompatActivity {
                         .setValue(mFirebaseAuth.getUid());
 
                 // region Upload user profile photo and get its download url
-                // TODO: Upload the uncompressed photo?
-
                 if (mProfilePhotoUri == null) {
                     mProfilePhotoUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
                             "://" + getResources().getResourcePackageName(R.drawable.default_profile_picture)

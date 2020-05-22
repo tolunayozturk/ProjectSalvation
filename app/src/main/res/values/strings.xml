@@ -97,4 +97,6 @@
 
     <string name="text_provide_group_name">Provide a group name and optional group photo</string>
     <string name="text_type_your_group_name_here">Type your group name here</string>
+
+    <string name="text_photo">Photo</string>
 </resources>

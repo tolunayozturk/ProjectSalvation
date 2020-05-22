@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.badge.BadgeDrawable;
@@ -79,9 +80,10 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
         mNewMessageListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Log.d(TAG, "onChildAdded: " + s);
+                Log.d(TAG, "onChildAdded: " + dataSnapshot.toString());
                 String lastMessage = dataSnapshot.child("message").getValue().toString();
                 String timestamp = dataSnapshot.child("timestamp").getValue().toString();
+                String messageType = dataSnapshot.child("messageType").getValue().toString();
 
                 String time = "";
                 if (DateUtils.isToday(Long.parseLong(timestamp))) {
@@ -107,11 +109,26 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
 
                 newHolder.l_chats_list_tv_display_name.setText(chatDAO.getName());
 
-                if (chatDAO.getMessageType().equals("plaintext")) {
+                Log.d(TAG, "onChildAdded: " + chatDAO.getMessageType());
+                if (messageType.equals("plaintext")) {
                     newHolder.l_chats_list_tv_last_message.setText(lastMessage);
+                    newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                            null,
+                            null,
+                            null,
+                            null
+                    );
                 }
 
-                // TODO: Handle images and other attachments
+                if (messageType.equals("image")) {
+                    newHolder.l_chats_list_tv_last_message.setText(mContext.getString(R.string.text_photo));
+                    newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                            ContextCompat.getDrawable(mContext, R.drawable.ic_camera_alt_white_16dp),
+                            null,
+                            null,
+                            null
+                    );
+                }
             }
 
             @Override

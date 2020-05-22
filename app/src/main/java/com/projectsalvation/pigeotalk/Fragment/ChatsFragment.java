@@ -161,8 +161,6 @@ public class ChatsFragment extends Fragment {
 
                                                                                             }
                                                                                         });
-
-
                                                                             }
 
                                                                             @Override

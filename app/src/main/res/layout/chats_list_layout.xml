@@ -55,6 +55,7 @@
         android:layout_marginEnd="22dp"
         android:layout_toStartOf="@+id/l_chats_list_chip_group"
         android:layout_toEndOf="@+id/l_chats_list_civ_photo"
+        android:drawablePadding="4dp"
         android:ellipsize="end"
         android:singleLine="true"
         tools:text="Dışarıda tank görüyorum Faruk hayırdır bi' kutlama mı var?" />

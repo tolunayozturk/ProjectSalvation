@@ -2,14 +2,23 @@ package com.projectsalvation.pigeotalk.Activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -25,11 +34,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -38,17 +52,27 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.projectsalvation.pigeotalk.Adapter.ContactsRVAdapter;
 import com.projectsalvation.pigeotalk.Adapter.MessagesRVAdapter;
 import com.projectsalvation.pigeotalk.DAO.ChatDAO;
 import com.projectsalvation.pigeotalk.DAO.ContactDAO;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
+import com.projectsalvation.pigeotalk.Utility.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -81,11 +105,17 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
 
+    private static final int PERMISSION_REQUEST_CODE_CAMERA = 100;
+    private static final int INTENT_CHOOSE_PHOTO = 200;
+    private static final int INTENT_TAKE_PHOTO = 110;
+
     private DatabaseReference mDatabaseReference;
+    private StorageReference mStorageReference;
     private FirebaseAuth mFirebaseAuth;
 
     private ArrayList<MessageDAO> mMessageDAOS;
     private MessagesRVAdapter mMessageRVAdapter;
+
     private ChildEventListener mMessageListener;
     private ValueEventListener mRetMessageListener;
     private ValueEventListener mPresenceListener;
@@ -96,6 +126,7 @@ public class ChatActivity extends AppCompatActivity {
     private String mUserName;
     private String mUserPhotoUrl;
 
+    private Uri mAttachmentPhotoUri;
     private boolean isFirstTime = true;
 
     @Override
@@ -127,6 +158,7 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mStorageReference = FirebaseStorage.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
         mMessageDAOS = new ArrayList<>();
 
@@ -206,20 +238,22 @@ public class ChatActivity extends AppCompatActivity {
                             retrieveMessages(mChatID);
                             listenMessages(mChatID);
 
-                            mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
-                                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
-                                        unreadMsg.getRef().removeValue();
-                                    }
-                                }
+                            mDatabaseReference.child("user_chats_unread_messages")
+                                    .child(mFirebaseAuth.getUid())
+                                    .child(mChatID)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                                                unreadMsg.getRef().removeValue();
+                                            }
+                                        }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                }
-                            });
+                                        }
+                                    });
                         }
                     }
                 }
@@ -283,7 +317,8 @@ public class ChatActivity extends AppCompatActivity {
                     retrieveMessages(mChatID);
                     listenMessages(mChatID);
 
-                    mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                    mDatabaseReference.child("user_chats_unread_messages")
+                            .child(mFirebaseAuth.getUid())
                             .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -305,14 +340,31 @@ public class ChatActivity extends AppCompatActivity {
         a_chat_chip_attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Attachments
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ChatActivity.this);
+
+                builder.setItems(
+                        new String[]{getString(R.string.text_choose_from_gallery)},
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        launchPhotoLibrary();
+                                        break;
+                                } // end switch
+                            }
+                        }
+                );
+
+                AlertDialog addProfilePhotoDialog = builder.create();
+                addProfilePhotoDialog.show();
             }
         });
 
         a_chat_chip_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                launchCamera();
             }
         });
 
@@ -320,10 +372,13 @@ public class ChatActivity extends AppCompatActivity {
         mDatabaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child(mFirebaseAuth.getUid()).child("contacts").child(mUserID).exists()) {
+                if (dataSnapshot.child(mFirebaseAuth.getUid())
+                        .child("contacts").child(mUserID).exists()) {
+
                     a_chat_tv_name.setText(mUserName);
                 } else {
-                    a_chat_tv_name.setText(dataSnapshot.child(mUserID).child("phone_number").getValue().toString());
+                    a_chat_tv_name.setText(dataSnapshot.child(mUserID).child("phone_number")
+                            .getValue().toString());
                 }
             }
 
@@ -338,6 +393,257 @@ public class ChatActivity extends AppCompatActivity {
 
         mMessageRVAdapter = new MessagesRVAdapter(getApplicationContext(), mMessageDAOS);
         a_chat_rv_messages.setAdapter(mMessageRVAdapter);
+    }
+
+    private void launchCamera() {
+        if (!Util.checkPermission(Manifest.permission.CAMERA, getApplicationContext())) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    ChatActivity.this, Manifest.permission.CAMERA)) {
+
+                // Explain to users why we request this permission
+                MaterialAlertDialogBuilder alertDialogBuilder =
+                        new MaterialAlertDialogBuilder(ChatActivity.this)
+                                .setMessage(R.string.dialog_permission_camera_explanation)
+                                .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Util.requestPermission(new String[]{Manifest.permission.CAMERA},
+                                                ChatActivity.this,
+                                                PERMISSION_REQUEST_CODE_CAMERA);
+                                    }
+                                })
+                                .setNegativeButton(R.string.action_not_now, null);
+
+                AlertDialog permissionExplanationDialog = alertDialogBuilder.create();
+                permissionExplanationDialog.show();
+            } else {
+                // No explanation needed; request the permission
+                Util.requestPermission(new String[]{Manifest.permission.CAMERA},
+                        ChatActivity.this,
+                        PERMISSION_REQUEST_CODE_CAMERA);
+            }
+        } else {
+            // Permission has already been granted
+            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+                File profilePhotoFile = null;
+
+                try {
+                    profilePhotoFile = createImageFile();
+                } catch (IOException e) {
+                    Snackbar.make(a_chat_ll_footer,
+                            R.string.text_profile_photo_upload_failed,
+                            BaseTransientBottomBar.LENGTH_LONG)
+                            .show();
+                }
+
+                if (profilePhotoFile != null) {
+                    mAttachmentPhotoUri = FileProvider.getUriForFile(this,
+                            "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
+
+                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mAttachmentPhotoUri);
+                    startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                }
+            }
+        }
+    }
+
+    private void launchPhotoLibrary() {
+        Intent choosePhotoIntent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                .setType("image/*");
+
+        if (choosePhotoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(
+                    choosePhotoIntent, INTENT_CHOOSE_PHOTO
+            );
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                .format(new Date());
+
+        String imageFileName = "JPEG_" + timeStamp + "_";
+
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return image;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+                        File profilePhotoFile = null;
+
+                        try {
+                            profilePhotoFile = createImageFile();
+                        } catch (IOException e) {
+                            // TODO: Handle error
+                        }
+
+                        if (profilePhotoFile != null) {
+                            mAttachmentPhotoUri = FileProvider.getUriForFile(this,
+                                    "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
+
+                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mAttachmentPhotoUri);
+                            startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    private void uploadAndSend(Uri attachmentPhotoUri) {
+        if (attachmentPhotoUri == null) {
+            // TODO: Handle error
+            return;
+        }
+
+        if (mChatID == null) {
+            createChat();
+        }
+
+        if (mChatListener != null) {
+            mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                    .removeEventListener(mChatListener);
+        }
+
+        final DatabaseReference messageReference = mDatabaseReference
+                .child("chat_messages").child(mChatID);
+
+        final String newMessageID = messageReference.push().getKey();
+
+        final MessageDAO newMessage = new MessageDAO(
+                "",
+                "image",
+                Long.toString(System.currentTimeMillis()),
+                mUserID,
+                mFirebaseAuth.getUid(),
+                newMessageID,
+                "false",
+                "",
+                mChatID
+        );
+
+        messageReference.child(Objects.requireNonNull(newMessageID)).setValue(newMessage);
+
+        mDatabaseReference.child("chats").child(mChatID)
+                .child("last_message_id").setValue(newMessageID);
+
+        mDatabaseReference.child("user_chats_unread_messages").child(mUserID)
+                .child(mChatID).child(newMessageID).setValue("");
+
+
+        InputStream stream = null;
+        try {
+            stream = getContentResolver().openInputStream(mAttachmentPhotoUri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (stream == null) {
+            Log.d(TAG, "uploadAndSend: " + stream.toString());
+        }
+
+        UploadTask uploadTask = mStorageReference.child("chats/" + mChatID
+                + "/image" + "/IMAGE_" + mAttachmentPhotoUri.getLastPathSegment() + ".jpeg").putStream(stream);
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                taskSnapshot.getStorage().getDownloadUrl()
+                        .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                String downloadUrl = Objects.requireNonNull(task.getResult())
+                                        .toString();
+
+                                newMessage.setMessage(downloadUrl);
+                                messageReference.child(newMessageID).child("message").setValue(downloadUrl);
+                                mMessageRVAdapter.notifyDataSetChanged();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // TODO: Handle error
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // TODO: Handle error
+            }
+        });
+
+        if (mMessageListener == null) {
+            Log.d(TAG, "MessageListener is null!");
+            retrieveMessages(mChatID);
+            listenMessages(mChatID);
+
+            mDatabaseReference.child("user_chats_unread_messages")
+                    .child(mFirebaseAuth.getUid())
+                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                        unreadMsg.getRef().removeValue();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode) {
+            case INTENT_TAKE_PHOTO:
+                if (resultCode == RESULT_OK) {
+
+                    if (mAttachmentPhotoUri != null) {
+                        Log.d(TAG, "onActivityResult: " + mAttachmentPhotoUri.getPath());
+                        uploadAndSend(mAttachmentPhotoUri);
+                    } else {
+                        // TODO: Handle error
+                    }
+                }
+                break;
+            case INTENT_CHOOSE_PHOTO:
+                if (resultCode == RESULT_OK) {
+                    mAttachmentPhotoUri = data.getData();
+
+                    if (mAttachmentPhotoUri != null) {
+                        Log.d(TAG, "onActivityResult: " + mAttachmentPhotoUri.getPath());
+                        uploadAndSend(mAttachmentPhotoUri);
+                    } else {
+                        // TODO: Handle error
+                    }
+                }
+                break;
+            default:
+                super.onActivityResult(resultCode, resultCode, data);
+                break;
+        }
     }
 
     private void listenPresence() {
@@ -391,7 +697,8 @@ public class ChatActivity extends AppCompatActivity {
                         messageDAO.setSeenAt(Long.toString(System.currentTimeMillis()));
 
                         dataSnapshot.getRef().child("isRead").setValue("true");
-                        dataSnapshot.getRef().child("seenAt").setValue(Long.toString(System.currentTimeMillis()));
+                        dataSnapshot.getRef().child("seenAt").setValue(
+                                Long.toString(System.currentTimeMillis()));
                     }
                 }
 
@@ -510,10 +817,47 @@ public class ChatActivity extends AppCompatActivity {
         if (mChatID != null) {
             mDatabaseReference.child("chat_messages").child(mChatID).limitToLast(1)
                     .removeEventListener(mMessageListener);
+
+            mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                        unreadMsg.getRef().removeValue();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
                 .child("last_seen").setValue(System.currentTimeMillis());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mChatID != null) {
+            mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                    .child(mChatID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                        unreadMsg.getRef().removeValue();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Override

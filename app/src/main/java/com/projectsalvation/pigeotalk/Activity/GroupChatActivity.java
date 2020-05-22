@@ -226,10 +226,7 @@ public class GroupChatActivity extends AppCompatActivity {
 
             }
         });
-
-        // TODO: Remove this and find a way to show this once on group creation
-
-
+        
         // region Send button onClick()
         a_group_chat_chip_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -532,5 +529,45 @@ public class GroupChatActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.group_chat_menu, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                .child(mGroupID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                    unreadMsg.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mDatabaseReference.child("user_chats_unread_messages").child(mFirebaseAuth.getUid())
+                .child(mGroupID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot unreadMsg : dataSnapshot.getChildren()) {
+                    unreadMsg.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }

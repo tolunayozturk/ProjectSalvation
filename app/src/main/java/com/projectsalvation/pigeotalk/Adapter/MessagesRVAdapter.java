@@ -2,6 +2,7 @@ package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,12 +28,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.ViewHolder> {
+
+    private static final String TAG = "MessagesRVAdapter";
 
     private Context mContext;
     private ArrayList<MessageDAO> messageDAOS;
@@ -54,8 +59,8 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ViewHolder newHolder = holder;
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        final ViewHolder newHolder = holder;
         final MessageDAO messageDAO = messageDAOS.get(position);
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -69,6 +74,8 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
             // If message_type is plaintext, move timestamp to end
             newHolder.l_chat_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+
+            newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
         } else if (messageDAO.getMessageType().equals("image")) {
             newHolder.l_chat_message_tv_message.setVisibility(View.GONE);
             newHolder.l_chat_message_btn_voice_attachment.setVisibility(View.GONE);
@@ -80,6 +87,26 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
             // If message_type is image, move timestamp to bottom
             newHolder.l_chat_messages_ll_child.setOrientation(LinearLayout.VERTICAL);
+
+            listenImageState(messageDAO, newHolder);
+
+            if (!messageDAO.getMessage().equals("")) {
+                Picasso.get().load(messageDAO.getMessage())
+                        .fit()
+                        .centerCrop()
+                        .into(holder.l_chat_message_iv_image_attachment, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                holder.l_chat_message_pb.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get().load(messageDAO.getMessage()).into(
+                                        holder.l_chat_message_iv_image_attachment);
+                            }
+                        });
+            }
         }
 
         // If self message, move it to end and set its bg color
@@ -88,8 +115,6 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
             newHolder.l_chat_messages_cv.setCardBackgroundColor(
                     ContextCompat.getColor(mContext, R.color.message_bg));
         }
-
-        newHolder.l_chat_message_tv_message.setText(messageDAO.getMessage());
 
         String time = "";
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -131,6 +156,54 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
         listenMessageSeenState(messageDAO, newHolder);
     }
 
+    private void listenImageState(final MessageDAO messageDAO, final ViewHolder holder) {
+        mDatabaseReference.child("chat_messages").child(messageDAO.getChatId())
+                .child(messageDAO.getMessageId())
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull final DataSnapshot dataSnapshot, @Nullable String s) {
+                        Log.d(TAG, "onChildChanged: " + dataSnapshot.toString());
+                        if (messageDAO.getMessageType().equals("image") && dataSnapshot.getKey().equals("message")) {
+                            Log.d("MRVA", "onChildChanged: " + messageDAO.getMessage());
+                            Picasso.get().load(dataSnapshot.getValue().toString())
+                                    .fit()
+                                    .centerCrop()
+                                    .into(holder.l_chat_message_iv_image_attachment, new Callback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            holder.l_chat_message_pb.setVisibility(View.GONE);
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e) {
+                                            Picasso.get().load(dataSnapshot.getValue().toString()).into(
+                                                    holder.l_chat_message_iv_image_attachment);
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
     private void listenMessageSeenState(final MessageDAO messageDAO, final ViewHolder holder) {
         mDatabaseReference.child("chat_messages").child(messageDAO.getChatId()).limitToLast(1)
                 .addChildEventListener(new ChildEventListener() {
@@ -140,6 +213,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
                     @Override
                     public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
                         if (messageDAO.getSender().equals(mFirebaseAuth.getUid())) {
                             holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                                     null,
