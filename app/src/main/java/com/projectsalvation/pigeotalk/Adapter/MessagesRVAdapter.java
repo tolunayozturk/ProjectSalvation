@@ -2,7 +2,6 @@ package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,10 +25,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -98,12 +101,37 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
                             @Override
                             public void onSuccess() {
                                 holder.l_chat_message_pb.setVisibility(View.GONE);
+
+                                holder.l_chat_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        new StfalconImageViewer.Builder<>(mContext, new String[]{messageDAO.getMessage()}, new ImageLoader<String>() {
+                                            @Override
+                                            public void loadImage(ImageView imageView, String imageUrl) {
+                                                Picasso.get().load(imageUrl).into(imageView);
+                                            }
+                                        }).withStartPosition(0).show();
+                                    }
+                                });
                             }
 
                             @Override
                             public void onError(Exception e) {
                                 Picasso.get().load(messageDAO.getMessage()).into(
                                         holder.l_chat_message_iv_image_attachment);
+                                holder.l_chat_message_pb.setVisibility(View.GONE);
+
+                                holder.l_chat_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        new StfalconImageViewer.Builder<>(mContext, new String[]{messageDAO.getMessage()}, new ImageLoader<String>() {
+                                            @Override
+                                            public void loadImage(ImageView imageView, String imageUrl) {
+                                                Picasso.get().load(imageUrl).into(imageView);
+                                            }
+                                        }).withStartPosition(0).show();
+                                    }
+                                });
                             }
                         });
             }
@@ -148,7 +176,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
             holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                     null,
                     null,
-                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                    ContextCompat.getDrawable(mContext, R.drawable.ic_doubletick_24dp),
                     null
             );
         }
@@ -166,9 +194,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
 
                     @Override
                     public void onChildChanged(@NonNull final DataSnapshot dataSnapshot, @Nullable String s) {
-                        Log.d(TAG, "onChildChanged: " + dataSnapshot.toString());
                         if (messageDAO.getMessageType().equals("image") && dataSnapshot.getKey().equals("message")) {
-                            Log.d("MRVA", "onChildChanged: " + messageDAO.getMessage());
                             Picasso.get().load(dataSnapshot.getValue().toString())
                                     .fit()
                                     .centerCrop()
@@ -176,12 +202,37 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
                                         @Override
                                         public void onSuccess() {
                                             holder.l_chat_message_pb.setVisibility(View.GONE);
+
+                                            holder.l_chat_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    new StfalconImageViewer.Builder<>(mContext, new String[]{dataSnapshot.getValue().toString()}, new ImageLoader<String>() {
+                                                        @Override
+                                                        public void loadImage(ImageView imageView, String imageUrl) {
+                                                            Picasso.get().load(imageUrl).into(imageView);
+                                                        }
+                                                    }).withStartPosition(0).show();
+                                                }
+                                            });
                                         }
 
                                         @Override
                                         public void onError(Exception e) {
                                             Picasso.get().load(dataSnapshot.getValue().toString()).into(
                                                     holder.l_chat_message_iv_image_attachment);
+
+                                            holder.l_chat_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    new StfalconImageViewer.Builder<>(mContext, new String[]{dataSnapshot.getValue().toString()}, new ImageLoader<String>() {
+                                                        @Override
+                                                        public void loadImage(ImageView imageView, String imageUrl) {
+                                                            Picasso.get().load(imageUrl).into(imageView);
+                                                        }
+                                                    }).withStartPosition(0).show();
+                                                }
+                                            });
+                                            holder.l_chat_message_pb.setVisibility(View.GONE);
                                         }
                                     });
                         }
@@ -218,7 +269,7 @@ public class MessagesRVAdapter extends RecyclerView.Adapter<MessagesRVAdapter.Vi
                             holder.l_chat_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                                     null,
                                     null,
-                                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                                    ContextCompat.getDrawable(mContext, R.drawable.ic_doubletick_24dp),
                                     null
                             );
                         }

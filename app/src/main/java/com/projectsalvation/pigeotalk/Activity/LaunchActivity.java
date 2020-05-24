@@ -23,7 +23,6 @@ public class LaunchActivity extends AppCompatActivity {
         // FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
         if (firebaseUser != null) {
             Intent i = new Intent(LaunchActivity.this, HomePageActivity.class);

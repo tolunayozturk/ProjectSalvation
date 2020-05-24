@@ -29,7 +29,8 @@
         android:layout_height="match_parent"
         android:background="@color/progress_bar_bg"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:visibility="gone">
 
         <ProgressBar
             android:id="@+id/a_contacts_pb"
@@ -51,9 +52,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:drawableTop="@drawable/ic_nocontacts"
+        android:drawableStart="@drawable/ic_nocontacts"
         android:drawablePadding="16dp"
-        android:fontFamily="sans-serif-condensed"
+        android:drawableTint="@color/secondary_text_material_light"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:padding="32dp"
         android:text="@string/text_no_contacts_using_pigeotalk"
         android:textAlignment="center"
         android:visibility="gone" />

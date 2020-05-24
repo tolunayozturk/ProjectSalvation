@@ -81,6 +81,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Log.d(TAG, "onChildAdded: " + dataSnapshot.toString());
+
                 String lastMessage = dataSnapshot.child("message").getValue().toString();
                 String timestamp = dataSnapshot.child("timestamp").getValue().toString();
                 String messageType = dataSnapshot.child("messageType").getValue().toString();

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -29,6 +30,7 @@ public class GroupsFragment extends Fragment {
 
     // region Resource Declaration
     RecyclerView f_groups_rv;
+    TextView f_groups_tv_no_groups;
     // endregion
 
     private static String TAG = "GroupsFragment";
@@ -54,6 +56,7 @@ public class GroupsFragment extends Fragment {
 
         // region Resource Assignment
         f_groups_rv = view.findViewById(R.id.f_groups_rv);
+        f_groups_tv_no_groups = view.findViewById(R.id.f_groups_tv_no_groups);
         // endregion
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -80,6 +83,10 @@ public class GroupsFragment extends Fragment {
         mNewMessageListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 0) {
+                    f_groups_tv_no_groups.setVisibility(View.VISIBLE);
+                    return;
+                }
                 mGroupChatDAOS.clear();
 
                 for (final DataSnapshot chat : dataSnapshot.getChildren()) {
@@ -138,6 +145,7 @@ public class GroupsFragment extends Fragment {
 
                                                                                 groupChatDAO.setIsMuted("false");
 
+                                                                                f_groups_tv_no_groups.setVisibility(View.GONE);
                                                                                 mGroupChatDAOS.add(groupChatDAO);
                                                                                 mGroupChatListRVAdapter.notifyDataSetChanged();
                                                                             }
@@ -186,6 +194,14 @@ public class GroupsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        mDatabaseReference.child("user_groups").child(mFirebaseAuth.getUid())
+                .removeEventListener(mNewMessageListener);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
         mDatabaseReference.child("user_groups").child(mFirebaseAuth.getUid())
                 .removeEventListener(mNewMessageListener);

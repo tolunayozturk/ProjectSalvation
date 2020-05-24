@@ -22,11 +22,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="4dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/l_chat_group_messages_ll_orientation"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 

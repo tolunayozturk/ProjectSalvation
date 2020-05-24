@@ -76,8 +76,11 @@
 
     <string name="subtitle_contact_size">%1$d contacts</string>
 
-    <string name="text_no_contacts_using_pigeotalk">No one in your contact list seems to be on PigeoTalk.\n
+    <string name="text_no_contacts_using_pigeotalk">No one in your contact list seems to be on PigeoTalk.
     Tap here to invite your friends and family to PigeoTalk.</string>
+
+    <string name="text_start_new_conversation">Once you start a new conversation, you\'ll see it listed here.</string>
+    <string name="text_start_new_group">Once you create or join a group, you\'ll see it listed here.</string>
 
     <string name="text_invite_to_pigeotalk">Invite friends and family to PigeoTalk</string>
 

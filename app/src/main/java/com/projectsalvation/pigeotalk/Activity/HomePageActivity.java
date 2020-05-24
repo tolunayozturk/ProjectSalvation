@@ -282,8 +282,24 @@ public class HomePageActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("isOnline").setValue("false");
+
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
+                .child("last_seen").setValue(System.currentTimeMillis());
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+
+        mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid()).keepSynced(true);
+        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).keepSynced(true);
+        mDatabaseReference.child("chat_messages").child(mFirebaseAuth.getUid()).keepSynced(true);
+        mDatabaseReference.child("chats").child(mFirebaseAuth.getUid()).keepSynced(true);
 
         mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("presence")
                 .child("isOnline").setValue("true");

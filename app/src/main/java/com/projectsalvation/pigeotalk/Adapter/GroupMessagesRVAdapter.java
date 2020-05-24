@@ -1,9 +1,7 @@
 package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,19 +29,26 @@ import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.projectsalvation.pigeotalk.Utility.Util;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Random;
 
 public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRVAdapter.ViewHolder> {
+
+    private static final String TAG = "GroupMessagesRVAdapter";
 
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
 
     private ArrayList<MessageDAO> messageDAOS;
     private Context mContext;
+
+    private ChildEventListener mImageStateListener;
 
     public GroupMessagesRVAdapter(ArrayList<MessageDAO> messageDAOS, Context mContext) {
         this.messageDAOS = messageDAOS;
@@ -58,7 +63,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         final ViewHolder newHolder = holder;
         final MessageDAO messageDAO = messageDAOS.get(position);
 
@@ -73,6 +78,8 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
 
             // If message_type is plaintext, move timestamp to end
             newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+
+            newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
         } else if (messageDAO.getMessageType().equals("image")) {
             newHolder.l_chat_group_message_tv_message.setVisibility(View.GONE);
             newHolder.l_chat_group_message_btn_voice_attachment.setVisibility(View.GONE);
@@ -84,6 +91,50 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
 
             // If message_type is image, move timestamp to bottom
             newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.VERTICAL);
+
+            listenImageState(messageDAO, newHolder);
+
+            if (!messageDAO.getMessage().equals("")) {
+                Picasso.get().load(messageDAO.getMessage())
+                        .fit()
+                        .centerCrop()
+                        .into(holder.l_chat_group_message_iv_image_attachment, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                holder.l_chat_group_message_pb.setVisibility(View.GONE);
+
+                                holder.l_chat_group_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        new StfalconImageViewer.Builder<>(mContext, new String[]{messageDAO.getMessage()}, new ImageLoader<String>() {
+                                            @Override
+                                            public void loadImage(ImageView imageView, String imageUrl) {
+                                                Picasso.get().load(imageUrl).into(imageView);
+                                            }
+                                        }).withStartPosition(0).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get().load(messageDAO.getMessage()).into(
+                                        holder.l_chat_group_message_iv_image_attachment);
+
+                                holder.l_chat_group_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        new StfalconImageViewer.Builder<>(mContext, new String[]{messageDAO.getMessage()}, new ImageLoader<String>() {
+                                            @Override
+                                            public void loadImage(ImageView imageView, String imageUrl) {
+                                                Picasso.get().load(imageUrl).into(imageView);
+                                            }
+                                        }).withStartPosition(0).show();
+                                    }
+                                });
+                            }
+                        });
+            }
         } else if (messageDAO.getMessageType().equals("system")) {
             newHolder.l_chat_group_message_fl.setVisibility(View.GONE);
             newHolder.l_chat_group_message_btn_voice_attachment.setVisibility(View.GONE);
@@ -158,8 +209,6 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
                     });
         }
 
-        newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
-
         String time = "";
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
         calendar.setTimeInMillis(Long.parseLong(messageDAO.getTimestamp()));
@@ -192,13 +241,88 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
             holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                     null,
                     null,
-                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                    ContextCompat.getDrawable(mContext, R.drawable.ic_doubletick_24dp),
                     null
             );
         }
 
         listenMessageSeenState(messageDAO, newHolder);
 
+    }
+
+    private void listenImageState(final MessageDAO messageDAO, final ViewHolder holder) {
+        mImageStateListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            }
+
+            @Override
+            public void onChildChanged(@NonNull final DataSnapshot dataSnapshot, @Nullable String s) {
+                if (messageDAO.getMessageType().equals("image") && dataSnapshot.getKey().equals("message")) {
+                    Picasso.get().load(dataSnapshot.getValue().toString())
+                            .fit()
+                            .centerCrop()
+                            .into(holder.l_chat_group_message_iv_image_attachment, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    holder.l_chat_group_message_pb.setVisibility(View.GONE);
+
+                                    holder.l_chat_group_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            new StfalconImageViewer.Builder<>(mContext.getApplicationContext(), new String[]{dataSnapshot.getValue().toString()}, new ImageLoader<String>() {
+                                                @Override
+                                                public void loadImage(ImageView imageView, String imageUrl) {
+                                                    Picasso.get().load(imageUrl).into(imageView);
+                                                }
+                                            }).show();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Picasso.get().load(dataSnapshot.getValue().toString()).into(
+                                            holder.l_chat_group_message_iv_image_attachment);
+                                    holder.l_chat_group_message_pb.setVisibility(View.GONE);
+
+                                    holder.l_chat_group_message_iv_image_attachment.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            new StfalconImageViewer.Builder<>(mContext.getApplicationContext(), new String[]{dataSnapshot.getValue().toString()}, new ImageLoader<String>() {
+                                                @Override
+                                                public void loadImage(ImageView imageView, String imageUrl) {
+                                                    Picasso.get().load(imageUrl).into(imageView);
+                                                }
+                                            }).show();
+                                        }
+                                    });
+                                }
+                            });
+
+                    holder.l_chat_group_message_pb.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        mDatabaseReference.child("group_messages").child(messageDAO.getChatId())
+                .child(messageDAO.getMessageId())
+                .addChildEventListener(mImageStateListener);
     }
 
     private void listenMessageSeenState(final MessageDAO messageDAO, final ViewHolder holder) {
@@ -214,7 +338,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
                             holder.l_chat_group_message_tv_timestamp.setCompoundDrawablesWithIntrinsicBounds(
                                     null,
                                     null,
-                                    ContextCompat.getDrawable(mContext, R.drawable.ic_double_tick_indicator),
+                                    ContextCompat.getDrawable(mContext, R.drawable.ic_doubletick_24dp),
                                     null
                             );
                         }

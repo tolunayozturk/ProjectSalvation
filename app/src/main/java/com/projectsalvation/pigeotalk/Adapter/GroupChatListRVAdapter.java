@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
@@ -66,7 +67,6 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final ViewHolder newHolder = holder;
         final GroupChatDAO groupChatDAO = mGroupChatDAOS.get(position);
-        Log.d(TAG, "onBindViewHolder: " + "LINE 68");
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -80,8 +80,11 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Log.d(TAG, "onChildAdded: " + dataSnapshot.toString());
+
                 final String lastMessage = dataSnapshot.child("message").getValue().toString();
                 String timestamp = dataSnapshot.child("timestamp").getValue().toString();
+                String messageType = dataSnapshot.child("messageType").getValue().toString();
+                final String sender = dataSnapshot.child("sender").getValue().toString();
 
                 String time = "";
                 if (DateUtils.isToday(Long.parseLong(timestamp))) {
@@ -107,24 +110,38 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
                 newHolder.l_chats_list_tv_display_name.setText(groupChatDAO.getGroupName());
 
                 final StringBuilder message = new StringBuilder();
-                if (groupChatDAO.getMessageType().equals("plaintext")) {
-                    if (groupChatDAO.getSenderId().equals(mFirebaseAuth.getUid())) {
+                if (messageType.equals("plaintext")) {
+                    Log.d(TAG, "SENDER: " + sender);
+                    Log.d(TAG, "UID: " + mFirebaseAuth.getUid());
+                    if (sender.equals(mFirebaseAuth.getUid())) {
                         message.setLength(0);
                         message.append("You: ").append(lastMessage);
                         newHolder.l_chats_list_tv_last_message.setText(message);
+                        newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                                null,
+                                null,
+                                null,
+                                null
+                        );
                     } else {
                         mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
                                 .addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        if (dataSnapshot.hasChild(groupChatDAO.getSenderId())) {
+                                        if (dataSnapshot.hasChild(sender)) {
                                             message.setLength(0);
-                                            message.append(dataSnapshot.child(groupChatDAO.getSenderId())
+                                            message.append(dataSnapshot.child(sender)
                                                     .getValue().toString() + ": " + lastMessage);
 
                                             newHolder.l_chats_list_tv_last_message.setText(message);
+                                            newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    null
+                                            );
                                         } else {
-                                            mDatabaseReference.child("users").child(groupChatDAO.getSenderId())
+                                            mDatabaseReference.child("users").child(sender)
                                                     .addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -134,6 +151,12 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
                                                                     .append(lastMessage);
 
                                                             newHolder.l_chats_list_tv_last_message.setText(message);
+                                                            newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                                                                    null,
+                                                                    null,
+                                                                    null,
+                                                                    null
+                                                            );
                                                         }
 
                                                         @Override
@@ -150,8 +173,20 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
                                     }
                                 });
                     }
-                } else if (groupChatDAO.getMessageType().equals("system")) {
+                }
+
+                if (messageType.equals("system")) {
                     newHolder.l_chats_list_tv_last_message.setText(groupChatDAO.getLastMessage());
+                }
+
+                if (messageType.equals("image")) {
+                    newHolder.l_chats_list_tv_last_message.setText(mContext.getString(R.string.text_photo));
+                    newHolder.l_chats_list_tv_last_message.setCompoundDrawablesWithIntrinsicBounds(
+                            ContextCompat.getDrawable(mContext, R.drawable.ic_camera_alt_white_16dp),
+                            null,
+                            null,
+                            null
+                    );
                 }
             }
 
@@ -176,7 +211,7 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
             }
         };
 
-        mDatabaseReference.child("group_messages").child(groupChatDAO.getChatId())
+        mDatabaseReference.child("group_messages").child(groupChatDAO.getChatId()).limitToLast(1)
                 .addChildEventListener(mNewMessageListener);
 
         mNewMessageCountListener = new ChildEventListener() {

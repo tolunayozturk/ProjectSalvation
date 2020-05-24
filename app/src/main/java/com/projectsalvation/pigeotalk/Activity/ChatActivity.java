@@ -5,30 +5,27 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,28 +34,21 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.projectsalvation.pigeotalk.Adapter.ContactsRVAdapter;
 import com.projectsalvation.pigeotalk.Adapter.MessagesRVAdapter;
-import com.projectsalvation.pigeotalk.DAO.ChatDAO;
-import com.projectsalvation.pigeotalk.DAO.ContactDAO;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.projectsalvation.pigeotalk.Utility.Util;
@@ -73,14 +63,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -127,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
     private String mUserPhotoUrl;
 
     private Uri mAttachmentPhotoUri;
-    private boolean isFirstTime = true;
+    private boolean mIsFirstTime = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,7 +328,7 @@ public class ChatActivity extends AppCompatActivity {
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(ChatActivity.this);
 
                 builder.setItems(
-                        new String[]{getString(R.string.text_choose_from_gallery)},
+                        new String[]{getString(R.string.text_photo)},
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -391,7 +376,7 @@ public class ChatActivity extends AppCompatActivity {
 
         listenPresence();
 
-        mMessageRVAdapter = new MessagesRVAdapter(getApplicationContext(), mMessageDAOS);
+        mMessageRVAdapter = new MessagesRVAdapter(ChatActivity.this, mMessageDAOS);
         a_chat_rv_messages.setAdapter(mMessageRVAdapter);
     }
 
@@ -431,10 +416,7 @@ public class ChatActivity extends AppCompatActivity {
                 try {
                     profilePhotoFile = createImageFile();
                 } catch (IOException e) {
-                    Snackbar.make(a_chat_ll_footer,
-                            R.string.text_profile_photo_upload_failed,
-                            BaseTransientBottomBar.LENGTH_LONG)
-                            .show();
+                    // TODO: Handle error
                 }
 
                 if (profilePhotoFile != null) {
@@ -477,43 +459,7 @@ public class ChatActivity extends AppCompatActivity {
         return image;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
-                        File profilePhotoFile = null;
-
-                        try {
-                            profilePhotoFile = createImageFile();
-                        } catch (IOException e) {
-                            // TODO: Handle error
-                        }
-
-                        if (profilePhotoFile != null) {
-                            mAttachmentPhotoUri = FileProvider.getUriForFile(this,
-                                    "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
-
-                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mAttachmentPhotoUri);
-                            startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
-                        }
-                    }
-                }
-                break;
-        }
-    }
-
-    private void uploadAndSend(Uri attachmentPhotoUri) {
-        if (attachmentPhotoUri == null) {
-            // TODO: Handle error
-            return;
-        }
-
+    private void uploadAndSend() {
         if (mChatID == null) {
             createChat();
         }
@@ -548,6 +494,7 @@ public class ChatActivity extends AppCompatActivity {
         mDatabaseReference.child("user_chats_unread_messages").child(mUserID)
                 .child(mChatID).child(newMessageID).setValue("");
 
+        String path = "chats/" + mChatID + "/image" + "/IMAGE_" + mAttachmentPhotoUri.getLastPathSegment() + ".jpeg";
 
         InputStream stream = null;
         try {
@@ -556,13 +503,7 @@ public class ChatActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        if (stream == null) {
-            Log.d(TAG, "uploadAndSend: " + stream.toString());
-        }
-
-        UploadTask uploadTask = mStorageReference.child("chats/" + mChatID
-                + "/image" + "/IMAGE_" + mAttachmentPhotoUri.getLastPathSegment() + ".jpeg").putStream(stream);
-
+        UploadTask uploadTask = mStorageReference.child(path).putStream(stream);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -583,11 +524,6 @@ public class ChatActivity extends AppCompatActivity {
                         // TODO: Handle error
                     }
                 });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // TODO: Handle error
             }
         });
 
@@ -615,6 +551,37 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+                        File profilePhotoFile = null;
+
+                        try {
+                            profilePhotoFile = createImageFile();
+                        } catch (IOException e) {
+                            // TODO: Handle error
+                        }
+
+                        if (profilePhotoFile != null) {
+                            mAttachmentPhotoUri = FileProvider.getUriForFile(this,
+                                    "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
+
+                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mAttachmentPhotoUri);
+                            startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
             case INTENT_TAKE_PHOTO:
@@ -622,7 +589,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     if (mAttachmentPhotoUri != null) {
                         Log.d(TAG, "onActivityResult: " + mAttachmentPhotoUri.getPath());
-                        uploadAndSend(mAttachmentPhotoUri);
+                        uploadAndSend();
                     } else {
                         // TODO: Handle error
                     }
@@ -634,7 +601,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     if (mAttachmentPhotoUri != null) {
                         Log.d(TAG, "onActivityResult: " + mAttachmentPhotoUri.getPath());
-                        uploadAndSend(mAttachmentPhotoUri);
+                        uploadAndSend();
                     } else {
                         // TODO: Handle error
                     }
@@ -702,13 +669,13 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
 
-                if (!isFirstTime) {
+                if (!mIsFirstTime) {
                     mMessageDAOS.add(messageDAO);
                     mMessageRVAdapter.notifyDataSetChanged();
                     a_chat_rv_messages.smoothScrollToPosition(mMessageRVAdapter.getItemCount() - 1);
                 }
 
-                isFirstTime = false;
+                mIsFirstTime = false;
             }
 
             @Override

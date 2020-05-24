@@ -1,5 +1,6 @@
 package com.projectsalvation.pigeotalk.DAO;
 
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -32,9 +33,9 @@ public class MessageDAO {
     }
 
     public MessageDAO(String message, String messageType,
-                      String timestamp,
-                      String sender, String messageId,
-                      String isRead, String seenAt, String chatId) {
+                      String timestamp, String sender,
+                      String messageId, String isRead,
+                      String seenAt, String chatId) {
         this.message = message;
         this.messageType = messageType;
         this.timestamp = timestamp;

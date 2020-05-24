@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +32,7 @@ public class ChatsFragment extends Fragment {
 
     // region Resource Declaration
     RecyclerView f_chats_rv;
+    TextView f_chats_tv_no_chats;
     // endregion
 
     private static String TAG = "ChatsFragment";
@@ -54,6 +56,7 @@ public class ChatsFragment extends Fragment {
 
         // region Resource Assignment
         f_chats_rv = view.findViewById(R.id.f_chats_rv);
+        f_chats_tv_no_chats = view.findViewById(R.id.f_chats_tv_no_chats);
         // endregion
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -72,8 +75,6 @@ public class ChatsFragment extends Fragment {
         mChatListRVAdapter = new ChatListRVAdapter(getActivity().getApplicationContext(), mChatDAOS);
         f_chats_rv.setAdapter(mChatListRVAdapter);
 
-        retrieveChats();
-
         return view;
     }
 
@@ -82,9 +83,14 @@ public class ChatsFragment extends Fragment {
         mNewMessageListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 0) {
+                    f_chats_tv_no_chats.setVisibility(View.VISIBLE);
+                    return;
+                }
                 mChatDAOS.clear();
 
                 for (final DataSnapshot chat : dataSnapshot.getChildren()) {
+                    f_chats_tv_no_chats.setVisibility(View.GONE);
                     final ChatDAO chatDAO = new ChatDAO(null,
                             null,
                             null,
@@ -154,6 +160,7 @@ public class ChatsFragment extends Fragment {
 
                                                                                                 mChatDAOS.add(chatDAO);
                                                                                                 mChatListRVAdapter.notifyDataSetChanged();
+
                                                                                             }
 
                                                                                             @Override
@@ -200,5 +207,23 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        retrieveChats();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                .removeEventListener(mNewMessageListener);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mDatabaseReference.child("user_chats").child(mFirebaseAuth.getUid())
+                .removeEventListener(mNewMessageListener);
     }
 }
