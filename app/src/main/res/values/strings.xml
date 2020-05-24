@@ -8,6 +8,9 @@
     <string name="action_continue">CONTINUE</string>
     <string name="action_not_now">NOT NOW</string>
 
+    <string name="action_done">DONE</string>
+    <string name="action_save">SAVE</string>
+
     <string name="EMPTY_STRING" />
     <string name="title_chats">CHATS</string>
     <string name="title_calls">CALLS</string>
@@ -102,4 +105,9 @@
     <string name="text_type_your_group_name_here">Type your group name here</string>
 
     <string name="text_photo">Photo</string>
+    <string name="text_account">Account</string>
+    <string name="text_phone_and_status">Phone and status</string>
+    <string name="text_about_and_help">About and help</string>
+
+    <string name="text_not_your_username">This is not your username or pin. This name will be visible to your PigeoTalk contacts.</string>
 </resources>

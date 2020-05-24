@@ -1,8 +1,11 @@
 package com.projectsalvation.pigeotalk.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.projectsalvation.pigeotalk.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.util.Objects;
 
@@ -31,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     CircleImageView a_settings_civ_profile_photo;
     TextView a_settings_tv_name;
     TextView a_settings_tv_about;
+    TextView a_settings_tv_account;
     // endregion
 
     private FirebaseAuth mFirebaseAuth;
@@ -46,6 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
         a_settings_civ_profile_photo = findViewById(R.id.a_settings_civ_profile_photo);
         a_settings_tv_name = findViewById(R.id.a_settings_tv_name);
         a_settings_tv_about = findViewById(R.id.a_settings_tv_about);
+        a_settings_tv_account = findViewById(R.id.a_settings_tv_account);
         // endregion
 
         setSupportActionBar(a_settings_toolbar);
@@ -56,23 +63,32 @@ public class SettingsActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+        a_settings_tv_account.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(SettingsActivity.this, AccountSettingsActivity.class);
+                startActivity(i);
+            }
+        });
+    }
+
+    private void loadProfile() {
         Picasso.get().load(mFirebaseAuth.getCurrentUser().getPhotoUrl())
                 .fit()
                 .centerCrop()
-                .into(a_settings_civ_profile_photo, new Callback() {
-                    @Override
-                    public void onSuccess() {
+                .into(a_settings_civ_profile_photo);
 
-                    }
-
+        a_settings_civ_profile_photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new StfalconImageViewer.Builder<>(SettingsActivity.this, new String[]{mFirebaseAuth.getCurrentUser().getPhotoUrl().toString()}, new ImageLoader<String>() {
                     @Override
-                    public void onError(Exception e) {
-                        Picasso.get().load(mFirebaseAuth.getCurrentUser().getPhotoUrl())
-                                .fit()
-                                .centerCrop()
-                                .into(a_settings_civ_profile_photo);
+                    public void loadImage(ImageView imageView, String imageUrl) {
+                        Picasso.get().load(imageUrl).into(imageView);
                     }
-                });
+                }).withStartPosition(0).show();
+            }
+        });
 
         a_settings_tv_name.setText(mFirebaseAuth.getCurrentUser().getDisplayName());
 
@@ -104,5 +120,12 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        loadProfile();
     }
 }

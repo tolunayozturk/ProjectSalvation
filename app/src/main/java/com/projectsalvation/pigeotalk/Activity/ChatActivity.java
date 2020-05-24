@@ -525,6 +525,11 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
             }
+        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                
+            }
         });
 
         if (mMessageListener == null) {

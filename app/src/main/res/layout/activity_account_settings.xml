@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#eeeeee"
+    tools:context=".Activity.AccountSettingsActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/a_account_sett_abl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/a_account_sett_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:title="@string/text_account"
+            app:titleTextColor="@color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <LinearLayout
+            android:id="@+id/a_account_sett_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/a_account_sett_abl"
+            app:layout_constraintVertical_bias="0.0">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="32dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/a_account_sett_civ_profile_photo"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/default_profile_picture" />
+
+                <com.google.android.material.chip.Chip
+                    android:layout_width="42dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="bottom|end"
+                    android:importantForAccessibility="no"
+                    app:chipBackgroundColor="@color/colorAccent"
+                    app:chipIcon="@drawable/ic_add_a_photo_black_24dp"
+                    app:chipIconSize="16dp"
+                    app:chipIconTint="@color/white"
+                    app:iconStartPadding="4dp"
+                    app:textEndPadding="0dp" />
+
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/a_account_sett_et_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:background="@color/white"
+                android:drawableEnd="@drawable/ic_mode_edit_black_24dp"
+                android:drawableTint="@color/colorAccent"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:maxLength="18"
+                android:maxLines="1"
+                android:nextFocusDown="@id/a_account_sett_et_user_name"
+                android:paddingStart="16dp"
+                android:paddingEnd="24dp"
+                android:textAlignment="textStart"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                android:padding="16dp"
+                android:text="@string/text_not_your_username" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:background="@color/white"
+                android:drawableTint="@color/colorAccent"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center_vertical"
+                android:maxLength="42"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/text_phone_and_status"
+                android:textColor="@color/colorAccent"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/a_account_sett_tv_phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/white"
+                android:drawableTint="@color/colorAccent"
+                android:gravity="center_vertical"
+                android:maxLength="42"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textIsSelectable="true"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/a_account_sett_et_about"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="64dp"
+                android:background="@color/white"
+                android:drawableEnd="@drawable/ic_mode_edit_black_24dp"
+                android:drawableTint="@color/colorAccent"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:maxLength="52"
+                android:nextFocusDown="@id/a_account_sett_et_about"
+                android:paddingStart="16dp"
+                android:paddingEnd="24dp"
+                android:textAlignment="textStart"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
