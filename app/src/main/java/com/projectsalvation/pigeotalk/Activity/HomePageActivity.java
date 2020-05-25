@@ -222,7 +222,6 @@ public class HomePageActivity extends AppCompatActivity {
 
                                             Intent i = new Intent(HomePageActivity.this, GroupChatActivity.class);
                                             i.putExtra("groupID", input.getText().toString());
-                                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             startActivity(i);
 
                                             return;

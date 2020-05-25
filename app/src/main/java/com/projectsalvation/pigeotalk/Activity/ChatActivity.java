@@ -769,7 +769,13 @@ public class ChatActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
+                break;
             case R.id.a_chat_menuItem_contact_info:
+                Intent i = new Intent(ChatActivity.this, ContactInfoActivity.class);
+                i.putExtra("userID", mUserID);
+                i.putExtra("userPhotoUrl", mUserPhotoUrl);
+                i.putExtra("userName", mUserName);
+                startActivity(i);
                 break;
         }
 
