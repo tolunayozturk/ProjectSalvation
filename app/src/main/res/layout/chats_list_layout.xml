@@ -43,7 +43,7 @@
         android:singleLine="true"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:text="Erşan Kuneri" />
+        tools:text="Tophaneli" />
 
     <TextView
         android:id="@+id/l_chats_list_tv_last_message"
@@ -58,7 +58,7 @@
         android:drawablePadding="4dp"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="Dışarıda tank görüyorum Faruk hayırdır bi' kutlama mı var?" />
+        tools:text="Her zaman abi" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/l_chats_list_chip_group"

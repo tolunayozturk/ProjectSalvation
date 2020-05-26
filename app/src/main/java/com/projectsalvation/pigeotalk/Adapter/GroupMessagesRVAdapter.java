@@ -76,8 +76,8 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
 
             newHolder.l_chat_group_message_tv_message.setVisibility(View.VISIBLE);
 
-            // If message_type is plaintext, move timestamp to end
-            newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.HORIZONTAL);
+            // If message_type is plaintext, move timestamp to bottom
+            newHolder.l_chat_group_messages_ll_child.setOrientation(LinearLayout.VERTICAL);
 
             newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
         } else if (messageDAO.getMessageType().equals("image")) {
@@ -146,9 +146,7 @@ public class GroupMessagesRVAdapter extends RecyclerView.Adapter<GroupMessagesRV
             newHolder.l_chat_group_messages_ll.setGravity(Gravity.CENTER);
 
             newHolder.l_chat_group_messages_cv.setCardBackgroundColor(
-                    ContextCompat.getColor(mContext, R.color.colorAccent));
-            newHolder.l_chat_group_message_tv_message.setTextColor(
-                    ContextCompat.getColor(mContext, R.color.white));
+                    ContextCompat.getColor(mContext, R.color.system_msg_color));
 
             newHolder.l_chat_group_message_tv_message.setText(messageDAO.getMessage());
 

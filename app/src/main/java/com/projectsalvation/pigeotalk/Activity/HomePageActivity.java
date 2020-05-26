@@ -7,8 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -192,11 +195,25 @@ public class HomePageActivity extends AppCompatActivity {
             case R.id.a_home_page_menuItem_join_group:
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
                 alert.setMessage(getString(R.string.text_paste_the_group_id));
+                alert.setTitle("Join a group");
 
-                // Set an EditText view to get user input
+                LinearLayout container = new LinearLayout(this);
                 final EditText input = new EditText(this);
+
+                container.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.setMargins(24, 0, 24, 0);
+                input.setLayoutParams(lp);
+
+                input.setGravity(Gravity.CENTER_VERTICAL | android.view.Gravity.LEFT);
+                input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+                input.setMaxLines(1);
+                input.setTextSize(14);
+                input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32)});
+
+                container.addView(input, lp);
                 input.requestFocus();
-                alert.setView(input);
+                alert.setView(container);
 
                 alert.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -223,13 +240,7 @@ public class HomePageActivity extends AppCompatActivity {
                                             Intent i = new Intent(HomePageActivity.this, GroupChatActivity.class);
                                             i.putExtra("groupID", input.getText().toString());
                                             startActivity(i);
-
                                             return;
-                                        } else {
-                                            Snackbar.make(a_home_page_toolbar,
-                                                    getString(R.string.text_invalid_pigeoid),
-                                                    BaseTransientBottomBar.LENGTH_LONG)
-                                                    .show();
                                         }
                                     }
 

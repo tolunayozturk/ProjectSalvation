@@ -61,6 +61,7 @@
                     android:src="@drawable/default_profile_picture" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/a_account_sett_chip_add_photo"
                     android:layout_width="42dp"
                     android:layout_height="48dp"
                     android:layout_gravity="bottom|end"

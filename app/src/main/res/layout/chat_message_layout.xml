@@ -97,7 +97,7 @@
                 android:textColor="@color/message_text_color"
                 android:textIsSelectable="true"
                 android:textSize="15sp"
-                tools:text="Lemme out" />
+                tools:text="Geçelim onu abi, muhteşem fikirlerim var, sinemada yepyeni bir soluk, bilim kurgu, ne dersin?" />
 
             <TextView
                 android:id="@+id/l_chat_message_tv_timestamp"
@@ -113,7 +113,7 @@
                 android:minWidth="48dp"
                 android:textColor="@color/message_time_color"
                 android:textSize="12sp"
-                tools:text="11:21 AM" />
+                tools:text="12:09 PM" />
 
 
         </LinearLayout>

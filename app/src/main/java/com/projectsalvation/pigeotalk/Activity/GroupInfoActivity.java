@@ -6,6 +6,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -16,20 +18,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -42,6 +46,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.projectsalvation.pigeotalk.Adapter.GroupMembersRVAdapter;
+import com.projectsalvation.pigeotalk.DAO.UserDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.projectsalvation.pigeotalk.Utility.Util;
 import com.squareup.picasso.Callback;
@@ -54,59 +60,85 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-public class AccountSettingsActivity extends AppCompatActivity {
+public class GroupInfoActivity extends AppCompatActivity {
 
     // region Resource Declaration
-    MaterialToolbar a_account_sett_toolbar;
-    CircleImageView a_account_sett_civ_profile_photo;
-    EditText a_account_sett_et_user_name;
-    TextView a_account_sett_tv_phone_number;
-    TextView a_account_sett_et_about;
-    Chip a_account_sett_chip_add_photo;
+    AppBarLayout a_group_info_abl;
+    CollapsingToolbarLayout a_group_info_ctl;
+    ImageView a_group_info_iv_group_photo;
+    EditText a_group_info_et_group_name;
+    TextView a_group_info_tv_member_count;
+    MaterialToolbar a_group_info_toolbar;
+    RecyclerView a_group_info_rv_members;
+    TextView a_group_info_tv_change_group_photo;
+    FrameLayout a_group_info_fl;
     // endregion
 
-    private FirebaseAuth mFirebaseAuth;
-    private DatabaseReference mDatabaseReference;
-    private StorageReference mStorageReference;
-
-    private Uri mProfilePhotoUri;
+    private static final String TAG = "GroupInfoActivity";
 
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 100;
     private static final int INTENT_CHOOSE_PHOTO = 200;
     private static final int INTENT_TAKE_PHOTO = 110;
 
+    private FirebaseAuth mFirebaseAuth;
+    private DatabaseReference mDatabaseReference;
+    private StorageReference mStorageReference;
+
+    private ArrayList<UserDAO> mUserDAOS;
+    private GroupMembersRVAdapter mGroupMembersRVAdapter;
+
+    private String mGroupID;
+    private String mGroupName;
+    private String mGroupPhotoUrl;
+
+    private Uri mGroupPhotoUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_account_settings);
+        setContentView(R.layout.activity_group_info);
 
         // region Resource Assignment
-        a_account_sett_toolbar = findViewById(R.id.a_account_sett_toolbar);
-        a_account_sett_civ_profile_photo = findViewById(R.id.a_account_sett_civ_profile_photo);
-        a_account_sett_et_user_name = findViewById(R.id.a_account_sett_et_user_name);
-        a_account_sett_tv_phone_number = findViewById(R.id.a_account_sett_tv_phone_number);
-        a_account_sett_et_about = findViewById(R.id.a_account_sett_et_about);
-        a_account_sett_chip_add_photo = findViewById(R.id.a_account_sett_chip_add_photo);
-        // endregion
+        a_group_info_abl = findViewById(R.id.a_group_info_abl);
+        a_group_info_ctl = findViewById(R.id.a_group_info_ctl);
+        a_group_info_iv_group_photo = findViewById(R.id.a_group_info_iv_group_photo);
+        a_group_info_et_group_name = findViewById(R.id.a_group_info_et_group_name);
+        a_group_info_tv_member_count = findViewById(R.id.a_group_info_tv_member_count);
+        a_group_info_toolbar = findViewById(R.id.a_group_info_toolbar);
+        a_group_info_rv_members = findViewById(R.id.a_group_info_rv_members);
+        a_group_info_tv_change_group_photo = findViewById(R.id.a_group_info_tv_change_group_photo);
+        a_group_info_fl = findViewById(R.id.a_group_info_fl);
+        // end region
 
-        setSupportActionBar(a_account_sett_toolbar);
+        setSupportActionBar(a_group_info_toolbar);
 
+        // Enable back button
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mStorageReference = FirebaseStorage.getInstance().getReference();
 
-        Picasso.get().load(mFirebaseAuth.getCurrentUser().getPhotoUrl())
+        mUserDAOS = new ArrayList<>();
+
+        a_group_info_rv_members.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
+                LinearLayoutManager.VERTICAL, false));
+
+        Intent i = getIntent();
+        mGroupID = i.getStringExtra("groupID");
+        mGroupName = i.getStringExtra("groupName");
+        mGroupPhotoUrl = i.getStringExtra("groupPhotoUrl");
+
+        Picasso.get().load(mGroupPhotoUrl)
                 .fit()
                 .centerCrop()
-                .into(a_account_sett_civ_profile_photo, new Callback() {
+                .into(a_group_info_iv_group_photo, new Callback() {
                     @Override
                     public void onSuccess() {
 
@@ -114,128 +146,17 @@ public class AccountSettingsActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(Exception e) {
-                        Picasso.get().load(mFirebaseAuth.getCurrentUser().getPhotoUrl())
+                        Picasso.get().load(mGroupPhotoUrl)
                                 .fit()
                                 .centerCrop()
-                                .into(a_account_sett_civ_profile_photo);
+                                .into(a_group_info_iv_group_photo);
                     }
                 });
 
-        a_account_sett_et_user_name.setText(mFirebaseAuth.getCurrentUser().getDisplayName());
-
-        a_account_sett_tv_phone_number.setText(mFirebaseAuth.getCurrentUser().getPhoneNumber());
-
-        mDatabaseReference.child("users").child(mFirebaseAuth.getUid())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        a_account_sett_et_about.setText(dataSnapshot.child("about").getValue().toString());
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-        // region Change Photo
-        a_account_sett_civ_profile_photo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(AccountSettingsActivity.this);
-
-                builder.setItems(
-                        new String[]{getString(R.string.text_take_a_photo), getString(R.string.text_choose_from_gallery)},
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case 0:
-                                        launchCamera();
-                                        break;
-                                    case 1:
-                                        launchPhotoLibrary();
-                                        break;
-                                } // end switch
-                            }
-                        }
-                );
-
-                AlertDialog addProfilePhotoDialog = builder.create();
-                addProfilePhotoDialog.show();
-            }
-        });
-
-        a_account_sett_chip_add_photo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(AccountSettingsActivity.this);
-
-                builder.setItems(
-                        new String[]{getString(R.string.text_take_a_photo), getString(R.string.text_choose_from_gallery)},
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case 0:
-                                        launchCamera();
-                                        break;
-                                    case 1:
-                                        launchPhotoLibrary();
-                                        break;
-                                } // end switch
-                            }
-                        }
-                );
-
-                AlertDialog addProfilePhotoDialog = builder.create();
-                addProfilePhotoDialog.show();
-            }
-        });
-        // endregion
-
-        a_account_sett_et_user_name.setImeActionLabel(getString(R.string.action_save), KeyEvent.KEYCODE_ENTER);
-        a_account_sett_et_about.setImeActionLabel(getString(R.string.action_save), KeyEvent.KEYCODE_ENTER);
-
-        a_account_sett_et_user_name.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    Util.updateUserProfile(mFirebaseAuth.getCurrentUser(), a_account_sett_et_user_name
-                            .getText().toString(), mFirebaseAuth.getCurrentUser().getPhotoUrl());
-
-                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("name")
-                            .setValue(a_account_sett_et_user_name.getText().toString());
-
-                    InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(a_account_sett_et_user_name.getWindowToken(), 0);
-                    a_account_sett_et_user_name.setCursorVisible(false);
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        a_account_sett_et_about.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
-                            .setValue(a_account_sett_et_about.getText().toString());
-
-                    InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(a_account_sett_et_about.getWindowToken(), 0);
-                    a_account_sett_et_about.setCursorVisible(false);
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        a_account_sett_civ_profile_photo.setOnLongClickListener(new View.OnLongClickListener() {
+        a_group_info_iv_group_photo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                new StfalconImageViewer.Builder<>(AccountSettingsActivity.this, new String[]{mFirebaseAuth.getCurrentUser().getPhotoUrl().toString()}, new ImageLoader<String>() {
+                new StfalconImageViewer.Builder<>(GroupInfoActivity.this, new String[]{mGroupPhotoUrl}, new ImageLoader<String>() {
                     @Override
                     public void loadImage(ImageView imageView, String imageUrl) {
                         Picasso.get().load(imageUrl).into(imageView);
@@ -244,22 +165,167 @@ public class AccountSettingsActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        a_group_info_et_group_name.setText(mGroupName);
+        mDatabaseReference.child("groups").child(mGroupID).child("members")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        a_group_info_tv_member_count.setText(getString(R.string.text_member_count, dataSnapshot.getChildrenCount()));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+        a_group_info_tv_change_group_photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(GroupInfoActivity.this);
+
+                builder.setItems(
+                        new String[]{getString(R.string.text_take_a_photo), getString(R.string.text_choose_from_gallery)},
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        launchCamera();
+                                        break;
+                                    case 1:
+                                        launchPhotoLibrary();
+                                        break;
+                                } // end switch
+                            }
+                        }
+                );
+
+                AlertDialog addProfilePhotoDialog = builder.create();
+                addProfilePhotoDialog.show();
+            }
+        });
+
+        a_group_info_et_group_name.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    mDatabaseReference.child("groups").child(mGroupID).child("groupName")
+                            .setValue(a_group_info_et_group_name.getText().toString());
+
+                    InputMethodManager imm = (InputMethodManager) getApplicationContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    imm.hideSoftInputFromWindow(a_group_info_et_group_name.getWindowToken(), 0);
+                    a_group_info_et_group_name.setCursorVisible(false);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        mDatabaseReference.child("groups").child(mGroupID).child("members")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (final DataSnapshot member : dataSnapshot.getChildren()) {
+                            final UserDAO user = new UserDAO(
+                                    "",
+                                    "",
+                                    "",
+                                    ""
+                            );
+
+                            if (mFirebaseAuth.getUid().equals(member.getKey())) {
+                                user.setUserID(mFirebaseAuth.getUid());
+                                user.setDisplayName(mFirebaseAuth.getCurrentUser().getDisplayName());
+                                user.setPhotoUrl(mFirebaseAuth.getCurrentUser().getPhotoUrl().toString());
+
+                                mDatabaseReference.child("users").child(mFirebaseAuth.getUid())
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                user.setAbout(dataSnapshot.child("about").getValue().toString());
+
+                                                mUserDAOS.add(user);
+                                                mGroupMembersRVAdapter.notifyDataSetChanged();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                continue;
+                            }
+
+                            user.setUserID(member.getKey());
+                            mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull final DataSnapshot contactsSnapshot) {
+                                            mDatabaseReference.child("users").child(member.getKey())
+                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            if (contactsSnapshot.hasChild(member.getKey())) {
+                                                                user.setDisplayName(contactsSnapshot
+                                                                        .child(member.getKey()).getValue().toString());
+                                                            } else {
+                                                                user.setDisplayName(dataSnapshot
+                                                                        .child("phone_number").getValue().toString());
+                                                            }
+
+                                                            user.setPhotoUrl(dataSnapshot
+                                                                    .child("profile_photo_url").getValue().toString());
+
+                                                            user.setAbout(dataSnapshot
+                                                                    .child("about").getValue().toString());
+
+                                                            mUserDAOS.add(user);
+                                                            mGroupMembersRVAdapter.notifyDataSetChanged();
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+        mGroupMembersRVAdapter = new GroupMembersRVAdapter(GroupInfoActivity.this, mUserDAOS);
+        a_group_info_rv_members.setAdapter(mGroupMembersRVAdapter);
     }
 
     private void launchCamera() {
         if (!Util.checkPermission(Manifest.permission.CAMERA, getApplicationContext())) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    AccountSettingsActivity.this, Manifest.permission.CAMERA)) {
+                    GroupInfoActivity.this, Manifest.permission.CAMERA)) {
 
                 // Explain to users why we request this permission
                 MaterialAlertDialogBuilder alertDialogBuilder =
-                        new MaterialAlertDialogBuilder(AccountSettingsActivity.this)
+                        new MaterialAlertDialogBuilder(GroupInfoActivity.this)
                                 .setMessage(R.string.dialog_permission_camera_explanation)
                                 .setPositiveButton(R.string.action_continue, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         Util.requestPermission(new String[]{Manifest.permission.CAMERA},
-                                                AccountSettingsActivity.this,
+                                                GroupInfoActivity.this,
                                                 PERMISSION_REQUEST_CODE_CAMERA);
                                     }
                                 })
@@ -270,7 +336,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
             } else {
                 // No explanation needed; request the permission
                 Util.requestPermission(new String[]{Manifest.permission.CAMERA},
-                        AccountSettingsActivity.this,
+                        GroupInfoActivity.this,
                         PERMISSION_REQUEST_CODE_CAMERA);
             }
         } else {
@@ -282,17 +348,17 @@ public class AccountSettingsActivity extends AppCompatActivity {
                 try {
                     profilePhotoFile = createImageFile();
                 } catch (IOException e) {
-                    Snackbar.make(a_account_sett_civ_profile_photo,
+                    Snackbar.make(a_group_info_iv_group_photo,
                             R.string.text_profile_photo_upload_failed,
                             BaseTransientBottomBar.LENGTH_LONG)
                             .show();
                 }
 
                 if (profilePhotoFile != null) {
-                    mProfilePhotoUri = FileProvider.getUriForFile(this,
+                    mGroupPhotoUri = FileProvider.getUriForFile(this,
                             "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
 
-                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mProfilePhotoUri);
+                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mGroupPhotoUri);
                     startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
                 }
             }
@@ -343,17 +409,17 @@ public class AccountSettingsActivity extends AppCompatActivity {
                         try {
                             profilePhotoFile = createImageFile();
                         } catch (IOException e) {
-                            Snackbar.make(a_account_sett_civ_profile_photo,
+                            Snackbar.make(a_group_info_iv_group_photo,
                                     R.string.text_profile_photo_upload_failed,
                                     BaseTransientBottomBar.LENGTH_LONG)
                                     .show();
                         }
 
                         if (profilePhotoFile != null) {
-                            mProfilePhotoUri = FileProvider.getUriForFile(this,
+                            mGroupPhotoUri = FileProvider.getUriForFile(this,
                                     "com.projectsalvation.pigeotalk.fileprovider", profilePhotoFile);
 
-                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mProfilePhotoUri);
+                            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mGroupPhotoUri);
                             startActivityForResult(takePhotoIntent, INTENT_TAKE_PHOTO);
                         }
                     }
@@ -368,13 +434,13 @@ public class AccountSettingsActivity extends AppCompatActivity {
             case INTENT_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
 
-                    if (mProfilePhotoUri != null) {
-                        Picasso.get().load(mProfilePhotoUri).noFade()
-                                .into(a_account_sett_civ_profile_photo);
+                    if (mGroupPhotoUri != null) {
+                        Picasso.get().load(mGroupPhotoUri).noFade()
+                                .into(a_group_info_iv_group_photo);
 
-                        uploadAndUpdate(mProfilePhotoUri);
+                        uploadAndUpdate(mGroupPhotoUri);
                     } else {
-                        Snackbar.make(a_account_sett_civ_profile_photo,
+                        Snackbar.make(a_group_info_iv_group_photo,
                                 R.string.text_profile_photo_upload_failed,
                                 BaseTransientBottomBar.LENGTH_LONG)
                                 .show();
@@ -383,15 +449,15 @@ public class AccountSettingsActivity extends AppCompatActivity {
                 break;
             case INTENT_CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    mProfilePhotoUri = data.getData();
+                    mGroupPhotoUri = data.getData();
 
-                    if (mProfilePhotoUri != null) {
-                        Picasso.get().load(mProfilePhotoUri).noFade()
-                                .into(a_account_sett_civ_profile_photo);
+                    if (mGroupPhotoUri != null) {
+                        Picasso.get().load(mGroupPhotoUri).noFade()
+                                .into(a_group_info_iv_group_photo);
 
-                        uploadAndUpdate(mProfilePhotoUri);
+                        uploadAndUpdate(mGroupPhotoUri);
                     } else {
-                        Snackbar.make(a_account_sett_civ_profile_photo,
+                        Snackbar.make(a_group_info_iv_group_photo,
                                 R.string.text_profile_photo_upload_failed,
                                 BaseTransientBottomBar.LENGTH_LONG)
                                 .show();
@@ -412,7 +478,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String path = mFirebaseAuth.getUid() + "/pp.jpeg";
+        String path = "groups" + "/" + mGroupID + "/" + "gp.jpeg";
         UploadTask uploadTask = mStorageReference.child(path).putStream(stream);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -422,10 +488,8 @@ public class AccountSettingsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Uri> task) {
                         String downloadUrl = Objects.requireNonNull(task.getResult()).toString();
 
-                        mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("profile_photo_url")
-                                .setValue(downloadUrl);
-
-                        Util.updateUserProfile(Objects.requireNonNull(mFirebaseAuth.getCurrentUser()), mFirebaseAuth.getCurrentUser().getDisplayName(), Uri.parse(downloadUrl));
+                        mDatabaseReference.child("groups").child(mGroupID)
+                                .child("groupPhotoUrl").setValue(downloadUrl);
                     }
                 });
 

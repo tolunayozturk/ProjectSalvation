@@ -29,20 +29,24 @@
                 android:id="@+id/l_chat_group_messages_ll_orientation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:gravity="start"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/l_chat_group_message_tv_sender_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="start"
                     android:fontFamily="sans-serif"
+                    android:gravity="start"
                     android:paddingStart="8dp"
                     android:paddingTop="4dp"
                     android:paddingEnd="8dp"
-                    android:paddingBottom="4dp"
+                    android:paddingBottom="2dp"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    tools:text="You" />
+                    tools:text="Erşan Kuneri" />
 
                 <FrameLayout
                     android:id="@+id/l_chat_group_message_fl"
@@ -86,6 +90,7 @@
                     android:layout_gravity="start"
                     android:autoLink="all"
                     android:fontFamily="sans-serif"
+                    android:gravity="start"
                     android:linksClickable="true"
                     android:maxWidth="216dp"
                     android:minWidth="32dp"
@@ -96,7 +101,7 @@
                     android:textColor="@color/message_text_color"
                     android:textIsSelectable="true"
                     android:textSize="15sp"
-                    tools:text="Lemme out lemme out this is not a dance" />
+                    tools:text="Dışarıda tank görüyorum Faruk, hayırdır bi' kutlama mı var?" />
 
             </LinearLayout>
 
@@ -126,9 +131,11 @@
                 android:drawablePadding="4dp"
                 android:drawableTint="@color/message_time_color"
                 android:minWidth="32dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="0dp"
                 android:textColor="@color/message_time_color"
                 android:textSize="12sp"
-                tools:text="11:21 AM" />
+                tools:text="12:09 PM" />
 
 
         </LinearLayout>

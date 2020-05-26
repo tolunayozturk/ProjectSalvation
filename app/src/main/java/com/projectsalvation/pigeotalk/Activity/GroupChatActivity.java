@@ -803,7 +803,7 @@ public class GroupChatActivity extends AppCompatActivity {
         final String newMessageID = messageReference.push().getKey();
 
         MessageDAO newMessage = new MessageDAO(
-                firebaseAuth.getCurrentUser().getDisplayName() + " created this group!",
+                firebaseAuth.getCurrentUser().getDisplayName() + " created this group",
                 "system",
                 Long.toString(System.currentTimeMillis()),
                 "system",
@@ -824,7 +824,13 @@ public class GroupChatActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
+                break;
             case R.id.a_group_chat_menuItem_group_info:
+                Intent i = new Intent(GroupChatActivity.this, GroupInfoActivity.class);
+                i.putExtra("groupID", mGroupID);
+                i.putExtra("groupName", mGroupName);
+                i.putExtra("groupPhotoUrl", mGroupPhotoUrl);
+                startActivity(i);
                 break;
         }
 

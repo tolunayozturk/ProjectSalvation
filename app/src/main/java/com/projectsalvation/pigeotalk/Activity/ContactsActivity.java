@@ -97,7 +97,6 @@ public class ContactsActivity extends AppCompatActivity {
         mRegisteredPhoneNumbers = new HashMap<>();
         mContactDAOS = new ArrayList<>();
 
-        // Black magic to fix RV's layout error
         a_contacts_rv.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, false));
 
@@ -190,6 +189,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     private void loadContacts() {
         mContactDAOS.clear();
+        a_contacts_rv.removeAllViewsInLayout();
 
         if (mFoundRegisteredContacts.size() == 0) {
             // No contact found, show no contact info
@@ -227,7 +227,10 @@ public class ContactsActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.a_contacts_menuItem_refresh:
-                // TODO: Refresh
+                Intent intent = getIntent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                finish();
+                startActivity(intent);
                 break;
         }
 

@@ -15,6 +15,7 @@
     <color name="message_text_color">#3c3c3c</color>
     <color name="message_time_color">#8c8c8c</color>
     <color name="blue_double_tick">#61bee0</color>
+    <color name="system_msg_color">#e4f6fe</color>
 
     <color name="secondary_text_material_light">#8a000000</color>
     <color name="progress_bar_bg">#50000000</color>

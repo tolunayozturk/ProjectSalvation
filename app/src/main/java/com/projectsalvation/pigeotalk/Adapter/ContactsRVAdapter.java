@@ -23,8 +23,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactsRVAdapter extends RecyclerView.Adapter<ContactsRVAdapter.ViewHolder> {
 
-    private static final String TAG = "ContactsRVAdapter";
-
     private Context mContext;
     private ArrayList<ContactDAO> mContactDAOS;
 
