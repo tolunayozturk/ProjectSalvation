@@ -7,6 +7,8 @@
     <string name="action_resend_sms_code">RESEND CODE</string>
     <string name="action_continue">CONTINUE</string>
     <string name="action_not_now">NOT NOW</string>
+    <string name="action_yes">YES</string>
+    <string name="action_no">NO</string>
 
     <string name="action_done">DONE</string>
     <string name="action_save">SAVE</string>
@@ -114,4 +116,6 @@
 
     <string name="text_member_count">%1$d member(s)</string>
     <string name="text_members">Members</string>
+
+    <string name="dialog_remove_group_member">Do you want to remove this person from this group?</string>
 </resources>

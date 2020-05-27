@@ -24,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -37,6 +39,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.projectsalvation.pigeotalk.Adapter.HomeViewPagerAdapter;
 import com.projectsalvation.pigeotalk.Fragment.GroupsFragment;
 import com.projectsalvation.pigeotalk.Fragment.CameraFragment;
@@ -167,6 +171,23 @@ public class HomePageActivity extends AppCompatActivity {
             }
         });
         // endregion
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        mDatabaseReference.child("users").child(mFirebaseAuth.getUid())
+                                .child("device_token").setValue(token);
+                    }
+                });
     }
 
     public static void setBadge(int count, int index) {
@@ -178,6 +199,8 @@ public class HomePageActivity extends AppCompatActivity {
     public static void removeBadge(int index) {
         a_home_page_tab_layout.getTabAt(index).removeBadge();
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

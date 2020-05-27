@@ -50,6 +50,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.projectsalvation.pigeotalk.Adapter.MessagesRVAdapter;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
+import com.projectsalvation.pigeotalk.DAO.NotificationDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.projectsalvation.pigeotalk.Utility.Util;
 import com.squareup.picasso.Callback;
@@ -289,6 +290,18 @@ public class ChatActivity extends AppCompatActivity {
 
                 messageReference.child(Objects.requireNonNull(newMessageID)).setValue(newMessage);
 
+                String newNotificationID = mDatabaseReference.child("notifications").child(mUserID)
+                        .push().getKey();
+
+                NotificationDAO newNotification = new NotificationDAO(
+                        getString(R.string.app_name),
+                        a_chat_et_message.getText().toString(),
+                        ""
+                );
+
+                mDatabaseReference.child("notifications").child(mUserID).child(newNotificationID)
+                        .setValue(newNotification);
+
                 a_chat_et_message.setText("");
 
                 mDatabaseReference.child("chats").child(mChatID)
@@ -517,6 +530,18 @@ public class ChatActivity extends AppCompatActivity {
                                 newMessage.setMessage(downloadUrl);
                                 messageReference.child(newMessageID).child("message").setValue(downloadUrl);
                                 mMessageRVAdapter.notifyDataSetChanged();
+
+                                String newNotificationID = mDatabaseReference.child("notifications").child(mUserID)
+                                        .push().getKey();
+
+                                NotificationDAO newNotification = new NotificationDAO(
+                                        getString(R.string.app_name),
+                                        "\uD83D\uDCF7 Photo",
+                                        downloadUrl
+                                );
+
+                                mDatabaseReference.child("notifications").child(mUserID).child(newNotificationID)
+                                        .setValue(newNotification);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
