@@ -105,6 +105,7 @@ public class AccountSettingsActivity extends AppCompatActivity {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mStorageReference = FirebaseStorage.getInstance().getReference();
 
+        Log.d("ACCOUNTSETTINGS", "onCreate: "+ mFirebaseAuth.getCurrentUser().getPhotoUrl());
         Picasso.get().load(mFirebaseAuth.getCurrentUser().getPhotoUrl())
                 .fit()
                 .centerCrop()

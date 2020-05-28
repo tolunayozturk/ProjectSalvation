@@ -1,7 +1,6 @@
 package com.projectsalvation.pigeotalk.Adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,11 +9,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -131,8 +128,8 @@ public class GroupMembersRVAdapter extends RecyclerView.Adapter<GroupMembersRVAd
         TextView l_chats_list_tv_time;
         Chip l_chats_list_chip_mute;
         Chip l_chats_list_chip_new_message_count;
-
         // endregion
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 

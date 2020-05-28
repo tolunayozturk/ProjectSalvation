@@ -1,6 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.StatusFragment"/>
+    android:orientation="vertical"
+    tools:context=".Fragment.StatusFragment">
+
+    <RelativeLayout
+        android:id="@+id/f_status_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/f_status_civ_profile_photo"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:src="@drawable/default_profile_picture" />
+
+        <TextView
+            android:id="@+id/f_status_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toEndOf="@+id/f_status_civ_profile_photo"
+            android:ellipsize="end"
+
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="My Status" />
+
+        <TextView
+            android:id="@+id/f_status_tv_status_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/f_status_tv"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="22dp"
+            android:layout_toEndOf="@+id/f_status_civ_profile_photo"
+            android:drawablePadding="4dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            tools:text="24 hours ago" />
+
+        <Button
+            android:id="@+id/f_status_add_status"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/f_status_tv_status_timestamp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="4dp"
+            android:text="TAP TO ADD STATUS"
+            android:textSize="12sp"/>
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/f_status_rv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/f_status_rl" />
+
+    <TextView
+        android:id="@+id/f_status_tv_no_status"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/f_status_rv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:drawableTop="@drawable/ic_monochrome_photos_black_48dp"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/secondary_text_material_light"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:padding="64dp"
+        android:text="@string/text_new_status"
+        android:textAlignment="center" />
+</androidx.constraintlayout.widget.ConstraintLayout>

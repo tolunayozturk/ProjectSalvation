@@ -87,6 +87,7 @@
 
     <string name="text_start_new_conversation">Once you start a new conversation, you\'ll see it listed here.</string>
     <string name="text_start_new_group">Once you create or join a group, you\'ll see it listed here.</string>
+    <string name="text_new_status">Your contact\'s status updates will be shown here.</string>
 
     <string name="text_invite_to_pigeotalk">Invite friends and family to PigeoTalk</string>
 
