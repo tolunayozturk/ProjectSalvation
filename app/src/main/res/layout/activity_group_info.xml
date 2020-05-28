@@ -55,6 +55,7 @@
                     android:drawableEnd="@drawable/ic_mode_edit_black_24dp"
                     android:drawablePadding="8dp"
                     android:drawableTint="@color/white"
+                    android:imeOptions="actionDone"
                     android:inputType="textNoSuggestions"
                     android:maxLength="27"
                     android:padding="16dp"

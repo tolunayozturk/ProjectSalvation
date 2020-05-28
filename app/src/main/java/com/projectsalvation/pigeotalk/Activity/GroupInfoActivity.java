@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -207,10 +208,10 @@ public class GroupInfoActivity extends AppCompatActivity {
             }
         });
 
-        a_group_info_et_group_name.setOnKeyListener(new View.OnKeyListener() {
+        a_group_info_et_group_name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_ACTION_DONE) {
                     mDatabaseReference.child("groups").child(mGroupID).child("groupName")
                             .setValue(a_group_info_et_group_name.getText().toString());
 

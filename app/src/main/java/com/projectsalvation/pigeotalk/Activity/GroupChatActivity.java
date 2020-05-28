@@ -51,6 +51,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.projectsalvation.pigeotalk.Adapter.GroupMessagesRVAdapter;
 import com.projectsalvation.pigeotalk.DAO.MessageDAO;
+import com.projectsalvation.pigeotalk.DAO.NotificationDAO;
 import com.projectsalvation.pigeotalk.R;
 import com.projectsalvation.pigeotalk.Utility.Util;
 import com.squareup.picasso.Callback;
@@ -266,7 +267,7 @@ public class GroupChatActivity extends AppCompatActivity {
 
                 final String newMessageID = messageReference.push().getKey();
 
-                MessageDAO newMessage = new MessageDAO(
+                final MessageDAO newMessage = new MessageDAO(
                         a_group_chat_et_message.getText().toString(),
                         "plaintext",
                         Long.toString(System.currentTimeMillis()),
@@ -292,6 +293,18 @@ public class GroupChatActivity extends AppCompatActivity {
                             if (!member.getKey().equals(mFirebaseAuth.getUid())) {
                                 mDatabaseReference.child("user_chats_unread_messages").child(member.getKey())
                                         .child(mGroupID).child(newMessageID).setValue("");
+
+                                String newNotificationID = mDatabaseReference.child("notifications").child(member.getKey())
+                                        .push().getKey();
+
+                                NotificationDAO newNotification = new NotificationDAO(
+                                        mFirebaseAuth.getCurrentUser().getDisplayName(),
+                                        newMessage.getMessage(),
+                                        ""
+                                );
+
+                                mDatabaseReference.child("notifications").child(member.getKey()).child(newNotificationID)
+                                        .setValue(newNotification);
                             }
                         }
                     }
@@ -582,12 +595,40 @@ public class GroupChatActivity extends AppCompatActivity {
                         .addOnCompleteListener(new OnCompleteListener<Uri>() {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
-                                String downloadUrl = Objects.requireNonNull(task.getResult())
+                                final String downloadUrl = Objects.requireNonNull(task.getResult())
                                         .toString();
 
                                 newMessage.setMessage(downloadUrl);
                                 messageReference.child(newMessageID).child("message").setValue(downloadUrl);
                                 mGroupMessagesRVAdapter.notifyDataSetChanged();
+
+                                mDatabaseReference.child("groups").child(mGroupID).child("members")
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                for (DataSnapshot member : dataSnapshot.getChildren()) {
+                                                    if (!member.getKey().equals(mFirebaseAuth.getUid())) {
+
+                                                        String newNotificationID = mDatabaseReference.child("notifications").child(member.getKey())
+                                                                .push().getKey();
+
+                                                        NotificationDAO newNotification = new NotificationDAO(
+                                                                mFirebaseAuth.getCurrentUser().getDisplayName(),
+                                                                "\uD83D\uDCF7 Photo",
+                                                                downloadUrl
+                                                        );
+
+                                                        mDatabaseReference.child("notifications").child(member.getKey()).child(newNotificationID)
+                                                                .setValue(newNotification);
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override

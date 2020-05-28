@@ -294,7 +294,7 @@ public class ChatActivity extends AppCompatActivity {
                         .push().getKey();
 
                 NotificationDAO newNotification = new NotificationDAO(
-                        getString(R.string.app_name),
+                        mFirebaseAuth.getCurrentUser().getDisplayName(),
                         a_chat_et_message.getText().toString(),
                         ""
                 );
@@ -535,7 +535,7 @@ public class ChatActivity extends AppCompatActivity {
                                         .push().getKey();
 
                                 NotificationDAO newNotification = new NotificationDAO(
-                                        getString(R.string.app_name),
+                                        mFirebaseAuth.getCurrentUser().getDisplayName(),
                                         "\uD83D\uDCF7 Photo",
                                         downloadUrl
                                 );

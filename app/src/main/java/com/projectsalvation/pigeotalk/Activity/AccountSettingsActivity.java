@@ -16,10 +16,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -194,13 +196,11 @@ public class AccountSettingsActivity extends AppCompatActivity {
         });
         // endregion
 
-        a_account_sett_et_user_name.setImeActionLabel(getString(R.string.action_save), KeyEvent.KEYCODE_ENTER);
-        a_account_sett_et_about.setImeActionLabel(getString(R.string.action_save), KeyEvent.KEYCODE_ENTER);
-
-        a_account_sett_et_user_name.setOnKeyListener(new View.OnKeyListener() {
+        a_account_sett_et_user_name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d("AccountSettingsActivity", "onEditorAction: " + actionId);
+                if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_ACTION_DONE) {
                     Util.updateUserProfile(mFirebaseAuth.getCurrentUser(), a_account_sett_et_user_name
                             .getText().toString(), mFirebaseAuth.getCurrentUser().getPhotoUrl());
 
@@ -216,10 +216,10 @@ public class AccountSettingsActivity extends AppCompatActivity {
             }
         });
 
-        a_account_sett_et_about.setOnKeyListener(new View.OnKeyListener() {
+        a_account_sett_et_about.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_ACTION_DONE) {
                     mDatabaseReference.child("users").child(mFirebaseAuth.getUid()).child("about")
                             .setValue(a_account_sett_et_about.getText().toString());
 
