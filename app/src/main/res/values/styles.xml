@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
@@ -16,7 +16,8 @@
 
     <style name="SplashScreenTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:background">@color/colorPrimary</item>
-        <item name="android:foreground">@drawable/ic_launcher_foreground</item>
+        <item name="android:foreground">@mipmap/ic_app_icon_foreground</item>
+        <item name="android:foregroundGravity">center</item>
     </style>
 
     <style name="Widget.App.Button.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
@@ -25,8 +26,8 @@
         <item name="android:insetBottom">0dp</item>
         <item name="android:paddingLeft">12dp</item>
         <item name="android:paddingRight">12dp</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">24dp</item>
+        <item name="android:minHeight">24dp</item>
         <item name="strokeColor">@android:color/transparent</item>
     </style>
 

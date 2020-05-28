@@ -9,7 +9,7 @@
     <string name="action_not_now">NOT NOW</string>
     <string name="action_yes">YES</string>
     <string name="action_no">NO</string>
-
+    <string name="action_add">ADD</string>
     <string name="action_done">DONE</string>
     <string name="action_save">SAVE</string>
     <string name="action_change">CHANGE</string>
@@ -119,4 +119,8 @@
     <string name="text_members">Members</string>
 
     <string name="dialog_remove_group_member">Do you want to remove this person from this group?</string>
+
+    <string name="text_my_status">My Status</string>
+    <string name="text_tap_add_status">tap add to add to your status</string>
+    <string name="text_recent_updates">Recent updates</string>
 </resources>

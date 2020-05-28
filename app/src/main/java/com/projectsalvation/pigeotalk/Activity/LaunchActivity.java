@@ -33,8 +33,6 @@ public class LaunchActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         }
-
-        // TODO: Implement a proper splash screen!
     }
 
     @Override

@@ -4,10 +4,12 @@ public class StatusDAO {
 
     private String photoUrl;
     private String timestamp;
+    private String displayName;
 
-    public StatusDAO(String photoUrl, String timestamp) {
+    public StatusDAO(String photoUrl, String timestamp, String displayName) {
         this.photoUrl = photoUrl;
         this.timestamp = timestamp;
+        this.displayName = displayName;
     }
 
     public String getPhotoUrl() {
@@ -24,5 +26,13 @@ public class StatusDAO {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

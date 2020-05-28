@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -69,6 +70,8 @@ import java.util.MissingFormatArgumentException;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
 public class GroupChatActivity extends AppCompatActivity {
 
@@ -81,11 +84,11 @@ public class GroupChatActivity extends AppCompatActivity {
     CardView a_group_chat_cv_footer;
     TextView a_group_chat_tv_name;
 
-    EditText a_group_chat_et_message;
+    EmojiconEditText a_group_chat_et_message;
 
     Chip a_group_chat_chip_attachment;
     Chip a_group_chat_chip_camera;
-    Chip a_group_chat_chip_emoji;
+    ImageView a_group_chat_iv_emoji;
     Chip a_group_chat_chip_send;
     // endregion
 
@@ -129,7 +132,7 @@ public class GroupChatActivity extends AppCompatActivity {
         a_group_chat_et_message = findViewById(R.id.a_group_chat_et_message);
         a_group_chat_chip_attachment = findViewById(R.id.a_group_chat_chip_attachment);
         a_group_chat_chip_camera = findViewById(R.id.a_group_chat_chip_camera);
-        a_group_chat_chip_emoji = findViewById(R.id.a_group_chat_chip_emoji);
+        a_group_chat_iv_emoji = findViewById(R.id.a_group_chat_iv_emoji);
         a_group_chat_chip_send = findViewById(R.id.a_group_chat_chip_send);
         a_group_chat_tv_name = findViewById(R.id.a_group_chat_tv_name);
         // endregion
@@ -467,6 +470,11 @@ public class GroupChatActivity extends AppCompatActivity {
                 addProfilePhotoDialog.show();
             }
         });
+
+        final EmojIconActions emojIcon = new EmojIconActions(GroupChatActivity.this,
+                a_group_chat_iv_emoji.getRootView(), a_group_chat_et_message, a_group_chat_iv_emoji);
+        emojIcon.setIconsIds(R.drawable.ic_keyboard_black_24dp, R.drawable.ic_smile_24dp);
+        emojIcon.ShowEmojIcon();
 
         mGroupMessagesRVAdapter = new GroupMessagesRVAdapter(mMessageDAOS, GroupChatActivity.this);
         a_group_chat_rv_messages.setAdapter(mGroupMessagesRVAdapter);

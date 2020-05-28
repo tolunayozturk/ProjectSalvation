@@ -101,21 +101,18 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/a_chat_chip_emoji"
+                <ImageView
+                    android:id="@+id/a_chat_iv_emoji"
+                    style="@style/Widget.App.Button.IconOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:src="@drawable/ic_smile_24dp"
+                    android:layout_gravity="center_vertical"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/icon_grey_alt" />
 
-                    android:layout_gravity="bottom"
-                    app:chipBackgroundColor="@android:color/transparent"
-                    app:chipEndPadding="4dp"
-                    app:chipIcon="@drawable/ic_smile_24dp"
-                    app:chipIconSize="24dp"
-                    app:chipStartPadding="4dp"
-                    app:textEndPadding="0dp"
-                    app:textStartPadding="0dp" />
-
-                <EditText
+                <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
                     android:id="@+id/a_chat_et_message"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

@@ -10,6 +10,7 @@
     <color name="grey">#7A7A7A</color>
     <color name="black">#000000</color>
     <color name="icon_grey">#80666666</color>
+    <color name="icon_grey_alt">#5f5f5f</color>
 
     <color name="message_bg">#d8f4c6</color>
     <color name="message_text_color">#3c3c3c</color>

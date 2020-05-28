@@ -26,7 +26,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -69,6 +71,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -81,11 +85,11 @@ public class ChatActivity extends AppCompatActivity {
     CardView a_chat_cv_footer;
     TextView a_chat_tv_presence;
 
-    EditText a_chat_et_message;
+    EmojiconEditText a_chat_et_message;
 
     Chip a_chat_chip_attachment;
     Chip a_chat_chip_camera;
-    Chip a_chat_chip_emoji;
+    ImageView a_chat_iv_emoji;
     Chip a_chat_chip_send;
     // endregion
 
@@ -133,7 +137,7 @@ public class ChatActivity extends AppCompatActivity {
 
         a_chat_chip_attachment = findViewById(R.id.a_chat_chip_attachment);
         a_chat_chip_camera = findViewById(R.id.a_chat_chip_camera);
-        a_chat_chip_emoji = findViewById(R.id.a_chat_chip_emoji);
+        a_chat_iv_emoji = findViewById(R.id.a_chat_iv_emoji);
         a_chat_chip_send = findViewById(R.id.a_chat_chip_send);
         // endregion
 
@@ -358,6 +362,11 @@ public class ChatActivity extends AppCompatActivity {
                 addProfilePhotoDialog.show();
             }
         });
+
+        final EmojIconActions emojIcon = new EmojIconActions(ChatActivity.this,
+                a_chat_iv_emoji.getRootView(), a_chat_et_message, a_chat_iv_emoji);
+        emojIcon.setIconsIds(R.drawable.ic_keyboard_black_24dp, R.drawable.ic_smile_24dp);
+        emojIcon.ShowEmojIcon();
 
         a_chat_chip_camera.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -28,18 +28,19 @@
 
         <TextView
             android:id="@+id/f_status_tv"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
             android:layout_toEndOf="@+id/f_status_civ_profile_photo"
-            android:ellipsize="end"
 
+            android:ellipsize="end"
             android:singleLine="true"
+            android:text="@string/text_my_status"
             android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="My Status" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/f_status_tv_status_timestamp"
@@ -53,36 +54,47 @@
             android:drawablePadding="4dp"
             android:ellipsize="end"
             android:singleLine="true"
-            tools:text="24 hours ago" />
+            android:text="@string/text_tap_add_status"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/f_status_add_status"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
+            android:layout_width="64dp"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_toEndOf="@id/f_status_tv_status_timestamp"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="4dp"
-            android:text="TAP TO ADD STATUS"
-            android:textSize="12sp"/>
+            android:text="@string/action_add"
+            android:textSize="12sp" />
 
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/f_status_tv_recents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:padding="8dp"
+        android:text="@string/text_recent_updates"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@id/f_status_rv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.04"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/f_status_rl" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/f_status_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/f_status_rl" />
+        app:layout_constraintTop_toBottomOf="@+id/f_status_tv_recents" />
 
     <TextView
         android:id="@+id/f_status_tv_no_status"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/f_status_rv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -94,5 +106,8 @@
         android:gravity="center"
         android:padding="64dp"
         android:text="@string/text_new_status"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/f_status_rv" />
 </androidx.constraintlayout.widget.ConstraintLayout>
