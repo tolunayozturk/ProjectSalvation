@@ -165,7 +165,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
                         Long unreadMessageCount = dataSnapshot.getChildrenCount();
                         chatDAO.setUnreadMessageCount(String.valueOf(unreadMessageCount));
                         newHolder.l_chats_list_chip_new_message_count.setText(String.valueOf(unreadMessageCount));
-                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 1);
+                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 0);
                     }
 
                     @Override
@@ -184,7 +184,7 @@ public class ChatListRVAdapter extends RecyclerView.Adapter<ChatListRVAdapter.Vi
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 chatDAO.setUnreadMessageCount(String.valueOf(dataSnapshot.getChildrenCount()));
-                HomePageActivity.removeBadge(1);
+                HomePageActivity.removeBadge(0);
                 newHolder.l_chats_list_chip_new_message_count.setVisibility(View.GONE);
             }
 

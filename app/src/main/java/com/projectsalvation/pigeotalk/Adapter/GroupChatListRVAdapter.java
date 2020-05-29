@@ -224,7 +224,7 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
                         Long unreadMessageCount = dataSnapshot.getChildrenCount();
                         groupChatDAO.setUnreadMessageCount(String.valueOf(unreadMessageCount));
                         newHolder.l_chats_list_chip_new_message_count.setText(String.valueOf(unreadMessageCount));
-                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 2);
+                        HomePageActivity.setBadge(Math.toIntExact(unreadMessageCount), 1);
                     }
 
                     @Override
@@ -244,7 +244,7 @@ public class GroupChatListRVAdapter extends RecyclerView.Adapter<GroupChatListRV
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 groupChatDAO.setUnreadMessageCount(String.valueOf(dataSnapshot.getChildrenCount()));
                 newHolder.l_chats_list_chip_new_message_count.setVisibility(View.GONE);
-                HomePageActivity.removeBadge(2);
+                HomePageActivity.removeBadge(1);
             }
 
             @Override

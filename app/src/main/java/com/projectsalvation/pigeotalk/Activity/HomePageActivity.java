@@ -85,7 +85,6 @@ public class HomePageActivity extends AppCompatActivity {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         // region Set up fragments
-        CameraFragment cameraFragment = new CameraFragment();
         ChatsFragment chatsFragment = new ChatsFragment();
         StatusFragment statusFragment = new StatusFragment();
         GroupsFragment groupsFragment = new GroupsFragment();
@@ -94,29 +93,12 @@ public class HomePageActivity extends AppCompatActivity {
 
         HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), 0);
 
-        viewPagerAdapter.addFragment(cameraFragment, getString(R.string.EMPTY_STRING));
         viewPagerAdapter.addFragment(chatsFragment, getString(R.string.title_chats));
         viewPagerAdapter.addFragment(groupsFragment, getString(R.string.title_groups));
         viewPagerAdapter.addFragment(statusFragment, getString(R.string.title_status));
         // endregion
 
         a_home_page_viewpager.setAdapter(viewPagerAdapter);
-
-        // Set camera icon to the first tab of the tab layout
-        Objects.requireNonNull(a_home_page_tab_layout.getTabAt(0))
-                .setIcon(R.drawable.ic_camera_alt_white_24dp);
-
-        // Set starting tab to Chats
-        a_home_page_viewpager.setCurrentItem(1);
-
-        // region Shrink the first item in tab layout (camera tab)
-        LinearLayout layout = ((LinearLayout) ((LinearLayout) a_home_page_tab_layout.getChildAt(0))
-                .getChildAt(0));
-
-        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) layout.getLayoutParams();
-        layoutParams.weight = 0.64f;
-        layout.setLayoutParams(layoutParams);
-        // endregion
 
         a_home_page_viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -199,8 +181,6 @@ public class HomePageActivity extends AppCompatActivity {
     public static void removeBadge(int index) {
         a_home_page_tab_layout.getTabAt(index).removeBadge();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

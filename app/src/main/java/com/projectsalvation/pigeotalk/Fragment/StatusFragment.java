@@ -172,60 +172,6 @@ public class StatusFragment extends Fragment {
             }
         });
 
-        mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (final DataSnapshot contact : dataSnapshot.getChildren()) {
-                            f_status_tv_no_status.setVisibility(View.GONE);
-                            mStatusEventListener = new ChildEventListener() {
-                                @Override
-                                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                                    Log.d("StatusFragment", "onChildAdded: " + dataSnapshot.getKey());
-                                    Log.d("StatusFragment", "onChildAdded: " + dataSnapshot.getValue().toString());
-
-                                    StatusDAO statusDAO = new StatusDAO(
-                                            dataSnapshot.getValue().toString(),
-                                            dataSnapshot.getKey(),
-                                            contact.getValue().toString()
-                                    );
-
-                                    mStatusDAOS.add(statusDAO);
-                                    mStatusListRVAdapter.notifyDataSetChanged();
-                                }
-
-                                @Override
-                                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                                }
-
-                                @Override
-                                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                                }
-
-                                @Override
-                                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            };
-
-                            mDatabaseReference.child("user_status").child(contact.getKey())
-                                    .addChildEventListener(mStatusEventListener);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
         mStatusListRVAdapter = new StatusListRVAdapter(getActivity(), mStatusDAOS);
         f_status_rv.setAdapter(mStatusListRVAdapter);
         return view;
@@ -401,5 +347,88 @@ public class StatusFragment extends Fragment {
                 super.onActivityResult(resultCode, resultCode, data);
                 break;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (final DataSnapshot contact : dataSnapshot.getChildren()) {
+                            f_status_tv_no_status.setVisibility(View.GONE);
+
+                            mStatusEventListener = new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                                    Log.d("StatusFragment", "onChildAdded: " + dataSnapshot.getKey());
+                                    Log.d("StatusFragment", "onChildAdded: " + dataSnapshot.getValue().toString());
+
+                                    StatusDAO statusDAO = new StatusDAO(
+                                            dataSnapshot.getValue().toString(),
+                                            dataSnapshot.getKey(),
+                                            contact.getValue().toString()
+                                    );
+
+                                    mStatusDAOS.add(statusDAO);
+                                    mStatusListRVAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                }
+
+                                @Override
+                                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                }
+
+                                @Override
+                                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            };
+
+                            mDatabaseReference.child("user_status").child(contact.getKey())
+                                    .addChildEventListener(mStatusEventListener);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mDatabaseReference.child("user_contacts").child(mFirebaseAuth.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (final DataSnapshot contact : dataSnapshot.getChildren()) {
+                            f_status_tv_no_status.setVisibility(View.GONE);
+
+                            mDatabaseReference.child("user_status").child(contact.getKey())
+                                    .removeEventListener(mStatusEventListener);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 }
